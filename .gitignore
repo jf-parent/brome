@@ -2,3 +2,4 @@
 *.swp
 *.pyc
 *.pkl
+*.DS_STORE

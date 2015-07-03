@@ -25,21 +25,17 @@ class BaseBrowserInstance(object):
         return '%s-%s-%s'%(
                     self.get_browser_name(),
                     self.get_browser_version(),
-                    self.get_platform(),
-                    self.get_platform_version()
+                    self.get_platform()
                 )
 
     def get_browser_name(self):
-        pass
+        return self.driver.capabilities['browserName']
 
     def get_browser_version(self):
-        pass
+        return self.driver.capabilities['version']
 
     def get_platform(self):
-        pass
-
-    def get_platform_version(self):
-        pass
+        return self.driver.capabilities['platform']
 
     def startup(self):
         pass

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Selector Test{% endblock %}
+{% block content %}
+<button id='1'>click me</button>
+<div id='2'><div>
+<script type="text/javascript">
+    $("#1").click(function() {
+        $("#2").html('clicked');
+    });
+</script>
+{% endblock %}

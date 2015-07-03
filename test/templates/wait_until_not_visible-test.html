@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Selector Test{% endblock %}
+{% block content %}
+<div id='1'><div id='2'>visible</div><div>
+<div id='3'><div id='4'>visible</div><div>
+<script type="text/javascript">
+setTimeout(
+    function(){ 
+        $('#2').remove();
+    }, 4000
+);
+setTimeout(
+    function(){ 
+        $('#4').hide();
+    }, 4000
+);
+</script>
+{% endblock %}

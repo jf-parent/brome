@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
 import unittest
-
-from IPython import embed
-from brome.core.models.utils import *
 from selenium import webdriver
+
+from brome.core.models.utils import *
 from brome.core.models.proxy_driver import ProxyDriver
 
 class Test(unittest.TestCase):

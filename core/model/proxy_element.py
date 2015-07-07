@@ -1,5 +1,5 @@
 
-from brome.core.models.utils import *
+from brome.core.model.utils import *
 
 class ProxyElement(object):
     

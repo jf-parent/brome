@@ -1,5 +1,5 @@
 
-from brome.core.models.proxy_element import ProxyElement
+from brome.core.model.proxy_element import ProxyElement
 
 class ProxyElementList(list):
     def __init__(self, elements, selector):

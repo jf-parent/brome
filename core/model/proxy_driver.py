@@ -1,18 +1,16 @@
 
-from brome import config
-from brome.core.models.utils import *
-from brome.core.models.proxy_element import ProxyElement
-from brome.core.models.proxy_element_list import ProxyElementList
-from brome.core.runner.base_browser_instance import BaseBrowserInstance
+from brome.core.model.utils import *
+from brome.core.model.proxy_element import ProxyElement
+from brome.core.model.proxy_element_list import ProxyElementList
 
 class ProxyDriver(object):
 
-    def __init__(self, driver):
+    def __init__(self, driver, browser_instance, selector_dict):
         self._driver = driver
-        self.browser_instance = BaseBrowserInstance(self)
+        self.browser_instance = browser_instance
+        self.selector_dict = selector_dict
     
     def __getattr__(self, funcname):
-        print 'proxydriver'
         return getattr(self._driver, funcname)
 
     def find(self, selector, **kwargs):
@@ -32,12 +30,18 @@ class ProxyDriver(object):
             return None
 
     def find_all(self, selector, **kwargs):
-        """
-            raise_exception: bool; default: true
-            wait_until_visible: bool; default: true
-        """
-        raise_exception = kwargs.get('raise_exception', True)
-        wait_until_visible = kwargs.get('wait_until_visible', True)
+        raise_exception = kwargs.get(
+                                    'raise_exception',
+                                    self.browser_instance.get_config_value(
+                                        'proxy_driver:raise_exception'
+                                    )
+                                )
+        wait_until_visible = kwargs.get(
+                                        'wait_until_visible',
+                                        self.browser_instance.get_config_value(
+                                            'proxy_driver:wait_until_visible_before_find'
+                                        )
+                                    )
 
         func, effective_selector = self.selector_function_resolver(selector)
 
@@ -66,11 +70,6 @@ class ProxyDriver(object):
             return [ProxyElement(elements, selector)]
 
     def selector_function_resolver(self, selector, **kwargs):
-        """
-            kwargs:
-                function_type: 'by' | 'find_by'; default: 'find_by'
-        """
-
         function_type = kwargs.get('function_type', 'find_by')
 
         selector_type = selector[0:2]
@@ -125,7 +124,10 @@ class ProxyDriver(object):
                 func = 'PARTIAL_LINK_TEXT'
 
         elif selector_type == 'sv':
-            selector_variable = config['selector_variable_dict'][selector[3:]]
+            if not self.selector_dict:
+                raise Exception("No selector dict given to the brome-execute")
+
+            selector_variable = self.selector_dict[selector[3:]]
             if type(selector_variable) == dict:
                 if selector_variable.has_key(self.browser_instance.get_id()):
                     return self.selector_function_resolver(
@@ -142,18 +144,23 @@ class ProxyDriver(object):
                     'nm:' (name), 'xp:' (xpath), 'cn:' (classname), 'id:' (id), 'cs:' (css), 'tn:' (tag name), 'lt:' (link text), 'pl:' (partial link text)
             """)
 
-        print 'func', func
-        print 'effective_selector', effective_selector
+        self.browser_instance.debug_log('func: %s'%func)
+        self.browser_instance.debug_log('effective_selector: %s'%effective_selector)
         return func, effective_selector
 
     def wait_until_visible(self, selector, **kwargs):
-        """
-            kwargs:
-                timeout = int; default: 5
-        """
-        
-        timeout = kwargs.get('timeout', 5)
-        raise_exception = kwargs.get('raise_exception', True)
+        timeout = kwargs.get(
+                            'timeout',
+                            int(self.browser_instance.get_config_value(
+                                'proxy_driver:default_timeout'
+                            ))
+                        )
+        raise_exception = kwargs.get(
+                                    'raise_exception',
+                                    self.browser_instance.get_config_value(
+                                        'proxy_driver:raise_exception'
+                                    )
+                                )
 
         func, effective_selector = self.selector_function_resolver(selector, function_type = 'by')
 
@@ -167,13 +174,18 @@ class ProxyDriver(object):
                 return False
 
     def wait_until_not_visible(self, selector, **kwargs):
-        """
-            kwargs:
-                timeout = int; default: 5
-        """
-        
-        timeout = kwargs.get('timeout', 5)
-        raise_exception = kwargs.get('raise_exception', True)
+        timeout = kwargs.get(
+                            'timeout',
+                            int(self.browser_instance.get_config_value(
+                                'proxy_driver:default_timeout'
+                            ))
+                        )
+        raise_exception = kwargs.get(
+                                    'raise_exception',
+                                    self.browser_instance.get_config_value(
+                                        'proxy_driver:raise_exception'
+                                    )
+                                )
 
         func, effective_selector = self.selector_function_resolver(selector, function_type = 'by')
 

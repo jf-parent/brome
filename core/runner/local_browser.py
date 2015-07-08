@@ -18,5 +18,13 @@ class LocalBrowser(BaseBrowser):
         self.driver = getattr(webdriver, self.config['browserName'].capitalize())()
         self.pdriver = ProxyDriver(self.driver, self, self.runner.brome.selector_dict)
 
+        self.configure_resolution()
+
     def tear_down(self):
-        self.pdriver.quit()
+        try:
+            self.pdriver.quit()
+        except Exception as e:
+            self.error_log('Exception driver.quit(): %s'%str(e))
+
+    def configure_resolution(self):
+        pass

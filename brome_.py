@@ -1,5 +1,6 @@
 
 import argparse
+import re
 
 from brome.core.runner.local_runner import LocalRunner
 
@@ -54,16 +55,34 @@ class Brome(object):
                             help = 'Launch a browser on a remote location ("ec2", "virtualbox")'
         )
 
+        def test_config_string(value):
+            try:
+                re.match("([^=]+=[^,]+,?)+", value).group(0)
+                return value
+            except AttributeError:
+                print "--test-config '%s' does not match required format (key=value,key1:value1)"%(value)
+                exit(1)
+
         #TEST CONFIG KWARGS
         parser.add_argument(
                             '--test-config',
+                            type = test_config_string,
                             dest = 'test_config', 
                             help = 'The config that will be pass to the test. ex: "key=value,key1=value1"'
         )
 
+        def brome_config_string(value):
+            try:
+                re.match("([^:]+:[^=]+=[^,]+,?)+", value).group(0)
+                return value
+            except AttributeError:
+                print "--brome-config '%s' does not match required format (section:key=value,section1:key1:value1)"%(value)
+                exit(1)
+
         #BROME CONFIG KWARGS
         parser.add_argument(
                             '--brome-config',
+                            type = brome_config_string,
                             dest = 'brome_config', 
                             help = 'The config that will be pass to the brome runner. ex: "section:key=value,section1:key1=value1"'
         )

@@ -25,10 +25,14 @@ default_config["runner"]["play_sound_on_test_crash"] = True
 default_config["runner"]["play_sound_on_assertion_success"] = False
 default_config["runner"]["play_sound_on_assertion_failure"] = True
 default_config["runner"]["play_sound_on_test_finished"] = True
+default_config["runner"]["play_sound_on_ipython_embed"] = True
+default_config["runner"]["play_sound_on_pdb"] = True
 default_config["runner"]["sound_on_test_crash"] = 'Crash'
 default_config["runner"]["sound_on_assertion_success"] = "{testid} succeeded"
 default_config["runner"]["sound_on_assertion_failure"] = "{testid} failed"
 default_config["runner"]["sound_on_test_finished"] = "Test finished"
+default_config["runner"]["sound_on_ipython_embed"] = "Attention required"
+default_config["runner"]["sound_on_pdb"] = "Attention required"
 default_config["runner"]["cache_screenshot"] = True
 default_config["database"]["dbname"] = ""
 default_config["database"]["username"] = ""
@@ -47,6 +51,15 @@ def get_config_value(dict_list, config_name):
         if dict_.has_key(section):
             if dict_[section].has_key(option):
                 return dict_[section][option]
+
+def test_config_to_dict(test_config_string):
+    test_config = {}
+    if test_config_string:
+        for config in test_config_string.split(','):
+            key, value = config.split('=')
+            test_config[key] = value
+
+    return test_config
 
 def ini_to_dict(ini_path):
     config = {}

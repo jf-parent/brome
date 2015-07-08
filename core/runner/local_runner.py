@@ -1,11 +1,9 @@
 import copy
 from datetime import datetime
 
-from brome.core.model.utils import *
+from brome import *
 from brome.core.runner.base_runner import BaseRunner
 from brome.core.runner.local_browser import LocalBrowser
-
-from model.app import App
 
 class LocalRunner(BaseRunner):
     def __init__(self, *args):
@@ -22,10 +20,9 @@ class LocalRunner(BaseRunner):
             for test in tests:
                 self.browser_instances[0].startup()
 
-                app = App(self.browser_instances[0].pdriver)
+                test_instance = test.Test(browser_instance = self.browser_instances[0])
+                test_instance.execute()
 
-                test_instance = test.Test()
-                test_instance.run(app)
         except:
             raise
 

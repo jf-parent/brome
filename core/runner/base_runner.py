@@ -3,7 +3,6 @@ import logging
 import os
 import copy
 import os.path
-from IPython import embed
 
 from brome.core.runner.configurator import ini_to_dict, runner_args_to_dict, get_config_value, default_config
 

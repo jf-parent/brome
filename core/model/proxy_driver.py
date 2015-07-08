@@ -1,5 +1,5 @@
 
-from brome.core.model.utils import *
+from brome import *
 from brome.core.model.proxy_element import ProxyElement
 from brome.core.model.proxy_element_list import ProxyElementList
 
@@ -197,3 +197,31 @@ class ProxyDriver(object):
                 raise TimeoutException(selector)
             else:
                 return False
+
+    def pdb(self):
+        from pudb import set_trace
+        from bdb import BdbQuit
+
+        if self.browser_instance.get_config_value("runner:play_sound_on_pdb"):
+            say(self.browser_instance.get_config_value("runner:sound_on_pdb"))
+
+        try:
+            set_trace()
+        except BdbQuit:
+            pass
+
+    def embed(self, title, stack_depth = 2):
+        from IPython.terminal.embed import InteractiveShellEmbed
+
+        if self.browser_instance.get_config_value("runner:play_sound_on_ipython_embed"):
+            say(self.browser_instance.get_config_value("runner:sound_on_ipython_embed"))
+
+        ipshell = InteractiveShellEmbed(banner1 = note)
+
+        frame = currentframe()
+        for i in range(stack_depth - 1):
+            frame = frame.f_back
+
+        msg = 'Stopped at %s and line %s; stack_depth: %s'%(frame.f_code.co_filename, frame.f_lineno, stack_depth)
+
+        ipshell(msg, stack_depth = stack_depth)

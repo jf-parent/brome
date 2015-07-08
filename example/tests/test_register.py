@@ -1,14 +1,15 @@
 #! -*- coding: utf-8 -*-
 
 from brome import *
-from brome.core.model.base_test import BaseTest
+
+from model.basetest import BaseTest
 
 class Test(BaseTest):
 
     name = 'Register'
 
-    def run(self, app, **kwargs):
+    def run(self, **kwargs):
 
-        app.pdriver.get("http://reddit.local/")
+        self.pdriver.get("http://reddit.local/")
 
         sleep(3)

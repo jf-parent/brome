@@ -1,5 +1,6 @@
 #! -*- coding: utf-8 -*-
 
+from urlparse import urlparse
 import string
 import os
 from pudb import set_trace

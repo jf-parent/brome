@@ -23,7 +23,8 @@ class LocalRunner(BaseRunner):
                 test_ = test.Test(
                     browser_instance = self.browser_instances[0],
                     test_batch = self.test_batch,
-                    name = test.Test.name
+                    name = test.Test.name,
+                    index = 1
                 )
                 test_.execute()
 

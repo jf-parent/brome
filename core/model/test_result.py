@@ -1,12 +1,16 @@
-class TestResult(object):
-    def __init__(self, **kwargs):
-        self.title = kwargs.get('title')
-        self.result = kwargs.get('result')
-        self.timestamp = kwargs.get('timestamp')
-        self.test_id = kwarg.get('test_id')
-        self.test_instance_id = kwargs.get('test_instance_id')
-        self.test_batch_id = kwargs.get('test_batch_id')
-        self.browser_id = kwargs.get('browser_id')
-        self.screenshot_path = kwargs.get('screenshot_path')
-        self.videocapture_path = kwargs.get('video_capture_path')
-        self.extra_data = kwargs.get('extra_data')
+#! -*- coding: utf-8 -*-
+
+from brome.core.model.meta import SurrogatePK, Base, Column, DateTime, Boolean, Text, Integer, ForeignKey
+
+class TestResult(SurrogatePK, Base):
+    result = Column(Boolean())
+    timestamp = Column(DateTime())
+    browser_id = Column(Text())
+    screenshot_path = Column(Text())
+    videocapture_path = Column(Text())
+    extra_data = Column(Text())
+    title = Column(Text())
+
+    test_id = Column(Integer, ForeignKey('test.id'))
+    test_instance_id = Column(Integer, ForeignKey('testinstance.id'))
+    test_batch_id = Column(Integer, ForeignKey('testbatch.id'))

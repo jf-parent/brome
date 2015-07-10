@@ -1,5 +1,10 @@
+#! -*- coding: utf-8 -*-
 
-from brome import *
+from inspect import currentframe
+
+from brome.core.model.utils import *
+from brome.core.model.test import Test
+from brome.core.model.test_result import TestResult
 from brome.core.model.proxy_element import ProxyElement
 from brome.core.model.proxy_element_list import ProxyElementList
 
@@ -124,8 +129,8 @@ class ProxyDriver(object):
                 func = 'PARTIAL_LINK_TEXT'
 
         elif selector_type == 'sv':
-            if not self.selector_dict:
-                raise Exception("No selector dict given to the brome-execute")
+            if not self.selector_dict.has_key(selector[3:]):
+                raise Exception("Cannot find the selector variable (%s) in the selector dict"%selector[3:])
 
             selector_variable = self.selector_dict[selector[3:]]
             if type(selector_variable) == dict:
@@ -199,24 +204,18 @@ class ProxyDriver(object):
                 return False
 
     def pdb(self):
-        from pudb import set_trace
-        from bdb import BdbQuit
-
         if self.browser_instance.get_config_value("runner:play_sound_on_pdb"):
             say(self.browser_instance.get_config_value("runner:sound_on_pdb"))
 
-        try:
-            set_trace()
-        except BdbQuit:
-            pass
+        set_trace()
 
-    def embed(self, title, stack_depth = 2):
+    def embed(self, title = '', stack_depth = 2):
         from IPython.terminal.embed import InteractiveShellEmbed
 
         if self.browser_instance.get_config_value("runner:play_sound_on_ipython_embed"):
             say(self.browser_instance.get_config_value("runner:sound_on_ipython_embed"))
 
-        ipshell = InteractiveShellEmbed(banner1 = note)
+        ipshell = InteractiveShellEmbed(banner1 = title)
 
         frame = currentframe()
         for i in range(stack_depth - 1):
@@ -225,3 +224,134 @@ class ProxyDriver(object):
         msg = 'Stopped at %s and line %s; stack_depth: %s'%(frame.f_code.co_filename, frame.f_lineno, stack_depth)
 
         ipshell(msg, stack_depth = stack_depth)
+
+    def take_screenshot(self, screenshot_name = None, screenshot_path = None):
+        if screenshot_path:
+            self._driver.save_screenshot(screenshot_path)
+        elif screenshot_name:
+            self._driver.save_screenshot(
+                os.path.join(
+                    self.browser_instance.screenshot_dir,
+                    '%s.png'%string_to_filename(screenshot_name)
+                )
+            )
+        else:
+            self._driver.save_screenshot(
+                os.path.join(
+                    self.browser_instance.screenshot_dir,
+                    '%s.png'%get_timestamp()
+                )
+            )
+
+    def assert_visible(self, selector, testid = False, **kwargs):
+        element = self.find(selector, raise_exception = False)
+        if element:
+            self.create_test_result(testid, True)
+        else:
+            self.create_test_result(testid, False)
+
+    def assert_not_visible(self, selector, testid = False, **kwargs):
+        element = self.find(selector, raise_exception = False)
+        if element:
+            self.create_test_result(testid, False)
+        else:
+            self.create_test_result(testid, True)
+
+    def assert_text_equal(self, selector, value, testid = False, **kwargs):
+        element = self.find(selector, raise_exception = False)
+        if element:
+            if element.text == value:
+                self.create_test_result(testid, True)
+            else:
+                self.create_test_result(testid, False)
+        else:
+            self.create_test_result(testid, False)
+
+    def assert_text_not_equal(self, selector, value, testid = False, **kwargs):
+        element = self.find(selector, raise_exception = False)
+        if element:
+            if element.text != value:
+                self.create_test_result(testid, True)
+            else:
+                self.create_test_result(testid, False)
+        else:
+            self.create_test_result(testid, False)
+
+    def create_test_result(self, testid, result, **kwargs):
+        embed = True
+        videocapture_path = ''
+        extra_data = ''
+
+        if not self.session.query(Test).filter(Test.test_id == testid).count():
+            test = None
+        else:
+            test = self.session.query(Test).filter(Test.test_id == testid).one()
+
+        if self.brome.test_dict.has_key(testid):
+            test_config = self.brome.test_dict[testid]
+            if type(test_config) == dict:
+                if test_config.has_key('embed'):
+                    embed = test_config['embed']
+                    test_name = test_config['name']
+            else:
+                test_name = test_config
+        else:
+            test_name = testid
+
+        if result:
+            #SCREENSHOT
+            if self.browser_instance.get_config_value("proxy_driver:take_screenshot_on_assertion_success"):
+                screenshot_name = 'succeed_%s_%s_%s.png'%(
+                    string_to_filename(testid),
+                    get_timestamp(),
+                    self.browser_instance.get_id(join_char = '_')
+                )
+                screenshot_path = os.path.join(
+                    self.browser_instance.assertion_screenshot_dir,
+                    screenshot_name
+                )
+                self.take_screenshot(screenshot_path = screenshot_path)
+
+            #SOUND NOTIFICATION
+            if self.browser_instance.get_config_value("runner:play_sound_on_assertion_success"):
+                say(self.browser_instance.get_config_value("runner:sound_on_assertion_success").format(testid = testid))
+
+            #EMBED
+            if self.browser_instance.get_config_value("runner:embed_on_assertion_success") and embed:
+                self.embed(title = test_name)
+        else:
+            #SCREENSHOT
+            if self.browser_instance.get_config_value("proxy_driver:take_screenshot_on_assertion_success"):
+                screenshot_name = 'failed_%s_%s_%s.png'%(
+                    string_to_filename(testid),
+                    get_timestamp(),
+                    self.browser_instance.get_id(join_char = '_')
+                )
+                screenshot_path = os.path.join(
+                    self.browser_instance.assertion_screenshot_dir,
+                    screenshot_name
+                )
+                self.take_screenshot(screenshot_path = screenshot_path)
+
+            #SOUND NOTIFICATION
+            if self.browser_instance.get_config_value("runner:play_sound_on_assertion_failure"):
+                say(self.browser_instance.get_config_value("runner:sound_on_assertion_failure").format(testid = testid))
+
+            #EMBED
+            if self.browser_instance.get_config_value("runner:embed_on_assertion_failure") and embed:
+                self.embed(title = test_name)
+
+        test_result = TestResult(
+            result = result,
+            timestamp = datetime.now(),
+            browser_id = self.browser_instance.get_id(),
+            screenshot_path = screenshot_path,
+            videocapture_path = videocapture_path,
+            extra_data = extra_data,
+            title = test_name,
+            test = test,
+            testinstance = self.test_instance,
+            testbatch = self.browser_instance.runner.test_batch
+        )
+        self.session.add(test_result)
+        self.session.commit()

@@ -1,4 +1,13 @@
-class TestInstance(object):
+#! -*- coding: utf-8 -*-
 
-    def __init__(self, test_batch):
-        self.test_batch_id = test_batch.id
+from brome.core.model.meta import SurrogatePK, Text, Base, Column, DateTime, ForeignKey, Integer, relationship
+
+class TestInstance(SurrogatePK, Base):
+
+    name = Column(Text())
+
+    starting_timestamp = Column(DateTime())
+    ending_timestamp = Column(DateTime())
+
+    test_batch_id = Column(Integer, ForeignKey('testbatch.id'))
+    test_results = relationship("TestResult", backref="testinstance")

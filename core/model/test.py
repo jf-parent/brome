@@ -1,4 +1,9 @@
-class Test(object):
-    def __init__(self, id, name):
-        self.test_id = id
-        self.name = name
+#! -*- coding: utf-8 -*-
+
+from brome.core.model.meta import SurrogatePK, Base, Column, Boolean, Text, relationship
+
+class Test(SurrogatePK, Base):
+
+    test_id = Column(Text())
+    name = Column(Text())
+    test_results = relationship("TestResult", backref="test")

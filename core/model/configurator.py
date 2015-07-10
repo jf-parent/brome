@@ -1,3 +1,4 @@
+#! -*- coding: utf-8 -*-
 
 import ConfigParser
 
@@ -9,34 +10,39 @@ default_config["highlight"] = {}
 default_config["runner"] = {}
 default_config["database"] = {}
 default_config["project"]["absolute_path"] = ""
+default_config["project"]["test_batch_result_path"] = ""
 default_config["proxy_driver"]["default_timeout"] = 5
 default_config["proxy_driver"]["raise_exception"] = True
-default_config["proxy_driver"]["wait_until_visible_before_find"] = True
+default_config["proxy_driver"]["wait_until_visible_before_find"] = False
+default_config["proxy_driver"]["take_screenshot_on_assertion_success"] = False
+default_config["proxy_driver"]["take_screenshot_on_assertion_failure"] = False
 default_config["browser"]["window_x_position"] = 0
 default_config["browser"]["window_y_position"] = 0
 default_config["browser"]["window_height"] = 725
 default_config["browser"]["window_width"] = 1650
+default_config["browser"]["maximize_window"] = False
 default_config["highlight"]["element_is_clicked"] = "background: yellow; border: 2px solid red;"
 default_config["highlight"]["element_on_assertion_failure"] = "background: red; border: 2px solid black;"
 default_config["highlight"]["element_on_assertion_success"] = "background: green; border: 2px solid black;"
 default_config["highlight"]["element_is_visible"] = "background: purple; border: 2px solid black;"
-default_config["highlight"]["use_highlight"] = True
-default_config["runner"]["play_sound_on_test_crash"] = True
+default_config["highlight"]["use_highlight"] = False
+default_config["runner"]["embed_on_assertion_success"] = False
+default_config["runner"]["embed_on_assertion_failure"] = False
+default_config["runner"]["embed_on_test_crash"] = False
+default_config["runner"]["play_sound_on_test_crash"] = False
 default_config["runner"]["play_sound_on_assertion_success"] = False
-default_config["runner"]["play_sound_on_assertion_failure"] = True
-default_config["runner"]["play_sound_on_test_finished"] = True
-default_config["runner"]["play_sound_on_ipython_embed"] = True
-default_config["runner"]["play_sound_on_pdb"] = True
+default_config["runner"]["play_sound_on_assertion_failure"] = False
+default_config["runner"]["play_sound_on_test_finished"] = False
+default_config["runner"]["play_sound_on_ipython_embed"] = False
+default_config["runner"]["play_sound_on_pdb"] = False
 default_config["runner"]["sound_on_test_crash"] = 'Crash'
 default_config["runner"]["sound_on_assertion_success"] = "{testid} succeeded"
 default_config["runner"]["sound_on_assertion_failure"] = "{testid} failed"
 default_config["runner"]["sound_on_test_finished"] = "Test finished"
 default_config["runner"]["sound_on_ipython_embed"] = "Attention required"
 default_config["runner"]["sound_on_pdb"] = "Attention required"
-default_config["runner"]["cache_screenshot"] = True
-default_config["database"]["dbname"] = ""
-default_config["database"]["username"] = ""
-default_config["database"]["password"] = ""
+default_config["runner"]["cache_screenshot"] = False
+default_config["database"]["sqlalchemy.url"] = ""
 
 def get_config_value(dict_list, config_name):
     try:
@@ -49,6 +55,8 @@ def get_config_value(dict_list, config_name):
 
     for dict_ in dict_list:
         if dict_.has_key(section):
+            if option == '*':
+                return dict_[section]
             if dict_[section].has_key(option):
                 return dict_[section][option]
 

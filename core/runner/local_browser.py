@@ -1,3 +1,5 @@
+#! -*- coding: utf-8 -*-
+
 from selenium import webdriver
 
 from brome.core.model.proxy_driver import ProxyDriver
@@ -7,6 +9,7 @@ class LocalBrowser(BaseBrowser):
     def __init__(self, runner, browser_type, local_config):
         self.browser_type = browser_type
         self.runner = runner
+        self.brome = runner.brome
         self.local_config = local_config
 
         self.config = self.local_config[self.browser_type]
@@ -15,9 +18,11 @@ class LocalBrowser(BaseBrowser):
         return 'localhost'
 
     def startup(self):
-        self.driver = getattr(webdriver, self.config['browserName'].capitalize())()
-        self.pdriver = ProxyDriver(self.driver, self, self.runner.brome.selector_dict)
+        driver = getattr(webdriver, self.config['browserName'].capitalize())()
+        self.pdriver = ProxyDriver(driver, self, self.runner.brome.selector_dict)
+        self.pdriver.brome = self.brome
 
+        self.configure_test_batch_dir()
         self.configure_resolution()
 
     def tear_down(self):
@@ -25,6 +30,3 @@ class LocalBrowser(BaseBrowser):
             self.pdriver.quit()
         except Exception as e:
             self.error_log('Exception driver.quit(): %s'%str(e))
-
-    def configure_resolution(self):
-        pass

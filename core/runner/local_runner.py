@@ -1,7 +1,7 @@
-import copy
-from datetime import datetime
+#! -*- coding: utf-8 -*-
 
-from brome import *
+from brome.core.model.utils import *
+from brome.core.model.meta.base import Session
 from brome.core.runner.base_runner import BaseRunner
 from brome.core.runner.local_browser import LocalBrowser
 
@@ -20,8 +20,12 @@ class LocalRunner(BaseRunner):
             for test in tests:
                 self.browser_instances[0].startup()
 
-                test_instance = test.Test(browser_instance = self.browser_instances[0])
-                test_instance.execute()
+                test_ = test.Test(
+                    browser_instance = self.browser_instances[0],
+                    test_batch = self.test_batch,
+                    name = test.Test.name
+                )
+                test_.execute()
 
         except:
             raise
@@ -32,3 +36,6 @@ class LocalRunner(BaseRunner):
 
     def terminate(self):
         self.info_log('The test batch is finished.')
+
+        self.test_batch.ending_timestamp = datetime.now()
+        self.session.commit()

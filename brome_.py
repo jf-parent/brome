@@ -1,13 +1,16 @@
+#! -*- coding: utf-8 -*-
 
 import argparse
 import re
 
+from brome.core.model.meta import Session
 from brome.core.runner.local_runner import LocalRunner
 
 class Brome(object):
     def __init__(self, **kwargs):
         self.config_path = kwargs.get('config_path')
-        self.selector_dict = kwargs.get('selector_dict', None)
+        self.selector_dict = kwargs.get('selector_dict', {})
+        self.test_dict = kwargs.get('test_dict', {})
         self.local_config_dict = kwargs.get('local_config_dict')
 
     def print_usage(self):

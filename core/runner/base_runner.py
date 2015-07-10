@@ -1,10 +1,15 @@
+#! -*- coding: utf-8 -*-
+
 import glob
 import logging
 import os
 import copy
 import os.path
 
-from brome.core.runner.configurator import ini_to_dict, runner_args_to_dict, get_config_value, default_config
+from brome.core.model.configurator import ini_to_dict, runner_args_to_dict, get_config_value, default_config
+from brome.core.model.meta import *
+from brome.core.model.test_batch import TestBatch
+from brome.core.model.utils import *
 
 class BaseRunner(object):
 
@@ -17,6 +22,21 @@ class BaseRunner(object):
         #CONFIG
         self.config = runner_args_to_dict(self.commandline_args)
         self.brome_config = ini_to_dict(self.brome_config_path)
+
+        delete_database(self.get_config_value('database:sqlalchemy.url'), 'brome_example')
+        create_database(self.get_config_value('database:sqlalchemy.url'), 'brome_example')
+        
+        setup_database(self.get_config_value('database:*'))
+
+        self.session = Session()
+
+        #Update the test dict
+        if self.brome.test_dict:
+            update_test(self.session, self.brome.test_dict)
+
+        self.test_batch = TestBatch(starting_timestamp = datetime.now())
+        self.session.add(self.test_batch)
+        self.session.commit()
 
         if self.get_config_value('runner:cache_screenshot'):
             #Dictionary that contains all the screenshot name

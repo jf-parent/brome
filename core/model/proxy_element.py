@@ -1,3 +1,4 @@
+#! -*- coding: utf-8 -*-
 
 from brome.core.model.utils import *
 

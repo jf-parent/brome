@@ -3,3 +3,6 @@
 *.pyc
 *.pkl
 *.DS_STORE
+*.png
+*.log
+*.ini

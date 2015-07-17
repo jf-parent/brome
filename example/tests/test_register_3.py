@@ -8,7 +8,7 @@ from model.bad_stuff import BadStuff
 
 class Test(BaseTest):
 
-    name = 'Register'
+    name = 'Register 3'
 
     def run(self, **kwargs):
 

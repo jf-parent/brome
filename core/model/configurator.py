@@ -9,8 +9,26 @@ default_config["browser"] = {}
 default_config["highlight"] = {}
 default_config["runner"] = {}
 default_config["database"] = {}
+default_config["logger_runner"] = {}
+default_config["logger_test"] = {}
+default_config["ec2"] = {}
+default_config["grid_runner"] = {}
+default_config["grid_runner"]["max_running_time"] = 7200
+default_config["grid_runner"]["start_selenium_server"] = True
+default_config["grid_runner"]["selenium_server_ip"] = 'localhost'
+default_config["grid_runner"]["selenium_server_port"] = 4444
+default_config["grid_runner"]["selenium_server_command"] = False
+default_config["grid_runner"]["kill_selenium_server"] = True
+default_config["ec2"]['wait_after_instance_launched'] = 30
+default_config["ec2"]['wait_until_system_and_instance_check_performed'] = True
 default_config["project"]["absolute_path"] = ""
 default_config["project"]["test_batch_result_path"] = ""
+default_config["logger_runner"]["level"] = "INFO"
+default_config["logger_runner"]["streamlogger"] = True
+default_config["logger_runner"]["filelogger"] = True
+default_config["logger_test"]["level"] = "INFO"
+default_config["logger_test"]["streamlogger"] = True
+default_config["logger_test"]["filelogger"] = True
 default_config["proxy_driver"]["default_timeout"] = 5
 default_config["proxy_driver"]["raise_exception"] = True
 default_config["proxy_driver"]["wait_until_visible_before_find"] = False
@@ -72,7 +90,7 @@ def test_config_to_dict(test_config_string):
 def ini_to_dict(ini_path):
     config = {}
 
-    config_parser = ConfigParser.ConfigParser()
+    config_parser = ConfigParser.SafeConfigParser()
 
     config_parser.read(ini_path)
 
@@ -138,5 +156,44 @@ def parse_brome_config_from_browser_config(browser_config):
             config[section] = {}
 
         config[section][option] = value
+
+    return config
+
+def validate_ec2_browser_config(config, caller = False):
+    if config.get('launch', True):
+        required_keys = [
+            'browserName',
+            'platform',
+            'ssh_key_path',
+            'username',
+            'amiid',
+            'region',
+            'instance_type',
+            'security_group_ids',
+            'selenium_command'
+        ]
+    else:
+        required_keys = [
+            'browserName',
+            'platform'
+        ]
+
+    for key in required_keys:
+        if not key in config.keys():
+            raise Exception("Add the '%s' in your ec2_config"%key)
+
+    optional_keys = {
+        'terminate': True,
+        'launch': True,
+        'nb_instance': 1,
+        'nb_browser_by_instance': 1,
+        'max_number_of_instance': 1,
+        'hub_ip': 'localhost'
+    }
+    for key, default in optional_keys.iteritems():
+        if not key in config.keys():
+            if caller:
+                caller.warning_log("Missing config '%s'; using default '%s'"%(key, default))
+            config[key] = default
 
     return config

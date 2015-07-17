@@ -33,3 +33,8 @@ def say(msg):
 def create_dir_if_doesnt_exist(path):
     if not os.path.exists(path):
         os.makedirs(path)
+
+if sys.platform == 'win32':
+    devnull = open('log-null', 'w')
+else:
+    devnull = open('/dev/null', 'w')

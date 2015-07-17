@@ -1,0 +1,314 @@
+import socket
+import threading
+import traceback
+import os
+from subprocess import Popen
+from datetime import datetime
+import math
+import virtualbox
+from IPython import embed
+
+from brome.core.model.utils import *
+from brome.core.model.meta.base import Session
+from brome.core.runner.base_runner import BaseRunner
+from brome.core.runner.ec2_instance import EC2Instance
+from brome.core.runner.virtualbox_instance import VirtualboxInstance
+from brome.core.runner.browser_config import BrowserConfig
+
+class GridRunner(BaseRunner):
+    def __init__(self, *args):
+        super(GridRunner, self).__init__(*args)
+
+        self.selenium_pid = None
+        self.instances_ip = []
+        self.instances = {}
+        self.xvfb_pids = []
+        self.browser_configs = {}
+
+        #START SELENIUM GRID
+        if self.get_config_value('grid_runner:start_selenium_server'):
+            self.start_selenium_server()
+
+        runner_type = None
+        if self.get_config_value("runner:ec2_browser"):
+            self.requested_browsers = self.get_config_value("runner:ec2_browser").split(',')
+            runner_type = 'ec2'
+        else:
+            self.requested_browsers = self.get_config_value("runner:virtualbox_browser").split(',')
+            runner_type = 'virtualbox'
+
+        instance_threads = []
+        for i, requested_browser in enumerate(self.requested_browsers):
+            if not self.browsers_config.get(requested_browser):
+                self.warning_log("Skipping browser (%s); not found in the provided browser config"%requested_browser)
+            else:
+                #EC2
+                if runner_type == 'ec2':
+                    browser_config = BrowserConfig(
+                        runner = self,
+                        browser_id = requested_browser,
+                        runner_type = runner_type,
+                        browsers_config = self.browsers_config
+                    )
+
+                    self.browser_configs[requested_browser] = browser_config
+
+                    max_number_of_instance = browser_config.get('max_number_of_instance')
+                    nb_browser_by_instance = browser_config.get('nb_browser_by_instance')
+
+                    if len(self.tests) < \
+                        max_number_of_instance * \
+                        nb_browser_by_instance:
+
+                        nb_instance_to_launch = int(math.ceil(float(len(self.tests))/nb_browser_by_instance))
+                    else:
+                        nb_instance_to_launch = max_number_of_instance
+
+                    """
+                    for j in enumerate(nb_instance_to_launch):
+                        ec2_instance = EC2Instance(
+                            runner = self,
+                            browser_config = browser_config,
+                            index = j
+                        )
+
+                        ec2_instance_thread = InstanceThread(ec2_instance, self)
+                        ec2_instance_thread.start()
+
+                        instance_threads.append(ec2_instance_thread)
+                    """
+                    for i in range(0, nb_instance_to_launch):
+                        if not self.instances.get(requested_browser):
+                            self.instances[requested_browser] = []
+                        self.instances[requested_browser].append(1)
+
+                #VIRTUALBOX
+                else:
+                    vbox = virtualbox.VirtualBox()
+
+                    #TODO
+
+        for t in instance_threads:
+            t.join()
+
+        self.info_log("The test batch is now ready!")
+
+        try:
+            self.run()
+        except:
+            tb = traceback.format_exc()
+            self.error_log("Exception in run of the grid runner: %s"%str(tb))
+            raise
+
+        finally:
+            try:
+                #self.tear_down_instances()
+
+                #Kill selenium server
+                if self.get_config_value('grid_runner:kill_selenium_server'):
+                    if self.selenium_pid:
+                        self.kill_pid(self.selenium_pid)
+
+                #Kill xvfb process
+                for xvfb_pid in self.xvfb_pids:
+                    self.kill_pid(xvfb_pid)
+
+            except:
+                tb = traceback.format_exc()
+                self.error_log("Exception in finally block of the grid runner: %s"%str(tb))
+                    
+        self.info_log("The test batch is finished.")
+
+    def resolve_instance_by_ip(self, ip):
+        return self.instances_ip[ip]
+
+    def run(self):
+        executed_tests = []
+
+        try:
+            active_thread = 0
+            start_thread = True
+            active_threard_by_browser_id = {}
+
+            test_index_by_browser_id = {}
+            for browser_id in self.requested_browsers:
+                test_index_by_browser_id[browser_id] = 0
+
+            self.kill_test_batch_if_necessary()
+            
+            while active_thread or start_thread:
+                start_thread = False
+
+                self.kill_test_batch_if_necessary()
+
+                for browser_id in self.requested_browsers:
+
+                    if not active_threard_by_browser_id.get(browser_id):
+                        active_threard_by_browser_id[browser_id] = 0
+                    else:
+                        current_active_thread = 0
+                        for thread in threading.enumerate():
+                            if type(thread) != threading._MainThread and \
+                                thread.test._browser_config.browser_id == browser_id:
+                                current_active_thread += 1
+
+                        active_threard_by_browser_id[browser_id] = current_active_thread
+
+                    for j in range(0, len(self.instances[browser_id]) - active_threard_by_browser_id[browser_id]):
+
+                        self.kill_test_batch_if_necessary()
+
+                        if test_index_by_browser_id[browser_id] < len(self.tests):
+                            test = self.tests[test_index_by_browser_id[browser_id]]
+
+                            test_index_by_browser_id[browser_id] += 1
+
+                            test_ = test.Test(
+                                runner = self,
+                                browser_config = self.browser_configs[browser_id],
+                                name = test.Test.name,
+                                index = test_index_by_browser_id[browser_id]
+                            )
+
+                            thread = TestThread(test_)
+                            thread.start()
+
+                            executed_tests.append(test_)
+
+                            self.info_log(
+                                "%s / %s = %s %%"%(
+                                    test_index_by_browser_id[browser_id],
+                                    len(self.tests) * len(self.requested_browsers),
+                                    (round(float(test_index_by_browser_id[browser_id]) / float(len(self.tests)) *100, 0))
+                                )
+                            )
+
+                active_thread = threading.active_count() - 1
+                if active_thread:
+                    try:
+                        self.info_log("Active thread number: %s"%active_thread)
+                        self.info_log("Active thread name: %s"%(', '.join([
+                                "%s-%s"%(
+                                    th.test.pdriver.get_id(),
+                                    th.test._name
+                                ) for th in threading.enumerate() if type(th) != threading._MainThread
+                            ])
+                        ))
+                    except Exception as e:
+                        self.error_log("print active exception: %s"% str(3))
+
+                #TIMEOUT
+                if (self.sa_test_batch.starting_timestamp - datetime.now()).total_seconds() >\
+                    self.get_config_value("grid_runner:max_running_time"):
+
+                    self.error_log("max_running_time reached... terminating!")
+                    raise TestRunnerKilledException()
+
+                self.kill_test_batch_if_necessary()
+
+                sleep(10)
+
+        except TestRunnerKilledException:
+            pass
+
+        except Exception:
+            tb = traceback.format_exc()
+            self.error_log("Run exception: %s"%str(tb))
+
+        self.sa_test_batch.ending_timestamp = datetime.now()
+        self.session.commit()
+
+    def kill_test_batch_if_necessary(self):
+        kill_file = os.path.join(
+            self.runner_dir,
+            "kill.txt"
+        )
+        if os.path.isfile(kill_file):
+            self.info_log("Killing itself")
+            for t in [t for t in threading.enumerate() if type(t) != threading._MainThread]:
+                self.info_log("Killing: %s"%t.config.get('name'))
+                t.end()
+
+            raise TestRunnerKilledException("Killed")
+
+    def tear_down_instances(self):
+        self.info_log('Tearing down all instances...')
+
+        for key, value in self.instances.iteritems():
+            for browser_instance in value:
+                browser_instance.tear_down()
+
+        self.info_log('[Done]Tearing down all instances')
+
+    def start_selenium_server(self):
+        ip = self.get_config_value("grid_runner:selenium_server_ip")
+        port = self.get_config_value("grid_runner:selenium_server_port")
+
+        def check_if_selenium_server_is_running():
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            result = s.connect_ex((ip, port))
+            s.close()
+            return not result
+
+        if check_if_selenium_server_is_running():
+            self.info_log('Starting selenium server...')
+
+            command = self.get_config_value("grid_runner:selenium_server_command"\
+                .format(
+                    **self.get_config_value("grid_runner:*")
+                )
+            )
+
+            self.info_log('Selenium hub command: %s'%command)
+
+            process = Popen(
+                command.split(' '),
+                stdout=open(os.path.join(self.runner_dir, "hub.log"), 'a'),
+                stderr=open(os.path.join(self.runner_dir, "hub.log"), 'a'),
+            )
+
+            self.selenium_pid = process.pid
+
+            self.info_log('Selenium server pid: %s'%self.selenium_pid)
+        else:
+            self.info_log('Selenium is already running.')
+            return True
+
+        for i in range(30):
+            self.info_log('Waiting for the selenium server to start...')
+            result = check_if_selenium_server_is_running()
+
+            if result:
+                self.info_log('[Done]Selenium server is running.')
+                return True
+            sleep(2)
+
+        raise Exception("Selenium server did not start!")
+
+class InstanceThread(threading.Thread):
+
+    def __init__(self, instance):
+        threading.Thread.__init__(self)
+        self.instance = instance
+        self.runner = self.instance.runner
+
+    def run(self):
+        success = self.instance.startup()
+        if success:
+            if not self.runner.instances.get(self.instance.browser_config.browser_id):
+                self.runner.instances[self.instance.browser_config.browser_id] = []
+
+            self.runner.instances[self.instance.browser_config.browser_id] = self.instance
+            self.runner.instances_ip[self.instance.get_ip()] = self.instance
+
+class TestThread(threading.Thread):
+
+    def __init__(self, test):
+        threading.Thread.__init__(self)
+        self.test = test
+
+    def run(self):
+        self.test.execute()
+
+class TestRunnerKilledException(Exception):
+    pass

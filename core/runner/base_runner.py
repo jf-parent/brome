@@ -6,6 +6,8 @@ import os
 import copy
 import os.path
 
+import psutil
+
 from brome.core.model.configurator import ini_to_dict, runner_args_to_dict, get_config_value, default_config
 from brome.core.model.meta import *
 from brome.core.model.test_batch import TestBatch
@@ -21,18 +23,17 @@ class BaseRunner(object):
 
         #CONFIG
         self.config = runner_args_to_dict(self.commandline_args)
-        self.brome_config = ini_to_dict(self.brome_config_path)
+        self.brome_config = self.brome.config
 
-        delete_database(self.get_config_value('database:sqlalchemy.url'), 'brome_example')
-        create_database(self.get_config_value('database:sqlalchemy.url'), 'brome_example')
-        
         setup_database(self.get_config_value('database:*'))
 
         self.session = Session()
 
         #Update the test dict
+        """
         if self.brome.test_dict:
             update_test(self.session, self.brome.test_dict)
+        """
 
         self.sa_test_batch = TestBatch(starting_timestamp = datetime.now())
         self.session.add(self.sa_test_batch)
@@ -55,6 +56,23 @@ class BaseRunner(object):
             self.screenshot_cache = {}
 
         self.tests = self.get_activated_tests()
+
+    def kill_pid(self, pid):
+        try:
+
+            p = psutil.Process(pid)
+
+            p.terminate()
+
+            self.info_log('Killed [pid:%s][name:%s]'%(p.pid, p.name()))
+        except psutil.NoSuchProcess:
+            self.error_log('No such process: [pid:%s]'%pid)
+
+    def kill(self, procname):
+        for proc in psutil.process_iter():
+            if proc.name() == procname:
+                self.info_log('[pid:%s][name:%s] killed'%(proc.pid, proc.name()))
+                proc.kill()
 
     def get_available_tests(self, search_query):
 

@@ -6,14 +6,20 @@ import re
 from brome.core.model.meta import Session
 from brome.core.runner.local_runner import LocalRunner
 from brome.core.runner.grid_runner import GridRunner
+from brome.core.model.meta import create_database, delete_database
+from brome.core.model.configurator import ini_to_dict, get_config_value, default_config
 
 class Brome(object):
     def __init__(self, **kwargs):
         self.config_path = kwargs.get('config_path')
         self.selector_dict = kwargs.get('selector_dict', {})
         self.test_dict = kwargs.get('test_dict', {})
-        self.local_config_dict = kwargs.get('local_config_dict', False)
-        self.ec2_config_dict = kwargs.get('ec2_config_dict', False)
+        self.browsers_config = kwargs.get('browsers_config')
+        self.config = ini_to_dict(self.config_path)
+
+        if not self.browsers_config:
+            print 'You must provide a browsers config dict to the brome instance'
+            exit(1)
 
     def print_usage(self):
         print 'brome [generate | admin | run]'
@@ -26,9 +32,9 @@ class Brome(object):
         if args[1] == 'run':
             self.run(args[2:])
         elif args[1] == 'generate':
-            self.generate(args)
+            self.generate(args[2:])
         elif args[1] == 'admin':
-            self.admin(args)
+            self.admin(args[2:])
         else:
             self.print_usage()
 
@@ -44,28 +50,21 @@ class Brome(object):
                             help = 'The search query used to activate tests'
         )
 
-        #LOCAL BROWSER
+        #LOCALHOST RUNNER
         parser.add_argument(
-                            '--local-browser',
+                            '--localhost',
                             '-l',
-                            dest = 'local_browser', 
+                            dest = 'localhost_runner', 
                             help = 'Launch a browser from localhost'
         )
 
-        #EC2
+        #REMOTE RUNNER
         parser.add_argument(
-                            '--ec2',
-                            dest = 'ec2_browser', 
+                            '-r',
+                            '--remote',
+                            dest = 'remote_runner', 
                             default = False,
-                            help = 'Launch a browser in an ec2 instance: comma separated list of browser'
-        )
-
-        #VIRTUALBOX
-        parser.add_argument(
-                            '--virtualbox',
-                            dest = 'virtualbox_browser', 
-                            default = False,
-                            help = 'Launch a browser in an virtualbox instance: comma separated list of browser'
+                            help = 'Launch a browser on a remote'
         )
 
         def test_config_string(value):
@@ -102,44 +101,71 @@ class Brome(object):
 
         self.parsed_args = parser.parse_args(args)
 
-        #LOCAL BROWSER
-        if self.parsed_args.local_browser:
-            if not self.local_config_dict:
-                print 'You must provide a local browser config dict to the brome instance'
+        if self.parsed_args.localhost_runner:
+            browsers_id = [self.parsed_args.localhost_runner]
+        else:
+            browsers_id = self.parsed_args.remote_runner.split(',')
+
+        for browser_id in browsers_id:
+            if browser_id not in self.browsers_config.keys():
+                print 'This browser id is not available in the provided browsers config'
+                print 'Supported browser(s) are: %s'%self.browsers_config.keys()
                 exit(1)
 
-            if self.parsed_args.local_browser not in self.local_config_dict.keys():
-                print 'This local browser is not supported'
-                print 'Supported local browser(s) are: %s'%self.local_config_dict.keys()
-                exit(1)
+        #LOCALHOST RUNNER 
+        if self.parsed_args.localhost_runner:
+            LocalRunner(self).execute()
 
-            self.browsers_config = self.local_config_dict
-            local_runner = LocalRunner(self)
-
-        #EC2
-        elif self.parsed_args.ec2_browser:
-            if not self.ec2_config_dict:
-                print 'You must provide a ec2 browser config dict to the brome instance'
-                exit(1)
-
-            if self.parsed_args.ec2_browser not in self.ec2_config_dict.keys():
-                print 'This ec2 browser is not supported'
-                print 'Supported ec2 browser(s) are: %s'%self.ec2_config_dict.keys()
-                exit(1)
-
-            self.browsers_config = self.ec2_config_dict
-            grid_runner = GridRunner(self)
-
-        #VIRTUALBOX
-        elif self.parsed_args.virtualbox:
-            pass
+        #REMOTE RUNNER
+        elif self.parsed_args.remote_runner:
+            GridRunner(self).execute()
 
         #ERROR
         else:
-            print 'Select either --virtualbox "{browser_id}" or --ec2 "{browser_id}" or -l "{browser_id}"'
+            print 'Select either -l "{browser_id}" or -r "{browser_id}"'
 
     def generate(self, args):
         print 'generate'
 
     def admin(self, args):
-        print 'admin'
+        parser = argparse.ArgumentParser(description='Brome admin')
+
+        parser.add_argument(
+                            '--create_database',
+                            dest = 'create_database', 
+                            action = 'store_true',
+                            help = 'Create the project database'
+        )
+
+        parser.add_argument(
+                            '--reset_database',
+                            dest = 'reset_database', 
+                            action = 'store_true',
+                            help = 'Reset the project database'
+        )
+
+        parser.add_argument(
+                            '--delete_database',
+                            dest = 'delete_database', 
+                            action = 'store_true',
+                            help = 'Delete the project database'
+        )
+
+        parsed_args = parser.parse_args(args)
+
+        if parsed_args.create_database:
+            create_database(self.get_config_value('database:sqlalchemy.url'))
+        elif parsed_args.reset_database:
+            delete_database(self.get_config_value('database:sqlalchemy.url'))
+            create_database(self.get_config_value('database:sqlalchemy.url'))
+        elif parsed_args.delete_database:
+            delete_database(self.get_config_value('database:sqlalchemy.url'))
+
+    def get_config_value(self, config_name):
+        config_list = [
+            self.config,
+            default_config
+        ]
+        value = get_config_value(config_list,config_name)
+
+        return value

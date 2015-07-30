@@ -7,8 +7,9 @@ import boto
 from selenium.webdriver.chrome.options import Options
 
 from brome.core.model.utils import *
+from .base_instance import BaseInstance
 
-class EC2Instance(object):
+class EC2Instance(BaseInstance):
 
     def __init__(self, **kwargs):
         self.runner = kwargs.get('runner')

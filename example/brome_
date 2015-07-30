@@ -5,8 +5,7 @@ import sys
 from brome import Brome
 
 from model.selector import selector_dict
-from browser_config.local_config import local_config_dict
-from browser_config.ec2_config import ec2_config_dict
+from browser_config.main_config import browsers_config
 from model.test_dict import test_dict
 
 if __name__ == '__main__':
@@ -15,8 +14,7 @@ if __name__ == '__main__':
         config_path = "/Users/pyrat/Documents/PROG/PYTHON/brome/example/brome.ini",
         selector_dict = selector_dict,
         test_dict = test_dict,
-        ec2_config_dict = ec2_config_dict,
-        local_config_dict = local_config_dict
+        browsers_config = browsers_config
     )
 
     brome.execute(sys.argv)

@@ -2,6 +2,7 @@
 
 import logging
 import os.path
+import os
 import pickle
 
 from selenium import webdriver
@@ -52,13 +53,14 @@ class BaseTest(object):
     def init_driver(self, retry = 10):
 
         #LOCAL
-        if self._browser_config.runner_type == 'local':
-            driver = getattr(webdriver, self._browser_config.get('browserName').capitalize())()
+        if self._browser_config.location == 'localhost':
+            try:
+                driver = getattr(webdriver, self._browser_config.get('browserName'))()
+            except AttributeError:
+                raise Exception("The browserName('%s') is invalid"%self._browser_config.get('browserName'))
 
         #REMOTE
-        elif self._browser_config.runner_type in ['virtualbox', 'ec2']:
-            driver = webdriver.PhantomJS()
-            """
+        elif self._browser_config.location in ['virtualbox', 'ec2']:
             config = self._browser_config.config
 
             desired_cap = {}
@@ -96,7 +98,6 @@ class BaseTest(object):
                         return self.init_driver(retry = (retry - 1))
                     else:
                         raise Exception("Cannot get the driver")
-            """
 
         self.pdriver = ProxyDriver(
             driver = driver,
@@ -104,19 +105,17 @@ class BaseTest(object):
             runner = self._runner
         )
 
-    def save_state(self):
-        self.info_log("Saving state...")
+    def delete_state(self):
+        state_pickle = self.get_state_pickle_path()
 
-        state = {}
-        state = {key:value for (key, value) in self.__dict__.iteritems() if key[0] != '_'}
-        del state['pdriver']
+        if os.path.isfile(state_pickle):
+            os.remove(state_pickle)
+            self.info_log("State deleted: %s"%state_pickle)
 
-        effective_state = Stateful.cleanup_state(state)
-
+    def get_state_pickle_path(self):
         #Extract the server name
         server = urlparse(self.pdriver.current_url).netloc
 
-        #State pickle name
         state_dir = os.path.join(
             self.get_config_value("project:absolute_path"),
             "tests/states/"
@@ -128,6 +127,19 @@ class BaseTest(object):
             string_to_filename('%s_%s_%s.pkl'%(self._name.replace(' ', '_'), server, self._index))
         )
 
+        return  state_pickle
+
+    def save_state(self):
+        self.info_log("Saving state...")
+
+        state = {}
+        state = {key:value for (key, value) in self.__dict__.iteritems() if key[0] != '_'}
+        del state['pdriver']
+
+        effective_state = Stateful.cleanup_state(state)
+
+        state_pickle = self.get_state_pickle_path()
+        
         with open(state_pickle,'wb') as s:
             pickle.dump(effective_state, s)
 
@@ -147,17 +159,7 @@ class BaseTest(object):
                     set_pdriver(v)
 
         #Extract the server name
-        server = urlparse(self.pdriver.current_url).netloc
-
-        state_dir = os.path.join(
-            self.get_config_value("project:absolute_path"),
-            "tests/states/"
-        )
-
-        state_pickle = os.path.join(
-            state_dir,
-            string_to_filename('%s_%s_%s.pkl'%(self._name.replace(' ', '_'), server, self._index))
-        )
+        state_pickle = self.get_state_pickle_path()
 
         if os.path.isfile(state_pickle):
             with open(state_pickle, 'rb') as s:
@@ -228,6 +230,14 @@ class BaseTest(object):
         try:
             self.before_run()
 
+            if self._test_config.get("delete_state"):
+                self.delete_state()
+
+            if not self.load_state():
+                if hasattr(self, 'create_state'):
+                    self.create_state()
+                    self.save_state()
+
             self.run(**self._test_config)
 
             self.after_run()
@@ -240,8 +250,6 @@ class BaseTest(object):
             self.error_log('Crash: %s'%tb)
 
             self.fail()
-
-            raise
         finally:
             self.end()
 
@@ -274,7 +282,7 @@ class BaseTest(object):
             say(self.get_config_value("runner:sound_on_test_crash"))
 
         if self.get_config_value("runner:embed_on_test_crash"):
-            self._pdriver.embed()
+            self.pdriver.embed()
 
     def get_config_value(self, config_name):
         if not hasattr(self, 'browser_brome_config'):

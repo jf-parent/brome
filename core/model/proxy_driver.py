@@ -21,6 +21,19 @@ class ProxyDriver(object):
     def __getattr__(self, funcname):
         return getattr(self._driver, funcname)
 
+    def is_visible(self, selector, **kwargs):
+        
+        element = self.find(selector, raise_exception = False)
+        if element:
+            element.highlight(
+                style = self.get_config_value(
+                            'highlight:element_is_visible'
+                        )
+            )
+            return True
+        else:
+            return False
+
     def find(self, selector, **kwargs):
         self.info_log("Finding element with selector: %s"%selector)
 
@@ -46,13 +59,13 @@ class ProxyDriver(object):
 
         raise_exception = kwargs.get(
                                     'raise_exception',
-                                    self.test_instance.get_config_value(
+                                    self.get_config_value(
                                         'proxy_driver:raise_exception'
                                     )
                                 )
         wait_until_visible = kwargs.get(
                                         'wait_until_visible',
-                                        self.test_instance.get_config_value(
+                                        self.get_config_value(
                                             'proxy_driver:wait_until_visible_before_find'
                                         )
                                     )
@@ -74,89 +87,115 @@ class ProxyDriver(object):
 
         if type(elements) == list:
             if len(elements):
-                return ProxyElementList(elements, selector)
+                return ProxyElementList(elements, selector, self)
             else:
                 if raise_exception:
                     raise NoSuchElementException(effective_selector)
                 else:
                     return []
         else:
-            return [ProxyElement(elements, selector)]
+            return [ProxyElement(elements, selector, self)]
 
     def selector_function_resolver(self, selector, **kwargs):
         function_type = kwargs.get('function_type', 'find_by')
 
-        selector_type = selector[0:2]
-        effective_selector = selector
-
-        if selector_type == 'nm':
-            if function_type == 'find_by':
-                func = 'find_elements_by_name'
-            elif 'by':
-                func = 'NAME'
-
-        elif selector_type == 'xp':
-            if function_type == 'find_by':
-                func = 'find_elements_by_xpath'
-            elif 'by':
-                func = 'XPATH'
-
-        elif selector_type == 'cn':
-            if function_type == 'find_by':
-                func = 'find_elements_by_class_name'
-            elif 'by':
-                func = 'CLASS_NAME'
-
-        elif selector_type == 'id':
-            if function_type == 'find_by':
-                func = 'find_element_by_id'
-            elif 'by':
-                func = 'ID'
-
-        elif selector_type == 'cs':
-            if function_type == 'find_by':
-                func = 'find_elements_by_css_selector'
-            elif 'by':
-                func = 'CSS_SELECTOR'
-
-        elif selector_type == 'tn':
-            if function_type == 'find_by':
-                func = 'find_elements_by_tag_name'
-            elif 'by':
-                func = 'TAG_NAME'
-
-        elif selector_type == 'lt':
-            if function_type == 'find_by':
-                func = 'find_elements_by_link_text'
-            elif 'by':
-                func = 'LINK_TEXT'
-
-        elif selector_type == 'pl':
-            if function_type == 'find_by':
-                func = 'find_elements_by_partial_link_text'
-            elif 'by':
-                func = 'PARTIAL_LINK_TEXT'
-
-        elif selector_type == 'sv':
-            if not self.selector_dict.has_key(selector[3:]):
-                raise Exception("Cannot find the selector variable (%s) in the selector dict"%selector[3:])
-
-            selector_variable = self.selector_dict[selector[3:]]
-            if type(selector_variable) == dict:
-                if selector_variable.has_key(self.get_id()):
-                    return self.selector_function_resolver(
-                        selector_variable.get(self.get_id())
-                    )
-                else:
-                    return self.selector_function_resolver(selector_variable.get('default'))
-            else:
-                return self.selector_function_resolver(selector_variable)
-
+        if type(selector) != list:
+            selector_list = [selector]
         else:
-            raise Exception("""
-                Cannot resolve selector function name! All selector need to start with either:
-                    'nm:' (name), 'xp:' (xpath), 'cn:' (classname), 'id:' (id), 'cs:' (css), 'tn:' (tag name), 'lt:' (link text), 'pl:' (partial link text)
-            """)
+            selector_list = selector
+
+        resolved_selector_list = []
+        for selector in selector_list:
+
+            selector_type = selector[:2]
+            current_selector = selector
+
+            if selector_type == 'nm':
+                if function_type == 'find_by':
+                    func = 'find_elements_by_name'
+                elif 'by':
+                    func = 'NAME'
+
+            elif selector_type == 'xp':
+                if function_type == 'find_by':
+                    func = 'find_elements_by_xpath'
+                elif 'by':
+                    func = 'XPATH'
+
+            elif selector_type == 'cn':
+                if function_type == 'find_by':
+                    func = 'find_elements_by_class_name'
+                elif 'by':
+                    func = 'CLASS_NAME'
+
+            elif selector_type == 'id':
+                if function_type == 'find_by':
+                    func = 'find_element_by_id'
+                elif 'by':
+                    func = 'ID'
+
+            elif selector_type == 'cs':
+                if function_type == 'find_by':
+                    func = 'find_elements_by_css_selector'
+                elif 'by':
+                    func = 'CSS_SELECTOR'
+
+            elif selector_type == 'tn':
+                if function_type == 'find_by':
+                    func = 'find_elements_by_tag_name'
+                elif 'by':
+                    func = 'TAG_NAME'
+
+            elif selector_type == 'lt':
+                if function_type == 'find_by':
+                    func = 'find_elements_by_link_text'
+                elif 'by':
+                    func = 'LINK_TEXT'
+
+            elif selector_type == 'pl':
+                if function_type == 'find_by':
+                    func = 'find_elements_by_partial_link_text'
+                elif 'by':
+                    func = 'PARTIAL_LINK_TEXT'
+
+            elif selector_type == 'sv':
+                if not self.selector_dict.has_key(current_selector[3:]):
+                    raise Exception("Cannot find the selector variable (%s) in the selector dict"%current_selector[3:])
+
+                selector_variable = self.selector_dict[current_selector[3:]]
+                if type(selector_variable) == dict:
+                    if selector_variable.has_key(self.get_id()):
+                        func, current_selector = self.selector_function_resolver(
+                            selector_variable.get(self.get_id()),
+                            function_type = function_type
+                        )
+                    else:
+                        func, current_selector = self.selector_function_resolver(selector_variable.get('default'), function_type = function_type)
+                else:
+                    func, current_selector = self.selector_function_resolver(selector_variable, function_type = function_type)
+
+            else:
+                raise Exception("""
+                    Cannot resolve selector function name! All selector need to start with either:
+                        'nm:' (name), 'xp:' (xpath), 'cn:' (classname), 'id:' (id), 'cs:' (css), 'tn:' (tag name), 'lt:' (link text), 'pl:' (partial link text)
+                """)
+
+            resolved_selector_list.append(current_selector)
+
+        effective_selector_list = []
+        resolved_selector_type_list = []
+        for i, resolved_selector in enumerate(resolved_selector_list):
+            resolved_selector_type_list.append(resolved_selector[:2])
+            if i != 0:
+                effective_selector_list.append(resolved_selector[3:])
+            else:
+                effective_selector_list.append(resolved_selector)
+
+        ret = set(resolved_selector_type_list)
+        if len(ret) != 1:
+            raise Exception("If you provide a list of selector all selector must be equal")
+
+        effective_selector = ''.join(effective_selector_list)
 
         self.debug_log('func: %s'%func)
         self.debug_log('effective_selector: %s'%effective_selector)
@@ -168,13 +207,13 @@ class ProxyDriver(object):
         
         timeout = kwargs.get(
                             'timeout',
-                            int(self.test_instance.get_config_value(
+                            self.get_config_value(
                                 'proxy_driver:default_timeout'
-                            ))
+                            )
                         )
         raise_exception = kwargs.get(
                                     'raise_exception',
-                                    self.test_instance.get_config_value(
+                                    self.get_config_value(
                                         'proxy_driver:raise_exception'
                                     )
                                 )
@@ -186,7 +225,7 @@ class ProxyDriver(object):
             return True
         except TimeoutException:
             if raise_exception:
-                raise TimeoutException(selector)
+                raise TimeoutException(effective_selector)
             else:
                 return False
 
@@ -195,13 +234,13 @@ class ProxyDriver(object):
 
         timeout = kwargs.get(
                             'timeout',
-                            int(self.test_instance.get_config_value(
+                            self.get_config_value(
                                 'proxy_driver:default_timeout'
-                            ))
+                            )
                         )
         raise_exception = kwargs.get(
                                     'raise_exception',
-                                    self.test_instance.get_config_value(
+                                    self.get_config_value(
                                         'proxy_driver:raise_exception'
                                     )
                                 )
@@ -218,16 +257,16 @@ class ProxyDriver(object):
                 return False
 
     def pdb(self):
-        if self.test_instance.get_config_value("runner:play_sound_on_pdb"):
-            say(self.test_instance.get_config_value("runner:sound_on_pdb"))
+        if self.get_config_value("runner:play_sound_on_pdb"):
+            say(self.get_config_value("runner:sound_on_pdb"))
 
         set_trace()
 
     def embed(self, title = '', stack_depth = 2):
         from IPython.terminal.embed import InteractiveShellEmbed
 
-        if self.test_instance.get_config_value("runner:play_sound_on_ipython_embed"):
-            say(self.test_instance.get_config_value("runner:sound_on_ipython_embed"))
+        if self.get_config_value("runner:play_sound_on_ipython_embed"):
+            say(self.get_config_value("runner:sound_on_ipython_embed"))
 
         ipshell = InteractiveShellEmbed(banner1 = title)
 
@@ -272,47 +311,121 @@ class ProxyDriver(object):
             )
             self.info_log("Screenshot taken (%s)"%screenshot_path)
 
-    def assert_visible(self, selector, testid = False, **kwargs):
+    def assert_visible(self, selector, testid = None, **kwargs):
         self.info_log("Assert visible selector(%s) testid(%s)"%(selector, testid))
 
+        highlight = kwargs.get('highlight', True)
+
         element = self.find(selector, raise_exception = False)
         if element:
-            self.create_test_result(testid, True)
-        else:
-            self.create_test_result(testid, False)
+            if highlight:
+                element.highlight(
+                    style = self.get_config_value(
+                                'highlight:on_assertion_success'
+                            )
+                )
+            if testid is not None:
+                self.create_test_result(testid, True)
 
-    def assert_not_visible(self, selector, testid = False, **kwargs):
+            return True
+        else:
+            if testid is not None:
+                self.create_test_result(testid, False)
+
+            return False
+
+    def assert_not_visible(self, selector, testid = None, **kwargs):
         self.info_log("Assert not visible selector(%s) testid(%s)"%(selector, testid))
 
+        highlight = kwargs.get('highlight', True)
+
         element = self.find(selector, raise_exception = False)
         if element:
-            self.create_test_result(testid, False)
-        else:
-            self.create_test_result(testid, True)
+            if highlight:
+                element.highlight(
+                    style = self.get_config_value(
+                                'highlight:on_assertion_failure'
+                            )
+                )
+            if testid is not None:
+                self.create_test_result(testid, False)
 
-    def assert_text_equal(self, selector, value, testid = False, **kwargs):
+            return False
+        else:
+            if testid is not None:
+                self.create_test_result(testid, True)
+            
+            return True
+
+    def assert_text_equal(self, selector, value, testid = None, **kwargs):
         self.info_log("Assert text equal selector(%s) testid(%s)"%(selector, testid))
+
+        highlight = kwargs.get('highlight', True)
 
         element = self.find(selector, raise_exception = False)
         if element:
             if element.text == value:
-                self.create_test_result(testid, True)
-            else:
-                self.create_test_result(testid, False)
-        else:
-            self.create_test_result(testid, False)
+                if highlight:
+                    element.highlight(
+                        style = self.get_config_value(
+                                    'highlight:on_assertion_success'
+                                )
+                    )
+                if testid is not None:
+                    self.create_test_result(testid, True)
 
-    def assert_text_not_equal(self, selector, value, testid = False, **kwargs):
+                return True
+            else:
+                if highlight:
+                    element.highlight(
+                        style = self.get_config_value(
+                                    'highlight:on_assertion_failure'
+                                )
+                    )
+                if testid is not None:
+                    self.create_test_result(testid, False)
+
+                return False
+        else:
+            if testid is not None:
+                self.create_test_result(testid, False)
+
+            return False
+
+    def assert_text_not_equal(self, selector, value, testid = None, **kwargs):
         self.info_log("Assert text not equal selector(%s) testid(%s)"%(selector, testid))
+
+        highlight = kwargs.get('highlight', True)
 
         element = self.find(selector, raise_exception = False)
         if element:
             if element.text != value:
-                self.create_test_result(testid, True)
+                if highlight:
+                    element.highlight(
+                        style = self.get_config_value(
+                                    'highlight:on_assertion_success'
+                                )
+                    )
+                if testid is not None:
+                    self.create_test_result(testid, True)
+
+                return True
             else:
-                self.create_test_result(testid, False)
+                if highlight:
+                    element.highlight(
+                        style = self.get_config_value(
+                                    'highlight:on_assertion_failure'
+                                )
+                    )
+                if testid is not None:
+                    self.create_test_result(testid, False)
+
+                return False
         else:
-            self.create_test_result(testid, False)
+            if testid is not None:
+                self.create_test_result(testid, False)
+
+            return False
 
     def create_test_result(self, testid, result, **kwargs):
         embed = True
@@ -337,7 +450,7 @@ class ProxyDriver(object):
 
         if result:
             #SCREENSHOT
-            if self.test_instance.get_config_value("proxy_driver:take_screenshot_on_assertion_success"):
+            if self.get_config_value("proxy_driver:take_screenshot_on_assertion_success"):
                 screenshot_name = 'succeed_%s_%s_%s.png'%(
                     string_to_filename(testid),
                     get_timestamp(),
@@ -350,15 +463,15 @@ class ProxyDriver(object):
                 self.take_screenshot(screenshot_path = screenshot_path)
 
             #SOUND NOTIFICATION
-            if self.test_instance.get_config_value("runner:play_sound_on_assertion_success"):
-                say(self.test_instance.get_config_value("runner:sound_on_assertion_success").format(testid = testid))
+            if self.get_config_value("runner:play_sound_on_assertion_success"):
+                say(self.get_config_value("runner:sound_on_assertion_success").format(testid = testid))
 
             #EMBED
-            if self.test_instance.get_config_value("runner:embed_on_assertion_success") and embed:
+            if self.get_config_value("runner:embed_on_assertion_success") and embed:
                 self.embed(title = test_name)
         else:
             #SCREENSHOT
-            if self.test_instance.get_config_value("proxy_driver:take_screenshot_on_assertion_success"):
+            if self.get_config_value("proxy_driver:take_screenshot_on_assertion_success"):
                 screenshot_name = 'failed_%s_%s_%s.png'%(
                     string_to_filename(testid),
                     get_timestamp(),
@@ -371,14 +484,14 @@ class ProxyDriver(object):
                 self.take_screenshot(screenshot_path = screenshot_path)
 
             #SOUND NOTIFICATION
-            if self.test_instance.get_config_value("runner:play_sound_on_assertion_failure"):
-                say(self.test_instance.get_config_value("runner:sound_on_assertion_failure").format(testid = testid))
+            if self.get_config_value("runner:play_sound_on_assertion_failure"):
+                say(self.get_config_value("runner:sound_on_assertion_failure").format(testid = testid))
 
             #EMBED
-            if self.test_instance.get_config_value("runner:embed_on_assertion_failure") and embed:
+            if self.get_config_value("runner:embed_on_assertion_failure") and embed:
                 self.embed(title = test_name)
 
-        test_result = TestResult(
+        sa_test_result = TestResult(
             result = result,
             timestamp = datetime.now(),
             browser_id = self.get_id(),
@@ -390,7 +503,7 @@ class ProxyDriver(object):
             testinstance = self.test_instance._sa_test_instance,
             testbatch = self.runner.sa_test_batch
         )
-        self.test_instance._session.add(test_result)
+        self.test_instance._session.add(sa_test_result)
         self.test_instance._session.commit()
 
     def debug_log(self, msg):
@@ -410,20 +523,23 @@ class ProxyDriver(object):
 
     def configure_resolution(self):
         #Maximaze window
-        if self.test_instance.get_config_value('browser:maximize_window'):
+        if self.get_config_value('browser:maximize_window'):
             self._driver.maximize_window()
         else:
             #Window position
             self._driver.set_window_position(
-                self.test_instance.get_config_value('browser:window_x_position'),
-                self.test_instance.get_config_value('browser:window_y_position')
+                self.get_config_value('browser:window_x_position'),
+                self.get_config_value('browser:window_y_position')
             )
 
             #Window size
             self._driver.set_window_size(
-                self.test_instance.get_config_value('browser:window_width'),
-                self.test_instance.get_config_value('browser:window_height')
+                self.get_config_value('browser:window_width'),
+                self.get_config_value('browser:window_height')
             )
+
+    def get_config_value(self, value):
+        return self.test_instance.get_config_value(value)
 
     def get_id(self, join_char = '-'):
         return join_char.join([

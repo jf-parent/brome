@@ -8,20 +8,6 @@ from brome.core.model.meta import MultipleResultsFound
 
 engine = None
 
-@decorator
-def commit_on_success(fn, *args, **kwargs):
-    """Decorate any function to commit the session on success, rollback in
-    the case of error."""
-
-    try:
-        result = fn(*args, **kwargs)
-        Session.commit()
-    except:
-        Session.rollback()
-        raise
-    else:
-        return result
-
 Session = scoped_session(sessionmaker())
 
 class Base(object):
@@ -42,17 +28,21 @@ Base.metadata.naming_convention={
         "ix": "ix_%(table_name)s_%(column_0_name)s"
     }
 
-def delete_database(sqlalchemy_url, db_name):
+def delete_database(sqlalchemy_url):
+    db_name = sqlalchemy_url.split('/')[-1]
     engine = create_engine('/'.join(sqlalchemy_url.split('/')[:-1]))
     conn = engine.connect()
     conn.execute("DROP DATABASE IF EXISTS %s"%db_name)
     conn.close()
+    print 'Database (%s) deleted!'%db_name
 
-def create_database(sqlalchemy_url, db_name):
+def create_database(sqlalchemy_url):
+    db_name = sqlalchemy_url.split('/')[-1]
     engine = create_engine('/'.join(sqlalchemy_url.split('/')[:-1]))
     conn = engine.connect()
     conn.execute("CREATE DATABASE %s"%db_name)
     conn.close()
+    print 'Database (%s) created!'%db_name
 
 def setup_database(config):
     """Setup the application given a config dictionary."""

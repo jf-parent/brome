@@ -2,5 +2,5 @@
 
 from .base_instance import BaseInstance
 
-class VirtualboxInstance(BaseInstance):
+class LocalhostInstance(BaseInstance):
     pass

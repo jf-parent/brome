@@ -40,8 +40,9 @@ default_config["browser"]["window_height"] = 725
 default_config["browser"]["window_width"] = 1650
 default_config["browser"]["maximize_window"] = False
 default_config["highlight"]["element_is_clicked"] = "background: yellow; border: 2px solid red;"
-default_config["highlight"]["element_on_assertion_failure"] = "background: red; border: 2px solid black;"
-default_config["highlight"]["element_on_assertion_success"] = "background: green; border: 2px solid black;"
+default_config["highlight"]["element_receive_keys"] = "background: yellow; border: 2px solid red;"
+default_config["highlight"]["on_assertion_failure"] = "background: red; border: 2px solid black;"
+default_config["highlight"]["on_assertion_success"] = "background: green; border: 2px solid black;"
 default_config["highlight"]["element_is_visible"] = "background: purple; border: 2px solid black;"
 default_config["highlight"]["use_highlight"] = False
 default_config["runner"]["embed_on_assertion_success"] = False
@@ -159,41 +160,3 @@ def parse_brome_config_from_browser_config(browser_config):
 
     return config
 
-def validate_ec2_browser_config(config, caller = False):
-    if config.get('launch', True):
-        required_keys = [
-            'browserName',
-            'platform',
-            'ssh_key_path',
-            'username',
-            'amiid',
-            'region',
-            'instance_type',
-            'security_group_ids',
-            'selenium_command'
-        ]
-    else:
-        required_keys = [
-            'browserName',
-            'platform'
-        ]
-
-    for key in required_keys:
-        if not key in config.keys():
-            raise Exception("Add the '%s' in your ec2_config"%key)
-
-    optional_keys = {
-        'terminate': True,
-        'launch': True,
-        'nb_instance': 1,
-        'nb_browser_by_instance': 1,
-        'max_number_of_instance': 1,
-        'hub_ip': 'localhost'
-    }
-    for key, default in optional_keys.iteritems():
-        if not key in config.keys():
-            if caller:
-                caller.warning_log("Missing config '%s'; using default '%s'"%(key, default))
-            config[key] = default
-
-    return config

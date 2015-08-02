@@ -7,7 +7,6 @@ from datetime import datetime
 import math
 
 import virtualbox
-from IPython import embed
 
 from brome.core.model.utils import *
 from brome.core.model.meta.base import Session

@@ -1,6 +1,10 @@
 #! -*- coding: utf-8 -*-
 
+from lxml import etree
+from cssselect.parser import SelectorSyntaxError
+from lxml.cssselect import CSSSelector
 from inspect import currentframe
+import re
 
 from brome.core.model.utils import *
 from brome.core.model.test import Test
@@ -117,6 +121,14 @@ class ProxyDriver(object):
                     func = 'NAME'
 
             elif selector_type == 'xp':
+
+                if self.get_config_value("proxy_driver:validate_xpath_selector"):
+                    xpath_test = etree.parse(StringIO('<foo><bar></bar></foo>'))
+                    try:
+                        xpath_test.xpath(current_selector[3:])
+                    except etree.XPathEvalError, e:
+                        raise Exception("Invalid xpath: %s"%current_selector[3:])
+
                 if function_type == 'find_by':
                     func = 'find_elements_by_xpath'
                 elif 'by':
@@ -135,6 +147,12 @@ class ProxyDriver(object):
                     func = 'ID'
 
             elif selector_type == 'cs':
+                if self.get_config_value("proxy_driver:validate_css_selector"):
+                    try:
+                        CSSSelector(current_selector[3:])
+                    except SelectorSyntaxError:
+                        raise Exception("Invalid xpath: %s"%current_selector[3:])
+
                 if function_type == 'find_by':
                     func = 'find_elements_by_css_selector'
                 elif 'by':
@@ -164,9 +182,20 @@ class ProxyDriver(object):
 
                 selector_variable = self.selector_dict[current_selector[3:]]
                 if type(selector_variable) == dict:
-                    if selector_variable.has_key(self.get_id()):
+                    current_browser_id = False
+
+                    keys = [key for key in selector_variable.keys() if key != 'default']
+                    for key in keys:
+                        for target in key.split('|'):
+                            try:
+                                re.search(target, self.get_id()).group(0)
+                                current_browser_id = key
+                            except AttributeError:
+                                pass
+
+                    if current_browser_id:
                         func, current_selector = self.selector_function_resolver(
-                            selector_variable.get(self.get_id()),
+                            selector_variable.get(current_browser_id),
                             function_type = function_type
                         )
                     else:

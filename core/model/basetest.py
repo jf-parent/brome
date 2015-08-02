@@ -189,7 +189,7 @@ class BaseTest(object):
 
         create_dir_if_doesnt_exist(self.test_log_dir)
 
-        format_ = "[%(batchid)s](%(testname)s):%(message)s"
+        format_ = self.get_config_value("logger_test:format")
 
         #Stream logger 
         if self.get_config_value('logger_test:streamlogger'):

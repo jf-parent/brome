@@ -29,6 +29,8 @@ default_config["logger_runner"]["filelogger"] = True
 default_config["logger_test"]["level"] = "INFO"
 default_config["logger_test"]["streamlogger"] = True
 default_config["logger_test"]["filelogger"] = True
+default_config["proxy_driver"]["validate_xpath_selector"] = True
+default_config["proxy_driver"]["validate_css_selector"] = True
 default_config["proxy_driver"]["default_timeout"] = 5
 default_config["proxy_driver"]["raise_exception"] = True
 default_config["proxy_driver"]["wait_until_visible_before_find"] = False
@@ -98,17 +100,20 @@ def ini_to_dict(ini_path):
     for section in config_parser.sections():
         config[section] = {}
         for option in config_parser.options(section):
-                value = config_parser.get(section, option)
+            value = config_parser.get(section, option)
 
-                effective_value = value
-                if value.lower() in ['false', 'true']:
-                     effective_value = config_parser.getboolean(section, option)
-                #NOTE will only work with positive integer;
-                #not a problem for now since we only have positive integer
-                elif value.isdigit():
-                    effective_value = config_parser.getint(section, option)
+            if section == 'webserver':
+                option = option.upper()
 
-                config[section][option] = effective_value
+            effective_value = value
+            if value.lower() in ['false', 'true']:
+                 effective_value = config_parser.getboolean(section, option)
+            #NOTE will only work with positive integer;
+            #not a problem for now since we only have positive integer
+            elif value.isdigit():
+                effective_value = config_parser.getint(section, option)
+
+            config[section][option] = effective_value
 
     return config
 

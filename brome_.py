@@ -8,6 +8,7 @@ from brome.core.runner.local_runner import LocalRunner
 from brome.core.runner.grid_runner import GridRunner
 from brome.core.model.meta import create_database, delete_database
 from brome.core.model.configurator import ini_to_dict, get_config_value, default_config
+from brome.webserver.webserver.app import create_app
 
 class Brome(object):
     def __init__(self, **kwargs):
@@ -16,6 +17,7 @@ class Brome(object):
         self.test_dict = kwargs.get('test_dict', {})
         self.browsers_config = kwargs.get('browsers_config')
         self.config = ini_to_dict(self.config_path)
+        self.config['project']['absolute_path'] = kwargs.get('absolute_path')
 
         if not self.browsers_config:
             print 'You must provide a browsers config dict to the brome instance'
@@ -35,6 +37,8 @@ class Brome(object):
             self.generate(args[2:])
         elif args[1] == 'admin':
             self.admin(args[2:])
+        elif args[1] == 'webserver':
+            self.webserver(args[2:])
         else:
             self.print_usage()
 
@@ -131,21 +135,21 @@ class Brome(object):
         parser = argparse.ArgumentParser(description='Brome admin')
 
         parser.add_argument(
-                            '--create_database',
+                            '--create-database',
                             dest = 'create_database', 
                             action = 'store_true',
                             help = 'Create the project database'
         )
 
         parser.add_argument(
-                            '--reset_database',
+                            '--reset-database',
                             dest = 'reset_database', 
                             action = 'store_true',
                             help = 'Reset the project database'
         )
 
         parser.add_argument(
-                            '--delete_database',
+                            '--delete-database',
                             dest = 'delete_database', 
                             action = 'store_true',
                             help = 'Delete the project database'
@@ -160,6 +164,10 @@ class Brome(object):
             create_database(self.get_config_value('database:sqlalchemy.url'))
         elif parsed_args.delete_database:
             delete_database(self.get_config_value('database:sqlalchemy.url'))
+
+    def webserver(self, args):
+        app = create_app(self.get_config_value("webserver:*"))
+        app.run()
 
     def get_config_value(self, config_name):
         config_list = [

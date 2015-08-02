@@ -40,7 +40,10 @@ class BaseRunner(object):
         self.session.commit()
 
         #RUNNER LOG DIR
-        self.root_test_result_dir = self.get_config_value("project:test_batch_result_path")
+        self.root_test_result_dir = os.path.join(
+            self.get_config_value("project:absolute_path"),
+            self.get_config_value("project:test_batch_result_path")
+        )
 
         self.runner_dir = os.path.join(
             self.root_test_result_dir,
@@ -115,7 +118,7 @@ class BaseRunner(object):
 
         self.logger = logging.getLogger(logger_name)
 
-        format_ = "[%(batchid)s]%(message)s"
+        format_ = self.get_config_value("logger_runner:format")
 
         #Stream logger 
         if self.get_config_value('logger_runner:streamlogger'):

@@ -1,9 +1,10 @@
 #! -*- coding: utf-8 -*-
 
-import paramiko
-from selenium import webdriver
 from subprocess import Popen
+
+import paramiko
 import boto
+from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
 from brome.core.model.utils import *

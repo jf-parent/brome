@@ -1,0 +1,48 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<script type="text/javascript">
+    $(function() {
+        $(document).puitooltip();
+        $('#testbatchlist').puidatagrid({
+            paginator: {
+                rows: 9
+            },
+            header: 'Test Batchs',
+            datasource: [
+                {% for tb in data['testbatchlist'] %}
+                    {
+                        'title': '{{ tb['id'] }}',
+                         'timestamp_start': '{{ tb['timestamp_start'] }}',
+                         'timestamp_end': '{{ tb['timestamp_end'] }}'
+                    },
+                {% endfor %}
+            ],
+            content: function(data) {
+                return $(
+                            '<div style="margin:0px;">' +
+                                '<div>' +
+                                    '<h3>Test batch id: ' + data.title + '</h3>' +
+                                '</div>' +
+                                '<div>' +
+                                    '<h5>' + data.timestamp_start + '</h5>' +
+                                '</div>' +
+                                '<div>' +
+                                    '<h5>' + data.timestamp_end + '</h5>' +
+                                '</div>' +
+                                '<div>' +
+                                    '<a class="btn btn-danger" title="Stop this test batch" style="margin-right: 20px;">' + 
+                                        '<i class="fa fa-stop"></i>' +
+                                    '</a>' +
+                                    '<a class="btn btn-danger" title="Delete this test batch" style="margin-right: 20px;">' +
+                                        '<i class="fa fa-remove"></i>' + 
+                                    '</a>' +
+                                '</div>' +
+                            '</div>'
+                        ).puipanel();
+            }
+        });
+    });
+</script>
+<div id="testbatchlist"></div>
+{% endblock %}

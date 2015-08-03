@@ -178,7 +178,8 @@ default_config["project"]["test_batch_result_path"] = {
 
 default_config["logger_runner"]["level"] = {
     'default': "INFO",
-    'type': 'input',
+    'type': 'dropdown',
+    'options': ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
     'title': 'Logger level'
 }
 
@@ -202,7 +203,8 @@ default_config["logger_runner"]["format"] = {
 
 default_config["logger_test"]["level"] = {
     'default': "INFO",
-    'type': 'input',
+    'type': 'dropdown',
+    'options': ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
     'title': 'Logger level'
 }
 

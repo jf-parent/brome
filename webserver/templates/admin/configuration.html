@@ -19,6 +19,10 @@
                     $(function() {
                         $(':checkbox').puicheckbox(); 
                     });
+                {% elif field['type'] == 'dropdown' %}
+                    $(function() {
+                        $('#{{ field_id }}').puidropdown();
+                    });
                 {% endif %}
             {% endfor %}
         {% endfor %}
@@ -39,6 +43,12 @@
                             <input class="form-control" id="{{ field_id  }}" type="text" value="{{ field['value'] }}"/>
                         {% elif field['type'] == 'checkbox' %}
                             <input type="checkbox" id="{{ field_id }}" {% if field['value'] %} checked {% endif %}/>
+                        {% elif field['type'] == 'dropdown' %}
+                            <select id="{{ field_id }}">
+                                {% for value in field['options'] %}
+                                    <option value="{{ value }}" {% if value == field['value'] %} selected {% endif %}>{{ value }}</option>
+                                {% endfor %}
+                            </select>
                         {% endif %}
                     </div>
                 {% endfor %}

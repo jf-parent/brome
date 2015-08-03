@@ -2,7 +2,6 @@
 
 from flask import Blueprint, render_template
 from flask.ext.login import login_required
-from IPython import embed
 
 from brome.core.model.configurator import default_config, ini_to_dict
 

@@ -21,7 +21,7 @@
     <ul class="nav navbar-nav">
         {% if current_user and current_user.is_authenticated() %}
           <li><a href="{{ url_for('admin.configuration') }}">Configuration</a></li>
-          <li><a href="{{ url_for('admin.configuration') }}">Test Batch</a></li>
+          <li><a href="{{ url_for('testbatch.list') }}">Test Batch</a></li>
         {% endif %}
     </ul>
     {% if current_user and current_user.is_authenticated() %}

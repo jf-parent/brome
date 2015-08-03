@@ -6,6 +6,7 @@ css = Bundle(
     "libs/jQueryui/jquery-ui.css",
     "libs/primeui/theme/bootstrap/theme.css",
     "libs/primeui/primeui-2.0-min.css",
+    "libs/primeui/css/datagrid/datagrid.css", #http://forum.primefaces.org/viewtopic.php?f=16&t=42486
     "libs/bootstrap/dist/css/bootstrap.css",
     "css/style.css",
     filters="cssmin",
@@ -16,6 +17,7 @@ js = Bundle(
     "libs/jQuery/dist/jquery.js",
     "libs/jQueryui/jquery-ui.js",
     "libs/primeui/primeui-2.0-min.js",
+    "libs/primeui/js/datagrid/datagrid.js", #http://forum.primefaces.org/viewtopic.php?f=16&t=42486
     "libs/bootstrap/dist/js/bootstrap.js",
     "js/plugins.js",
     filters='jsmin',

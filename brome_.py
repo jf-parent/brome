@@ -8,7 +8,7 @@ from brome.core.runner.local_runner import LocalRunner
 from brome.core.runner.grid_runner import GridRunner
 from brome.core.model.meta import create_database, delete_database
 from brome.core.model.configurator import ini_to_dict, get_config_value, default_config
-from brome.webserver.webserver.app import create_app
+from brome.webserver.app import create_app
 
 class Brome(object):
     def __init__(self, **kwargs):
@@ -166,7 +166,7 @@ class Brome(object):
             delete_database(self.get_config_value('database:sqlalchemy.url'))
 
     def webserver(self, args):
-        app = create_app(self.get_config_value("webserver:*"))
+        app = create_app(self.get_config_value("webserver:*"), self.config_path)
         app.run()
 
     def get_config_value(self, config_name):

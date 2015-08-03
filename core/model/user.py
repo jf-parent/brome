@@ -3,7 +3,7 @@
 from flask_login import UserMixin
 
 from brome.core.model.utils import *
-from brome.webserver.webserver.extensions import bcrypt
+from brome.webserver.extensions import bcrypt
 from brome.core.model.meta import SurrogatePK, Base, Column, DateTime, Text, Boolean
 
 class User(SurrogatePK, UserMixin, Base):

@@ -1,0 +1,50 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<script type="text/javascript">
+    $(function() {
+        $('#main').puifieldset();
+        {% for section_id, section in data.iteritems() %}
+            $('#{{ section_id }}').puifieldset({
+                toggleable: true
+            });
+            {% for field_id, field in section.iteritems() %}
+                {% if field['type'] == 'input' %}
+                    $('#{{ field_id }}').puiinputtext();
+                {% elif field['type'] == 'spinner' %}
+                    $('#{{ field_id }}').puispinner({
+                        min: '{{ field['min'] }}'
+                    });
+                {% elif field['type'] == 'checkbox' %}
+                    $(function() {
+                        $(':checkbox').puicheckbox(); 
+                    });
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    });
+</script>
+<fieldset id="main" class="brome-field">
+    <legend>Brome configuration</legend>
+
+    {% for section_id, section in data.iteritems() %}
+        <fieldset id="{{ section_id }}" class="brome-field">
+            <legend>{{ section_id|replace("_", " ") }}</legend>
+
+                <div class="container-fluid">
+                {% for field_id, field in section.iteritems() %}
+                    <div class="row brome-field">
+                        <label for="{{ field_id  }}">{{ field['title'] }}:</label>
+                        {% if field['type'] in ['input', 'spinner'] %}
+                            <input class="form-control" id="{{ field_id  }}" type="text" value="{{ field['value'] }}"/>
+                        {% elif field['type'] == 'checkbox' %}
+                            <input type="checkbox" id="{{ field_id }}" {% if field['value'] %} checked {% endif %}/>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                </div>
+
+        </fieldset>
+    {% endfor %}
+</fieldset>
+{% endblock %}

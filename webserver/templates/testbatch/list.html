@@ -20,9 +20,9 @@
             ],
             content: function(data) {
                 return $(
-                            '<div style="margin:0px;">' +
+                            '<div>' +
                                 '<div>' +
-                                    '<h3>Test batch id: ' + data.title + '</h3>' +
+                                    '<h3 class="text-center"><button class="btn btn-link" onclick="location.href=\'/tb/detail/' + data.title + '\'">Test batch id: ' + data.title + '</button></h3>' +
                                 '</div>' +
                                 '<div>' +
                                     '<h5>' + data.timestamp_start + '</h5>' +
@@ -31,11 +31,11 @@
                                     '<h5>' + data.timestamp_end + '</h5>' +
                                 '</div>' +
                                 '<div>' +
-                                    '<a class="btn btn-danger" title="Stop this test batch" style="margin-right: 20px;">' + 
-                                        '<i class="fa fa-stop"></i>' +
-                                    '</a>' +
-                                    '<a class="btn btn-danger" title="Delete this test batch" style="margin-right: 20px;">' +
+                                    '<a class="btn btn-danger" title="Delete this test batch" style="margin-right: 10px;">' +
                                         '<i class="fa fa-remove"></i>' + 
+                                    '</a>' +
+                                    '<a class="btn btn-danger" title="Stop this test batch" style="margin-right: 10px;">' + 
+                                        '<i class="fa fa-stop"></i>' +
                                     '</a>' +
                                 '</div>' +
                             '</div>'

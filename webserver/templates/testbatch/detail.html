@@ -1,0 +1,69 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<script type="text/javascript">
+    $(function() {
+         $('#testprogress').puiprogressbar();
+     
+         setInterval(function() {
+              var val = $('#testprogress').puiprogressbar('option', 'value') + 10;
+              $('#testprogress').puiprogressbar('option', 'value', val);
+         }, 4000);
+
+        $('#accordion').puiaccordion({multiple:true});
+        $('#accordion').puiaccordion('select', 1);
+    });
+</script>
+<div>
+    <a class="btn btn-danger" title="Delete this test batch" style="float: right; margin-right: 10px;">
+        <i class="fa fa-remove"></i>
+    </a>
+    {% if data['is_running'] %}
+        <a class="btn btn-danger" title="Stop this test batch" style="float: right; margin-right: 10px;">
+           <i class="fa fa-stop"></i>
+        </a>
+    {% endif %}
+    <h1>Test Batch id: {{ testbatch_id }}</h1>
+</div>
+<div>
+    <label>Test batch progress:</label>
+    <div id="testprogress"></div>
+</div>
+<div id="accordion">
+    <h3>Report:</h3>
+    <div>
+        <ul class="list-unstyled">
+            <li>
+                <button class="btn btn-link" onclick="location.href='{{ url_for('testbatch.videocapture', testbatch_id = testbatch_id) }}'"><i class="fa fa-television"></i> Video captures</a>
+            </li>
+            <li>
+                <button class="btn btn-link" onclick="location.href='{{ url_for('testbatch.screenshot', testbatch_id = testbatch_id) }}'"><i class="fa fa-file-image-o"></i> Screenshots</a>
+            </li>
+            <li>
+                <button class="btn btn-link" onclick="location.href='{{ url_for('testbatch.testresult', testbatch_id = testbatch_id) }}'"><i class="fa fa-bar-chart"></i> Test results</a>
+            </li>
+            <li>
+                <button class="btn btn-link" onclick="location.href='{{ url_for('testbatch.crash', testbatch_id = testbatch_id) }}'"><i class="fa fa-exclamation-triangle"></i> Crash reports</a>
+            </li>
+        </ul>
+    </div>
+ 
+    <h3>Runner's log:</h3>
+    <div>
+        <p>Total tests: 12</p>
+        <p>Total finished tests: 2</p>
+        <p>Total crash: 0</p>
+    </div>
+ 
+    <h3>Test instance's log:</h3>
+    <div>
+        <ul class="list-unstyled">
+            {% for log in data['logs'] %}
+                <li>
+                    <button class="btn btn-link"><i class="fa fa-sticky-note"></i> {{ log['name'] }}</button>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>    
+</div>
+{% endblock %}

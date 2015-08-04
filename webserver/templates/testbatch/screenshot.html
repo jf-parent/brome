@@ -1,0 +1,25 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<script type="text/javascript">
+    $(function() {
+        $('#screenshots').puigalleria({
+            autoPlay: false,
+            panelWidth: 1200,
+            panelHeight: 600
+        });
+    });
+</script>
+<div>
+    <h1>Screenshot in Test Batch id: {{ testbatch_id }}</h1>
+</div>
+<div id="screenshots">
+    <ul>
+        {% for screenshot in data['screenshot_list'] %}
+            <li>
+                <img width='100%' height='100%' src="{{ url_for('static', filename = screenshot['path']) }}" alt="{{ screenshot['browser_id'] }}" title="{{ screenshot['title'] }}"/>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

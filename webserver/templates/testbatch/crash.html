@@ -1,0 +1,26 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<script type="text/javascript">
+    $(function() {
+        $('#accordion').puiaccordion({multiple:true});
+    });
+</script>
+<div>
+    <h1>Crash in Test Batch id: {{ testbatch_id }}</h1>
+</div>
+<div id="accordion">
+    {% for crash in data['crash_list'] %}
+        <h3>{{ crash['name'] }}</h3>
+        <div>
+            <div class='text-center'>
+                <a target='_blank' href='{{ url_for("static", filename="image/crash.png") }}'>
+                    <img src='{{ url_for("static", filename="image/crash.png") }}' height='50%' width='50%'/>
+                </a>
+            </div>
+            <h3>Trace:</h3>
+            <p>{{ crash['trace'] }}</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

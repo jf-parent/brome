@@ -16,7 +16,7 @@ css = Bundle(
 js = Bundle(
     "libs/jQuery/dist/jquery.js",
     "libs/jQueryui/jquery-ui.js",
-    "libs/primeui/primeui-2.0-min.js",
+    "libs/primeui/primeui-2.0-hacked.js", #hacked version of primeui
     "libs/primeui/js/datagrid/datagrid.js", #http://forum.primefaces.org/viewtopic.php?f=16&t=42486
     "libs/bootstrap/dist/js/bootstrap.js",
     "js/plugins.js",

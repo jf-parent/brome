@@ -51,6 +51,30 @@ def videocapture(testbatch_id):
 @login_required
 def testresult(testbatch_id):
     data = {}
+    data['result_list'] = []
+    data['result_list'].append({'testid': 1, 'result': False, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 2, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 3, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 4, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 5, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 6, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 7, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 8, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 9, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 10, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 11, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 12, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 13, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 14, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 15, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 16, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 17, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 18, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 19, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 20, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 21, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 22, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+    data['result_list'].append({'testid': 23, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
 
     return render_template("testbatch/testresult.html", testbatch_id = testbatch_id, data = data)
 

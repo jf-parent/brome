@@ -249,7 +249,7 @@ class BaseTest(object):
 
             self.error_log('Crash: %s'%tb)
 
-            self.fail()
+            self.fail(tb)
         finally:
             self.end()
 
@@ -277,12 +277,29 @@ class BaseTest(object):
     def after_run(self):
         pass
 
-    def fail(self):
+    def fail(self, tb):
         if self.get_config_value("runner:play_sound_on_test_crash"):
             say(self.get_config_value("runner:sound_on_test_crash"))
 
         if self.get_config_value("runner:embed_on_test_crash"):
             self.pdriver.embed()
+
+        self.create_crash_report(tb)
+
+    def create_crash_report(self, tb):
+        self.info_log('Creating a crash report')
+
+        file_name = "%s - %s"%(self.pdriver.get_id(join_char = '_'), self._name)
+
+        #CRASH LOG
+        with open(os.path.join(self._crash_report_dir, string_to_filename('%s.log'%file_name)), 'w') as f:
+            f.write(str(tb))
+
+        #CRASH SCREENSHOT
+        self.pdriver.take_screenshot(screenshot_path = os.path.join(
+            self._crash_report_dir,
+            string_to_filename('%s.png'%file_name)
+        ))
 
     def get_config_value(self, config_name):
         if not hasattr(self, 'browser_brome_config'):
@@ -302,6 +319,15 @@ class BaseTest(object):
         return value
 
     def configure_test_result_dir(self):
+
+        #CRASH DIRECTORY
+        self._crash_report_dir = os.path.join(
+            self._runner_dir,
+            'crashes'
+        )
+
+        create_dir_if_doesnt_exist(self._crash_report_dir)
+
         #ASSERTION SCREENSHOT DIRECTORY
         self._assertion_screenshot_dir = os.path.join(
             self._runner_dir,

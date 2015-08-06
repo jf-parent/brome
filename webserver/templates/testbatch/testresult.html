@@ -20,7 +20,7 @@
                         'browserid': '{{ result["browserid"] }}',
                         'result': '<div class="text-center"><span class="label label-{% if result['result'] %}success{% else %}danger{% endif %}"> {% if result['result'] %} <i class="fa fa-check"></i> {% else %} <i class="fa fa-exclamation"></i> {% endif %}</span></div>',
                         'screenshot': '<div id="{{ result['testid'] }}">' +
-                                            '<a class="group" href="#">' +
+                                            '<a href="#">' +
                                                 'View screenshot' +
                                             '</a>' +
                                             '<div class="ui-helper-hidden text-center">' +

@@ -166,7 +166,7 @@ class Brome(object):
             delete_database(self.get_config_value('database:sqlalchemy.url'))
 
     def webserver(self, args):
-        app = create_app(self.get_config_value("webserver:*"), self.config_path)
+        app = create_app(self.get_config_value("webserver:*"), self.config_path, self.get_config_value("project:test_batch_result_path"))
         app.run()
 
     def get_config_value(self, config_name):

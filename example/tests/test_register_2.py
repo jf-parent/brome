@@ -16,5 +16,4 @@ class Test(BaseTest):
         self.pdriver.get("http://reddit.local/")
 
         #self.pdriver.find(["xp://*[@class, 'test1')]", "xp://*[@class = 'test')]"])
-        ret = self.pdriver.assert_visible(["sv:test1", "xp://*[@class = 'test')]"])
-        self.pdriver.embed()
+        self.pdriver.assert_visible(["sv:test1", "xp://*[@class = 'test')]"])

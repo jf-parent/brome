@@ -14,12 +14,16 @@
         <h3>{{ crash['name'] }}</h3>
         <div>
             <div class='text-center'>
-                <a target='_blank' href='{{ url_for("static", filename="image/crash.png") }}'>
-                    <img src='{{ url_for("static", filename="image/crash.png") }}' height='50%' width='50%'/>
+                <a target='_blank' href='{{ url_for("testbatch.test_batch_report_file", filename = crash['screenshot']) }}'>
+                    <img src='{{ url_for("testbatch.test_batch_report_file", filename = crash['screenshot']) }}' height='50%' width='50%'/>
                 </a>
             </div>
             <h3>Trace:</h3>
-            <p>{{ crash['trace'] }}</p>
+            <p>
+                {% for t in crash['trace'] %}
+                    {{ t }}</br>
+                {% endfor %}
+            </p>
         </div>
     {% endfor %}
 </div>

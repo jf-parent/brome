@@ -1,0 +1,52 @@
+
+{% extends "layout.html" %}
+{% block content %}
+<script type="text/javascript">
+    $(function() {
+        $('#accordion').puiaccordion({multiple:true});
+
+        $('#selectalltests').bind('click', function(){
+            $('#testlist > div > label > input').each(function(i,j){
+                 $(this).prop('checked', true);
+             });
+
+            return false;
+        });
+        $('#unselectalltests').bind('click', function(){
+            $('#testlist > div > label > input').each(function(i,j){
+                 $(this).prop('checked', false);
+             });
+
+            return false;
+        });
+    });
+</script>
+<div>
+    <h1>Launch a new test batch</h1>
+</div>
+<div id="accordion">
+    <h3>Browsers:</h3>
+    <div>
+        {% for browser in data['browser_list'] %}
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" value="{{ browser['id'] }}">{{ browser['id'] }} <i class="fa {{ browser['icon'] }}"> </i>
+                </label>
+            </div>
+        {% endfor %}
+    </div>
+ 
+    <h3>Tests:</h3>
+    <div id="testlist">
+        <button class="btn btn-primary" id="selectalltests">select all</button>
+        <button class="btn btn-primary" id="unselectalltests">unselect all</button>
+        {% for test in data['test_list'] %}
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" value="{{ test['name'] }}" checked>{{ test['name'] }}
+                </label>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

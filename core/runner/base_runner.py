@@ -40,10 +40,7 @@ class BaseRunner(object):
         self.session.commit()
 
         #RUNNER LOG DIR
-        self.root_test_result_dir = os.path.join(
-            self.get_config_value("project:absolute_path"),
-            self.get_config_value("project:test_batch_result_path")
-        )
+        self.root_test_result_dir = self.get_config_value("project:test_batch_result_path")
 
         self.runner_dir = os.path.join(
             self.root_test_result_dir,

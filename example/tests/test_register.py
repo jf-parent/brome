@@ -25,7 +25,6 @@ class Test(BaseTest):
         self.info_log("Running...")
         self.pdriver.get("http://reddit.local/")
 
-        """
         self.pdriver.take_screenshot()
         self.pdriver.take_screenshot('test')
         self.pdriver.assert_not_visible("xp://*[@class = 'test')]", '#3')
@@ -33,5 +32,4 @@ class Test(BaseTest):
         self.pdriver.assert_visible("xp://*[@class = 'test')]", '#2')
         self.pdriver.assert_visible("xp://*[@class = 'test')]", '#1')
         self.pdriver.assert_not_visible("xp://*[@class = 'test')]", '#1')
-        self.pdriver.find_all("xp://*[@class = 'test')]")
-        """
+        self.pdriver.find_all("xp://*[@class = 'test']")

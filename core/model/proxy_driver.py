@@ -1,10 +1,12 @@
 #! -*- coding: utf-8 -*-
 
-from lxml import etree
-from cssselect.parser import SelectorSyntaxError
-from lxml.cssselect import CSSSelector
+from StringIO import StringIO
 from inspect import currentframe
 import re
+
+from lxml import etree
+from lxml.cssselect import CSSSelector
+from cssselect.parser import SelectorSyntaxError
 
 from brome.core.model.utils import *
 from brome.core.model.test import Test

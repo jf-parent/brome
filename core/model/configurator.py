@@ -122,7 +122,7 @@ default_config["grid_runner"] = {}
 #OPTIONS
 default_config["grid_runner"]["max_running_time"] = {
     'default': 7200,
-    'type': 'spinner',
+    'type': 'number',
     'min': 0,
     'title': 'Max running time'
 }
@@ -141,7 +141,7 @@ default_config["grid_runner"]["selenium_server_ip"] = {
 
 default_config["grid_runner"]["selenium_server_port"] = {
     'default': 4444,
-    'type': 'spinner',
+    'type': 'number',
     'min': 0,
     'title': 'Selenium port'
 }
@@ -159,7 +159,7 @@ default_config["grid_runner"]["kill_selenium_server"] = {
 
 default_config["ec2"]['wait_after_instance_launched'] = {
     'default': 30,
-    'type': 'spinner',
+    'type': 'number',
     'min': 0,
     'title': 'Wait X seconds after the instances are launched'
 }
@@ -240,7 +240,7 @@ default_config["proxy_driver"]["validate_css_selector"] = {
 
 default_config["proxy_driver"]["default_timeout"] = {
     'default': 5,
-    'type': 'spinner',
+    'type': 'number',
     'min': 0,
     'title': 'Default timeout'
 }
@@ -271,28 +271,28 @@ default_config["proxy_driver"]["take_screenshot_on_assertion_failure"] = {
 
 default_config["browser"]["window_x_position"] = {
     'default': 0,
-    'type': 'spinner',
+    'type': 'number',
     'min': 0,
     'title': 'Window x position'
 }
 
 default_config["browser"]["window_y_position"] = {
     'default': 0,
-    'type': 'spinner',
+    'type': 'number',
     'min': 0,
     'title': 'Window y position'
 }
 
 default_config["browser"]["window_height"] = {
     'default': 725,
-    'type': 'spinner',
+    'type': 'number',
     'min': 0,
     'title': 'Window height'
 }
 
 default_config["browser"]["window_width"] = {
     'default': 1650,
-    'type': 'spinner',
+    'type': 'number',
     'min': 0,
     'title': 'Window width'
 }

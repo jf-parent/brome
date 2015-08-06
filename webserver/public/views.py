@@ -31,7 +31,6 @@ def home():
             flash_errors(form)
     return render_template("public/home.html", form=form)
 
-
 @blueprint.route('/logout/')
 @login_required
 def logout():
@@ -39,10 +38,12 @@ def logout():
     flash('You are logged out.', 'info')
     return redirect(url_for('public.home'))
 
-
 @blueprint.route("/register/", methods=['GET', 'POST'])
 def register():
-    form = RegisterForm(request.form, csrf_enabled=False)
+    
+    closed_registration = blueprint.app.config.get('CLOSED_REGISTRATION', False)
+
+    form = RegisterForm(request.form, csrf_enabled=False, app = blueprint.app)
     if form.validate_on_submit():
         new_user = User(username=form.username.data,
                         email=form.email.data,
@@ -58,7 +59,7 @@ def register():
     else:
         flash_errors(form)
 
-    return render_template('public/register.html', form=form)
+    return render_template('public/register.html', form=form, closed_registration = closed_registration)
 
 @blueprint.route("/about/")
 def about():

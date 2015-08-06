@@ -8,23 +8,6 @@
             $('#{{ section_id }}').puifieldset({
                 toggleable: true
             });
-            {% for field_id, field in section.iteritems() %}
-                {% if field['type'] == 'input' %}
-                    $('#{{ field_id }}').puiinputtext();
-                {% elif field['type'] == 'spinner' %}
-                    $('#{{ field_id }}').puispinner({
-                        min: '{{ field['min'] }}'
-                    });
-                {% elif field['type'] == 'checkbox' %}
-                    $(function() {
-                        $(':checkbox').puicheckbox(); 
-                    });
-                {% elif field['type'] == 'dropdown' %}
-                    $(function() {
-                        $('#{{ field_id }}').puidropdown();
-                    });
-                {% endif %}
-            {% endfor %}
         {% endfor %}
     });
 </script>
@@ -39,12 +22,14 @@
                 {% for field_id, field in section.iteritems() %}
                     <div class="row brome-field">
                         <label for="{{ field_id  }}">{{ field['title'] }}:</label>
-                        {% if field['type'] in ['input', 'spinner'] %}
-                            <input class="form-control" id="{{ field_id  }}" type="text" value="{{ field['value'] }}"/>
+                        {% if field['type'] == 'input' %}
+                            <input class="form-control" id="{{ field_id }}" type="text" value="{{ field['value'] }}"/>
+                        {% elif field['type'] == 'number' %}
+                            <input class="form-control" id="{{ field_id }}" type="number" value="{{ field['value'] }}"/>
                         {% elif field['type'] == 'checkbox' %}
                             <input type="checkbox" id="{{ field_id }}" {% if field['value'] %} checked {% endif %}/>
                         {% elif field['type'] == 'dropdown' %}
-                            <select id="{{ field_id }}">
+                            <select id="{{ field_id }}" class="form-control">
                                 {% for value in field['options'] %}
                                     <option value="{{ value }}" {% if value == field['value'] %} selected {% endif %}>{{ value }}</option>
                                 {% endfor %}

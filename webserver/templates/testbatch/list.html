@@ -10,11 +10,11 @@
             },
             header: 'Test Batchs',
             datasource: [
-                {% for tb in data['testbatchlist'] %}
+                {% for tb in data['testbatch_list'] %}
                     {
-                        'title': '{{ tb['id'] }}',
-                         'timestamp_start': '{{ tb['timestamp_start'] }}',
-                         'timestamp_end': '{{ tb['timestamp_end'] }}'
+                        'id': '{{ tb.id }}',
+                        'starting_timestamp': '{{ tb.starting_timestamp }}',
+                        'ending_timestamp': {% if tb.ending_timestamp is none %}'is running...' {% else %}'{{ tb.ending_timestamp }}' {% endif %}
                     },
                 {% endfor %}
             ],
@@ -22,13 +22,13 @@
                 return $(
                             '<div>' +
                                 '<div>' +
-                                    '<h3 class="text-center"><button class="btn btn-link" onclick="location.href=\'/tb/detail/' + data.title + '\'">Test batch id: ' + data.title + '</button></h3>' +
+                                    '<h3 class="text-center"><button class="btn btn-link" onclick="location.href=\'/tb/detail/' + data.id + '\'">Test batch id: ' + data.id + '</button></h3>' +
                                 '</div>' +
                                 '<div>' +
-                                    '<h5>' + data.timestamp_start + '</h5>' +
+                                    '<h5>' + data.starting_timestamp + '</h5>' +
                                 '</div>' +
                                 '<div>' +
-                                    '<h5>' + data.timestamp_end + '</h5>' +
+                                    '<h5>' + data.ending_timestamp + '</h5>' +
                                 '</div>' +
                                 '<div>' +
                                     '<a class="btn btn-danger" title="Delete this test batch" style="margin-right: 10px;">' +

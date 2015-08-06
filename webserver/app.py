@@ -14,9 +14,10 @@ from brome.webserver.extensions import (
 )
 from brome.webserver import public, admin, testbatch
 
-def create_app(config_object, brome_config_path):
+def create_app(config_object, brome_config_path, test_batch_result_path):
     app = Flask(__name__)
     app.brome_config_path = brome_config_path
+    app.config['TEST_BATCH_RESULT_PATH'] = test_batch_result_path
     app.config.update(config_object)
     register_extensions(app)
     register_blueprints(app)
@@ -43,11 +44,13 @@ def register_extensions(app):
 
 def register_blueprints(app):
     app.register_blueprint(public.views.blueprint)
+    public.views.blueprint.app = app
 
     app.register_blueprint(admin.views.blueprint)
     admin.views.blueprint.app = app
 
     app.register_blueprint(testbatch.views.blueprint)
+    testbatch.views.blueprint.app = app
 
 def register_errorhandlers(app):
 

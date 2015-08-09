@@ -6,7 +6,7 @@ import re
 from brome.core.model.meta import Session
 from brome.core.runner.local_runner import LocalRunner
 from brome.core.runner.grid_runner import GridRunner
-from brome.core.model.meta import create_database, delete_database
+from brome.core.model.meta import create_database, delete_database, setup_database, update_test
 from brome.core.model.configurator import ini_to_dict, get_config_value, default_config
 from brome.webserver.app import create_app
 
@@ -155,6 +155,13 @@ class Brome(object):
                             help = 'Delete the project database'
         )
 
+        parser.add_argument(
+                            '--update-test',
+                            dest = 'update_test', 
+                            action = 'store_true',
+                            help = 'Update the test in the database'
+        )
+
         parsed_args = parser.parse_args(args)
 
         if parsed_args.create_database:
@@ -164,6 +171,15 @@ class Brome(object):
             create_database(self.get_config_value('database:sqlalchemy.url'))
         elif parsed_args.delete_database:
             delete_database(self.get_config_value('database:sqlalchemy.url'))
+        elif parsed_args.update_test:
+            setup_database(self.get_config_value('database:*'))
+
+            session = Session()
+
+            if self.test_dict:
+                update_test(session, self.test_dict)
+            else:
+                raise Exception("No test dictionary provided")
 
     def webserver(self, args):
         app = create_app(self.get_config_value("webserver:*"), self.config_path, self.get_config_value("project:test_batch_result_path"))

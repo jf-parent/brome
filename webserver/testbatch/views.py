@@ -2,6 +2,7 @@
 
 from flask import Blueprint, render_template, send_from_directory
 from flask.ext.login import login_required
+from IPython import embed
 
 from brome.webserver import data_controller
 
@@ -51,19 +52,8 @@ def detail(testbatch_id):
 @login_required
 def screenshot(testbatch_id):
     data = {}
-    data['screenshot_list'] = []
-    data['screenshot_list'].append({'title': 'Empty bottle', 'path': 'image/sc1.png', 'browser_id': 'Chrome'})
-    data['screenshot_list'].append({'title': 'User with long name', 'path': 'image/sc2.png', 'browser_id': 'Chrome'})
-    data['screenshot_list'].append({'title': 'Unavailable feed', 'path': 'image/sc3.png', 'browser_id': 'Chrome'})
-    data['screenshot_list'].append({'title': 'Super admin', 'path': 'image/sc4.png', 'browser_id': 'Chrome'})
-    data['screenshot_list'].append({'title': 'Temporary', 'path': 'image/sc5.png', 'browser_id': 'Chrome'})
-    data['screenshot_list'].append({'title': 'Special feed', 'path': 'image/sc6.png', 'browser_id': 'Chrome'})
-    data['screenshot_list'].append({'title': 'Sick of it', 'path': 'image/sc7.png', 'browser_id': 'Chrome'})
-    data['screenshot_list'].append({'title': 'Deleted block', 'path': 'image/sc8.png', 'browser_id': 'Chrome'})
-    data['screenshot_list'].append({'title': 'User not logged', 'path': 'image/sc9.png', 'browser_id': 'Chrome'})
-    data['screenshot_list'].append({'title': 'Feed', 'path': 'image/sc10.png', 'browser_id': 'Chrome'})
-    data['screenshot_list'].append({'title': 'Application ready', 'path': 'image/sc11.png', 'browser_id': 'Chrome'})
-    data['screenshot_list'].append({'title': 'Block', 'path': 'image/sc12.png', 'browser_id': 'Chrome'})
+
+    data['screenshot_list'] = data_controller.get_test_batch_screenshot(blueprint.app, testbatch_id)
 
     return render_template("testbatch/screenshot.html", testbatch_id = testbatch_id, data = data)
 
@@ -78,30 +68,8 @@ def videocapture(testbatch_id):
 @login_required
 def testresult(testbatch_id):
     data = {}
-    data['result_list'] = []
-    data['result_list'].append({'testid': 1, 'result': False, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 2, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 3, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 4, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 5, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 6, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 7, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 8, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 9, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 10, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 11, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 12, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 13, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 14, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 15, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 16, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 17, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 18, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 19, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 20, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 21, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 22, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
-    data['result_list'].append({'testid': 23, 'result': True, 'testname': 'This is the test name of the test', 'browserid': 'Chrome head', 'screenshot_path': 'image/crash.png'})
+
+    data['result_list'] = data_controller.get_test_batch_test_result(blueprint.app, testbatch_id)
 
     return render_template("testbatch/testresult.html", testbatch_id = testbatch_id, data = data)
 

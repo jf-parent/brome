@@ -4,10 +4,45 @@ import os
 from glob import glob
 
 from brome.core.model.test_batch import TestBatch
+from brome.core.model.test_result import TestResult
 from brome.webserver.extensions import db
 
 def get_test_batch_list():
     data = db.session.query(TestBatch).all()
+
+    return data
+
+def get_test_batch_screenshot(app, testbatch_id):
+    data = []
+
+    relative_dir = os.path.join(
+        "tb_%s"%testbatch_id,
+        "screenshots"
+    )
+
+    abs_dir = os.path.join(
+        app.config['TEST_BATCH_RESULT_PATH'],
+        relative_dir
+    )
+
+    if os.path.isdir(abs_dir):
+        for browser_dir in os.listdir(abs_dir):
+            for screenshot in os.listdir(os.path.join(abs_dir, browser_dir)):
+                data.append({
+                    'title': screenshot.split('.')[0].replace('_', ' '),
+                    'broswer_id': browser_dir.replace('_', ' '),
+                    'path': os.path.join(relative_dir, browser_dir, screenshot)
+                })
+
+    return data
+
+    
+
+def get_test_batch_test_result(app, testbatch_id):
+    data = db.session.query(TestResult)\
+                .filter(TestResult.test_batch_id == testbatch_id)\
+                .order_by(TestResult.result)\
+                .all()
 
     return data
 

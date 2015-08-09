@@ -491,6 +491,10 @@ class ProxyDriver(object):
                     self.test_instance._assertion_screenshot_dir,
                     screenshot_name
                 )
+                screenshot_relative_path = os.path.join(
+                    self.test_instance._assertion_screenshot_relative_dir,
+                    screenshot_name
+                )
                 self.take_screenshot(screenshot_path = screenshot_path)
 
             #SOUND NOTIFICATION
@@ -512,6 +516,10 @@ class ProxyDriver(object):
                     self.test_instance._assertion_screenshot_dir,
                     screenshot_name
                 )
+                screenshot_relative_path = os.path.join(
+                    self.test_instance._assertion_screenshot_relative_dir,
+                    screenshot_name
+                )
                 self.take_screenshot(screenshot_path = screenshot_path)
 
             #SOUND NOTIFICATION
@@ -526,7 +534,7 @@ class ProxyDriver(object):
             result = result,
             timestamp = datetime.now(),
             browser_id = self.get_id(),
-            screenshot_path = screenshot_path,
+            screenshot_path = screenshot_relative_path,
             videocapture_path = videocapture_path,
             extra_data = extra_data,
             title = test_name,

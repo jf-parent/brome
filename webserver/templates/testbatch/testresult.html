@@ -15,16 +15,16 @@
             datasource: [
                 {% for result in data['result_list'] %}
                     {
-                        'testid': '{{ result["testid"] }}',
-                        'testname': '{{ result["testname"] }}',
-                        'browserid': '{{ result["browserid"] }}',
-                        'result': '<div class="text-center"><span class="label label-{% if result['result'] %}success{% else %}danger{% endif %}"> {% if result['result'] %} <i class="fa fa-check"></i> {% else %} <i class="fa fa-exclamation"></i> {% endif %}</span></div>',
-                        'screenshot': '<div id="{{ result['testid'] }}">' +
+                        'testid': '{{ result.test_id }}',
+                        'testname': '{{ result.title }}',
+                        'browserid': '{{ result.browser_id }}',
+                        'result': '<div class="text-center"><span class="label label-{% if result.result %}success{% else %}danger{% endif %}"> {% if result.result %} <i class="fa fa-check"></i> {% else %} <i class="fa fa-exclamation"></i> {% endif %}</span></div>',
+                        'screenshot': '<div id="{{ result.id }}">' +
                                             '<a href="#">' +
                                                 'View screenshot' +
                                             '</a>' +
                                             '<div class="ui-helper-hidden text-center">' +
-                                                '<img height="80%" width="80%" src="{{ url_for('static', filename = result['screenshot_path']) }}" /> ' +
+                                                '<img height="80%" width="80%" src="{{ url_for('testbatch.test_batch_report_file', filename = result.screenshot_path) }}" /> ' +
                                             '</div>' +
                                         '</div>'
                     },
@@ -33,7 +33,7 @@
         });
 
         {% for result in data['result_list'] %}
-            $('#{{ result['testid'] }}').puilightbox();
+            $('#{{ result.id }}').puilightbox();
         {% endfor %}
 
     });

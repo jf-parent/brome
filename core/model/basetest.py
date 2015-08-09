@@ -118,7 +118,8 @@ class BaseTest(object):
 
         state_dir = os.path.join(
             self.get_config_value("project:absolute_path"),
-            "tests/states/"
+            "tests",
+            "states"
         )
         create_dir_if_doesnt_exist(state_dir)
 
@@ -183,7 +184,7 @@ class BaseTest(object):
 
         self.test_log_dir = os.path.join(
             self._runner_dir,
-            "logs/"
+            "logs"
         )
         self._logger = logging.getLogger(logger_name)
 
@@ -329,17 +330,23 @@ class BaseTest(object):
         create_dir_if_doesnt_exist(self._crash_report_dir)
 
         #ASSERTION SCREENSHOT DIRECTORY
+        self._assertion_screenshot_relative_dir = os.path.join(
+            self._runner.relative_runner_dir,
+            'assertion_screenshots',
+            self.pdriver.get_id(join_char = '_')
+        )
+
         self._assertion_screenshot_dir = os.path.join(
             self._runner_dir,
-            self.pdriver.get_id(join_char = '_'),
-            'assertion_screenshots/'
+            'assertion_screenshots',
+            self.pdriver.get_id(join_char = '_')
         )
         create_dir_if_doesnt_exist(self._assertion_screenshot_dir)
 
         #SCREENSHOT DIRECTORY
         self._screenshot_dir = os.path.join(
             self._runner_dir,
-            self.pdriver.get_id(join_char = '_'),
-            'screenshots/'
+            'screenshots',
+            self.pdriver.get_id(join_char = '_')
         )
         create_dir_if_doesnt_exist(self._screenshot_dir)

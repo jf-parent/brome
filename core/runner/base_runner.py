@@ -29,12 +29,6 @@ class BaseRunner(object):
 
         self.session = Session()
 
-        #Update the test dict
-        """
-        if self.brome.test_dict:
-            update_test(self.session, self.brome.test_dict)
-        """
-
         self.sa_test_batch = TestBatch(starting_timestamp = datetime.now())
         self.session.add(self.sa_test_batch)
         self.session.commit()
@@ -46,6 +40,7 @@ class BaseRunner(object):
             self.root_test_result_dir,
             "tb_%s"%self.sa_test_batch.id
         )
+        self.relative_runner_dir = "tb_%s"%self.sa_test_batch.id
         create_dir_if_doesnt_exist(self.runner_dir)
 
         #LOGGING
@@ -76,7 +71,11 @@ class BaseRunner(object):
 
     def get_available_tests(self, search_query):
 
-        tests_path = os.path.join(self.get_config_value('project:absolute_path'), ('tests/test_%s.py'%search_query))
+        tests_path = os.path.join(
+            self.get_config_value('project:absolute_path'), 
+            'tests',
+            'test_%s.py'%search_query
+        )
         tests = sorted(glob.glob(tests_path))
 
         available_tests = []
@@ -126,7 +125,7 @@ class BaseRunner(object):
 
         #File logger
         if self.get_config_value('logger_runner:filelogger'):
-            fh = logging.FileHandler('%s/%s.log'%(self.runner_dir, logger_name))
+            fh = logging.FileHandler(os.path.join(self.runner_dir, '%s.log'%logger_name))
             file_formatter = logging.Formatter(format_)
             fh.setFormatter(file_formatter)
             self.logger.addHandler(fh)

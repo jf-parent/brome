@@ -8,7 +8,46 @@ from brome.core.model.test_result import TestResult
 from brome.webserver.extensions import db
 
 def get_test_batch_list():
-    data = db.session.query(TestBatch).all()
+    data = db.session.query(TestBatch).order_by(TestBatch.id.desc()).all()
+
+    return data
+
+def get_test_list(app):
+    data = []
+
+    tests_dir = os.path.join(
+        app.brome.get_config_value('project:absolute_path'),
+        "tests"
+    )
+
+    if os.path.isdir(tests_dir):
+        tests = glob(os.path.join(tests_dir, 'test_*.py'))
+        for test in tests:
+            name = test.split(os.sep)[-1][len('test_'):-3]
+            data.append({'name': name})
+
+    return data
+
+def get_browser_list(app):
+    data = []
+
+    for key, browser in app.brome.browsers_config.iteritems():
+        browser_config = {}
+        browser_config['id'] = key
+        browser_config['name'] = browser['browserName']
+
+        icon = "fa-%s"%browser_config['name'].lower().replace(' ', '-')
+        if browser_config.has_key('deviceName'):
+            if 'android' in browser_config['deviceName'].lower():
+                icon = "fa-android"
+            elif 'iphone' in browser_config['deviceName'].lower():
+                icon = "fa-mobile"
+            elif 'ipad' in browser_config['deviceName'].lower():
+                icon = "fa-tablet"
+
+        browser_config['icon'] = icon
+
+        data.append(browser_config)
 
     return data
 
@@ -21,7 +60,7 @@ def get_test_batch_screenshot(app, testbatch_id):
     )
 
     abs_dir = os.path.join(
-        app.config['TEST_BATCH_RESULT_PATH'],
+        app.brome.get_config_value('project:test_batch_result_path'),
         relative_dir
     )
 
@@ -55,7 +94,7 @@ def get_test_batch_test_instance_log(app, testbatch_id, index):
     )
 
     abs_logs_dir = os.path.join(
-        app.config['TEST_BATCH_RESULT_PATH'],
+        app.brome.get_config_value('project:test_batch_result_path'),
         relative_logs_dir
     )
 
@@ -81,7 +120,7 @@ def get_test_batch_crashes(app, testbatch_id):
     )
 
     abs_logs_dir = os.path.join(
-        app.config['TEST_BATCH_RESULT_PATH'],
+        app.brome.get_config_value('project:test_batch_result_path'),
         relative_dir
     )
 

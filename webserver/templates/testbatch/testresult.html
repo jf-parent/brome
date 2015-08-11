@@ -1,6 +1,7 @@
 
 {% extends "layout.html" %}
 {% block content %}
+{% if data['result_list']|count %}
 <script type="text/javascript">
     $(function() {
         $('#testresult').puidatatable({
@@ -38,8 +39,15 @@
 
     });
 </script>
+{% endif %}
 <div>
     <h1>Test Result for Test Batch id: {{ testbatch_id }}</h1>
 </div>
-<div id="testresult"></div>
+{% if data['result_list']|count %}
+    <div id="testresult"></div>
+{% else %}
+    <div>
+        <h1 class="text-center"> No test result in this test batch</h1>
+    </div>
+{% endif %}
 {% endblock %}

@@ -4,7 +4,7 @@
 <script type="text/javascript">
     $(function() {
         $('#main').puifieldset();
-        {% for section_id, section in data.iteritems() %}
+        {% for section_id, section in form.fields.iteritems() %}
             $('#{{ section_id }}').puifieldset({
                 toggleable: true
             });
@@ -14,32 +14,39 @@
 <fieldset id="main" class="brome-field">
     <legend>Brome configuration</legend>
 
-    {% for section_id, section in data.iteritems() %}
-        <fieldset id="{{ section_id }}" class="brome-field">
-            <legend>{{ section_id|replace("_", " ") }}</legend>
+    <form id="configurationForm" class="form form-configuration" method="POST" action="" role="form">
+        {% for section_id, section in form.fields.iteritems() %}
+            <fieldset id="{{ section_id }}" class="brome-field">
+                <legend>{{ section_id|replace("_", " ") }}</legend>
 
-                <div class="container-fluid">
-                {% for field_id, field in section.iteritems() %}
-                    <div class="row brome-field">
-                        <label for="{{ field_id  }}">{{ field['title'] }}:</label>
-                        {% if field['type'] == 'input' %}
-                            <input class="form-control" id="{{ field_id }}" type="text" value="{{ field['value'] }}"/>
-                        {% elif field['type'] == 'number' %}
-                            <input class="form-control" id="{{ field_id }}" type="number" value="{{ field['value'] }}"/>
-                        {% elif field['type'] == 'checkbox' %}
-                            <input type="checkbox" id="{{ field_id }}" {% if field['value'] %} checked {% endif %}/>
-                        {% elif field['type'] == 'dropdown' %}
-                            <select id="{{ field_id }}" class="form-control">
-                                {% for value in field['options'] %}
-                                    <option value="{{ value }}" {% if value == field['value'] %} selected {% endif %}>{{ value }}</option>
-                                {% endfor %}
-                            </select>
+                    <div class="container-fluid">
+                    {% for field_id, field in section.iteritems() %}
+                        {% if field['visible'] %}
+                            <div class="row brome-field">
+                                <label for="{{ section_id }}_{{ field_id  }}">{{ field['title'] }}:</label>
+                                {% if field['type'] == 'input' %}
+                                    <input class="form-control" id="{{ section_id }}_{{ field_id }}" name="{{ section_id }}_{{ field_id }}" type="text" value="{{ field['value'] }}"/>
+                                {% elif field['type'] == 'password' %}
+                                    <input class="form-control" id="{{ section_id }}_{{ field_id }}" name="{{ section_id }}_{{ field_id }}" type="password" value="{{ field['value'] }}"/>
+                                {% elif field['type'] == 'number' %}
+                                    <input class="form-control" id="{{ section_id }}_{{ field_id }}" name="{{ section_id }}_{{ field_id }}" type="number" value="{{ field['value'] }}"/>
+                                {% elif field['type'] == 'checkbox' %}
+                                    <input type="checkbox" id="{{ section_id }}_{{ field_id }}" name="{{ section_id }}_{{ field_id }}" {% if field['value'] %} checked {% endif %}/>
+                                {% elif field['type'] == 'dropdown' %}
+                                    <select id="{{ section_id }}_{{ field_id }}" name="{{ section_id }}_{{ field_id }}" class="form-control">
+                                        {% for value in field['options'] %}
+                                            <option value="{{ value }}" {% if value == field['value'] %} selected {% endif %}>{{ value }}</option>
+                                        {% endfor %}
+                                    </select>
+                                {% endif %}
+                            </div>
                         {% endif %}
+                    {% endfor %}
                     </div>
-                {% endfor %}
-                </div>
 
-        </fieldset>
-    {% endfor %}
+            </fieldset>
+        {% endfor %}
+        <p><input class="btn btn-default btn-submit" type="submit" value="Save"></p>
+    </form>
 </fieldset>
 {% endblock %}

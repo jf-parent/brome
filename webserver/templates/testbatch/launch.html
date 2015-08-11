@@ -24,29 +24,32 @@
 <div>
     <h1>Launch a new test batch</h1>
 </div>
-<div id="accordion">
-    <h3>Browsers:</h3>
-    <div>
-        {% for browser in data['browser_list'] %}
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox" value="{{ browser['id'] }}">{{ browser['id'] }} <i class="fa {{ browser['icon'] }}"> </i>
-                </label>
-            </div>
-        {% endfor %}
+<form id="launchForm" class="form form-launch" method="POST" action="" role="form">
+    <div id="accordion">
+        <h3>Browsers:</h3>
+        <div>
+            {% for browser in form.data['browser_list'] %}
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="browser_{{ browser['id'] }}" value="{{ browser['id'] }}">{{ browser['name'] }} ({{ browser['id'] }}) <i class="fa {{ browser['icon'] }}"> </i>
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+     
+        <h3>Tests:</h3>
+        <div id="testlist">
+            <button class="btn btn-primary" id="selectalltests">select all</button>
+            <button class="btn btn-primary" id="unselectalltests">unselect all</button>
+            {% for test in form.data['test_list'] %}
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="test_{{ test['name'] }}" value="{{ test['name'] }}" checked>{{ test['name'] }}
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
     </div>
- 
-    <h3>Tests:</h3>
-    <div id="testlist">
-        <button class="btn btn-primary" id="selectalltests">select all</button>
-        <button class="btn btn-primary" id="unselectalltests">unselect all</button>
-        {% for test in data['test_list'] %}
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox" value="{{ test['name'] }}" checked>{{ test['name'] }}
-                </label>
-            </div>
-        {% endfor %}
-    </div>
-</div>
+    <p><input class="btn btn-default btn-submit" type="submit" value="Launch"></p>
+</form>
 {% endblock %}

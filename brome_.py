@@ -24,7 +24,7 @@ class Brome(object):
             exit(1)
 
     def print_usage(self):
-        print 'brome [generate | admin | run]'
+        print 'brome_runner.py [admin | run | webserver]'
         exit(1)
 
     def execute(self, args):
@@ -52,6 +52,14 @@ class Brome(object):
                             dest = 'test_search_query', 
                             default = '*',
                             help = 'The search query used to activate tests'
+        )
+
+        #TEST FILE
+        parser.add_argument(
+            '--test-file',
+            dest = 'test_file',
+            default = False,
+            help = 'The file containing the name of all the tests that you want to run'
         )
 
         #LOCALHOST RUNNER
@@ -107,8 +115,11 @@ class Brome(object):
 
         if self.parsed_args.localhost_runner:
             browsers_id = [self.parsed_args.localhost_runner]
-        else:
+        elif self.parsed_args.remote_runner:
             browsers_id = self.parsed_args.remote_runner.split(',')
+        else:
+            print 'Please select -r or -l'
+            exit(1)
 
         for browser_id in browsers_id:
             if browser_id not in self.browsers_config.keys():
@@ -182,7 +193,7 @@ class Brome(object):
                 raise Exception("No test dictionary provided")
 
     def webserver(self, args):
-        app = create_app(self.get_config_value("webserver:*"), self.config_path, self.get_config_value("project:test_batch_result_path"))
+        app = create_app(self)
         app.run()
 
     def get_config_value(self, config_name):

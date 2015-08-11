@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from flask import Blueprint, render_template, send_from_directory
+from flask import Blueprint, render_template, flash, redirect, url_for, request, send_from_directory
 from flask.ext.login import login_required
-from IPython import embed
 
+from brome.webserver.testbatch.forms import LaunchForm
 from brome.webserver import data_controller
 
 blueprint = Blueprint("testbatch", __name__, url_prefix='/tb',
@@ -12,31 +12,22 @@ blueprint = Blueprint("testbatch", __name__, url_prefix='/tb',
 @blueprint.route("/file/<path:filename>")
 @login_required
 def test_batch_report_file(filename):
-    return send_from_directory(blueprint.app.config['TEST_BATCH_RESULT_PATH'], filename)
+    return send_from_directory(blueprint.app.brome.get_config_value('project:test_batch_result_path'), filename)
 
-@blueprint.route("/launch")
+@blueprint.route("/launch/", methods=['GET', 'POST'])
 @login_required
 def launch():
-    data = {}
-    data['browser_list'] = []
-    data['browser_list'].append({'id': 'Firefox', 'icon': 'fa-firefox'})
-    data['browser_list'].append({'id': 'Safari', 'icon': 'fa-safari'})
-    data['browser_list'].append({'id': 'Chrome', 'icon': 'fa-chrome'})
-    data['browser_list'].append({'id': 'Iphone', 'icon': 'fa-mobile'})
-    data['browser_list'].append({'id': 'Ipad', 'icon': 'fa-tablet'})
-    data['browser_list'].append({'id': 'Android', 'icon': 'fa-android'})
-    data['browser_list'].append({'id': 'Internet Explorer', 'icon': 'fa-internet-explorer'})
+    form = LaunchForm(blueprint.app)
 
-    data['test_list'] = []
-    data['test_list'].append({'name': 'Test Register'})
-    data['test_list'].append({'name': 'Test Register'})
-    data['test_list'].append({'name': 'Test Register'})
-    data['test_list'].append({'name': 'Test Register'})
-    data['test_list'].append({'name': 'Test Register'})
-    data['test_list'].append({'name': 'Test Register'})
-    data['test_list'].append({'name': 'Test Register'})
+    if request and request.method in ("PUT", "POST"):
+        success, msg = form.start_test_batch(request.form)
+        if success:
+            flash("The test batch has been started!", 'success')
+            return redirect(url_for('testbatch.list'))
+        else:
+            flash(msg, 'warning')
 
-    return render_template("testbatch/launch.html", data = data)
+    return render_template("testbatch/launch.html", form = form)
 
 @blueprint.route("/detail/<int:testbatch_id>")
 @login_required

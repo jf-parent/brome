@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import os
+
 from flask import Flask, render_template
 
 from brome.core.model import *
@@ -13,12 +15,21 @@ from brome.webserver.extensions import (
     debug_toolbar,
 )
 from brome.webserver import public, admin, testbatch
+from brome.core.model.utils import create_dir_if_doesnt_exist
 
-def create_app(config_object, brome_config_path, test_batch_result_path):
+def create_app(brome):
     app = Flask(__name__)
-    app.brome_config_path = brome_config_path
-    app.config['TEST_BATCH_RESULT_PATH'] = test_batch_result_path
-    app.config.update(config_object)
+    app.brome = brome
+
+    app.config.update(brome.get_config_value("webserver:*"))
+
+    app.temp_path = os.path.join(
+        os.path.abspath(os.path.dirname(__file__)),
+        'tmp'
+    )
+
+    create_dir_if_doesnt_exist(app.temp_path)
+
     register_extensions(app)
     register_blueprints(app)
     register_errorhandlers(app)

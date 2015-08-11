@@ -5,6 +5,7 @@ import logging
 import os
 import copy
 import os.path
+import yaml
 
 import psutil
 
@@ -87,15 +88,26 @@ class BaseRunner(object):
         return available_tests
 
     def get_activated_tests(self):
-        test_search_query = self.get_config_value('runner:test_search_query')
+        tests = []
 
-        #by index slice eg: [0:12], [:], [0], [-1]
-        if test_search_query.find('[') != -1:
-            exec('tests = self.get_available_tests("*")%s'%test_search_query)
+        #test file
+        if self.get_config_value('runner:test_file'):
+            test_file_path = self.get_config_value('runner:test_file')
+            with open(test_file_path, 'r') as f:
+                test_list = yaml.load(f)
+                for test in test_list:
+                    tests.append(self.get_available_tests(test)[0])
 
-        #by name
         else:
-            tests = self.get_available_tests(test_search_query)
+            test_search_query = self.get_config_value('runner:test_search_query')
+
+            #by index slice eg: [0:12], [:], [0], [-1]
+            if test_search_query.find('[') != -1:
+                exec('tests = self.get_available_tests("*")%s'%test_search_query)
+
+            #by name
+            else:
+                tests = self.get_available_tests(test_search_query)
 
         return tests
 

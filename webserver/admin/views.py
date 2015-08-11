@@ -1,51 +1,27 @@
 # -*- coding: utf-8 -*-
 
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, flash, redirect, url_for, request
 from flask.ext.login import login_required
+from IPython import embed
 
-from brome.core.model.configurator import default_config, ini_to_dict
+from brome.webserver.admin.forms import ConfigForm
 
 blueprint = Blueprint("admin", __name__, url_prefix='/admin',
                       static_folder="../static")
-
 
 @blueprint.route("/")
 @login_required
 def members():
     return render_template("admin/members.html")
 
-@blueprint.route("/configuration")
+@blueprint.route("/configuration/", methods=['GET', 'POST'])
 @login_required
 def configuration():
-    data = default_config
-    config = ini_to_dict(blueprint.app.brome_config_path)
-    
-    for section_key, section_item in config.iteritems():
+    form = ConfigForm(blueprint.app)
 
-        #Skip the webserver config
-        if section_key == 'webserver':
-            continue
+    if request and request.method in ("PUT", "POST"):
+        flash("The brome configuration has been updated successfully!", 'success')
+        form.save(request.form)
+        return redirect(url_for('public.home'))
 
-        for option_key, option_item in section_item.iteritems():
-
-            #User defined section
-            if not data.has_key(section_key):
-                data[section_key] = {}
-                data[section_key][option_key] = {
-                    'value': option_item,
-                    'type': 'input',
-                    'title': option_key
-                }
-
-            else:
-                #User defined option
-                if not data[section_key].has_key(option_key):
-                    data[section_key][option_key] = {
-                        'value': option_item,
-                        'type': 'input',
-                        'title': option_key
-                    }
-                else:
-                    data[section_key][option_key]['value'] = option_item
-
-    return render_template("admin/configuration.html", data = data)
+    return render_template("admin/configuration.html", form = form)

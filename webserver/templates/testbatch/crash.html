@@ -1,30 +1,38 @@
 
 {% extends "layout.html" %}
 {% block content %}
-<script type="text/javascript">
-    $(function() {
-        $('#accordion').puiaccordion({multiple:true});
-    });
-</script>
+{% if data['crash_list']|count %}
+    <script type="text/javascript">
+        $(function() {
+            $('#accordion').puiaccordion({multiple:true});
+        });
+    </script>
+{% endif %}
 <div>
     <h1>Crash in Test Batch id: {{ testbatch_id }}</h1>
 </div>
-<div id="accordion">
-    {% for crash in data['crash_list'] %}
-        <h3>{{ crash['name'] }}</h3>
-        <div>
-            <div class='text-center'>
-                <a target='_blank' href='{{ url_for("testbatch.test_batch_report_file", filename = crash['screenshot']) }}'>
-                    <img src='{{ url_for("testbatch.test_batch_report_file", filename = crash['screenshot']) }}' height='50%' width='50%'/>
-                </a>
+{% if data['crash_list']|count %}
+    <div id="accordion">
+        {% for crash in data['crash_list'] %}
+            <h3>{{ crash['name'] }}</h3>
+            <div>
+                <div class='text-center'>
+                    <a target='_blank' href='{{ url_for("testbatch.test_batch_report_file", filename = crash['screenshot']) }}'>
+                        <img src='{{ url_for("testbatch.test_batch_report_file", filename = crash['screenshot']) }}' height='50%' width='50%'/>
+                    </a>
+                </div>
+                <h3>Trace:</h3>
+                <p>
+                    {% for t in crash['trace'] %}
+                        {{ t }}</br>
+                    {% endfor %}
+                </p>
             </div>
-            <h3>Trace:</h3>
-            <p>
-                {% for t in crash['trace'] %}
-                    {{ t }}</br>
-                {% endfor %}
-            </p>
-        </div>
-    {% endfor %}
-</div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div>
+        <h1 class="text-center"> No crash in this test batch</h1>
+    </div>
+{% endif %}
 {% endblock %}

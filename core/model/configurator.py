@@ -2,6 +2,23 @@
 
 import ConfigParser
 
+def save_brome_config(brome_config_path, fields):
+    config = ConfigParser.RawConfigParser()
+
+    for section_id, section in fields.iteritems():
+        config.add_section(section_id)
+        for field_id, field in section.iteritems():
+            if field_id.lower() == 'sqlalchemy_database_uri':
+                continue
+            value = field['value']
+            if type(value) in [str, unicode]:
+                value = field['value'].replace('%', '%%')
+
+            config.set(section_id, field_id, value)
+
+    with open(brome_config_path, 'wb') as configfile:
+        config.write(configfile)
+
 def get_config_value(dict_list, config_name):
     try:
         section, option = config_name.split(':')
@@ -54,6 +71,8 @@ def ini_to_dict(ini_path):
                 effective_value = config_parser.getint(section, option)
 
             config[section][option] = effective_value
+
+    config['webserver']['SQLALCHEMY_DATABASE_URI'] = config['database']['sqlalchemy.url']
 
     return config
 
@@ -118,61 +137,82 @@ default_config["logger_runner"] = {}
 default_config["logger_test"] = {}
 default_config["ec2"] = {}
 default_config["grid_runner"] = {}
+default_config["webserver"] = {}
 
 #OPTIONS
 default_config["grid_runner"]["max_running_time"] = {
     'default': 7200,
     'type': 'number',
-    'min': 0,
+    'visible': True,
     'title': 'Max running time'
 }
 
 default_config["grid_runner"]["start_selenium_server"] = {
     'default': True,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Start selenium server automatically'
 }
 
 default_config["grid_runner"]["selenium_server_ip"] = {
     'default': 'localhost',
     'type': 'input',
+    'visible': True,
     'title': 'Selenium server ip address'
 }
 
 default_config["grid_runner"]["selenium_server_port"] = {
     'default': 4444,
     'type': 'number',
-    'min': 0,
+    'visible': True,
     'title': 'Selenium port'
 }
 default_config["grid_runner"]["selenium_server_command"] = {
-    'default': False,
-    'type': 'checkbox',
+    'default': "",
+    'type': 'input',
+    'visible': True,
     'title': 'Selenium server command'
+}
+
+default_config["grid_runner"]["selenium_server_jar_path"] = {
+    'default': "",
+    'type': 'input',
+    'visible': True,
+    'title': 'Selenium server jar path'
+}
+
+default_config["grid_runner"]["selenium_hub_config"] = {
+    'default': "",
+    'type': 'input',
+    'visible': True,
+    'title': 'Selenium server hub config path'
 }
 
 default_config["grid_runner"]["kill_selenium_server"] = {
     'default': True,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Kill selenium server when the test batch finished'
 }
 
 default_config["ec2"]['wait_after_instance_launched'] = {
     'default': 30,
     'type': 'number',
-    'min': 0,
+    'visible': True,
     'title': 'Wait X seconds after the instances are launched'
 }
 
 default_config["ec2"]['wait_until_system_and_instance_check_performed'] = {
     'default': True,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Wait until system and instance checks are performed'
 }
 
 default_config["project"]["test_batch_result_path"] = {
     'default': "",
     'type': 'input',
+    'visible': True,
     'title': 'Test batch result path'
 }
 
@@ -180,24 +220,28 @@ default_config["logger_runner"]["level"] = {
     'default': "INFO",
     'type': 'dropdown',
     'options': ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+    'visible': True,
     'title': 'Logger level'
 }
 
 default_config["logger_runner"]["streamlogger"] = {
     'default': True,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Use stream logger'
 }
 
 default_config["logger_runner"]["filelogger"] = {
     'default': True,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Use file logger'
 }
 
 default_config["logger_runner"]["format"] = {
     'default': "[%%(batchid)s]%%(message)s",
     'type': 'input',
+    'visible': True,
     'title': 'Logger format'
 }
 
@@ -205,238 +249,328 @@ default_config["logger_test"]["level"] = {
     'default': "INFO",
     'type': 'dropdown',
     'options': ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+    'visible': True,
     'title': 'Logger level'
 }
 
 default_config["logger_test"]["streamlogger"] = {
     'default': True,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Use stream logger'
 }
 
 default_config["logger_test"]["filelogger"] = {
     'default': True,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Use file logger'
 }
 
 default_config["logger_test"]["format"] = {
     'default': "[%%(batchid)s](%%(testname)s):%%(message)s",
     'type': 'input',
+    'visible': True,
     'title': 'Logger format'
 }
 
 default_config["proxy_driver"]["validate_xpath_selector"] = {
     'default': True,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Validate xpath selector'
 }
 
 default_config["proxy_driver"]["validate_css_selector"] = {
     'default': True,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Validate css selector'
 }
 
 default_config["proxy_driver"]["default_timeout"] = {
     'default': 5,
     'type': 'number',
-    'min': 0,
+    'visible': True,
     'title': 'Default timeout'
 }
 
 default_config["proxy_driver"]["raise_exception"] = {
     'default': True,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Raise exception'
 }
 
 default_config["proxy_driver"]["wait_until_visible_before_find"] = {
     'default': False,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Wait until visible before find'
 }
 
 default_config["proxy_driver"]["take_screenshot_on_assertion_success"] = {
     'default': False,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Take screenshot on assertion success'
 }
 
 default_config["proxy_driver"]["take_screenshot_on_assertion_failure"] = {
     'default': False,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Take screenshot on assertion failure'
 }
 
 default_config["browser"]["window_x_position"] = {
     'default': 0,
     'type': 'number',
-    'min': 0,
+    'visible': True,
     'title': 'Window x position'
 }
 
 default_config["browser"]["window_y_position"] = {
     'default': 0,
     'type': 'number',
-    'min': 0,
+    'visible': True,
     'title': 'Window y position'
 }
 
 default_config["browser"]["window_height"] = {
     'default': 725,
     'type': 'number',
-    'min': 0,
+    'visible': True,
     'title': 'Window height'
 }
 
 default_config["browser"]["window_width"] = {
     'default': 1650,
     'type': 'number',
-    'min': 0,
+    'visible': True,
     'title': 'Window width'
 }
 
 default_config["browser"]["maximize_window"] = {
     'default': False,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Maximize window'
 }
 
 default_config["highlight"]["element_is_clicked"] = {
     'default': "background: yellow; border: 2px solid red;",
     'type': 'input',
+    'visible': True,
     'title': 'Element is clicked'
 }
 
 default_config["highlight"]["element_receive_keys"] = {
     'default': "background: yellow; border: 2px solid red;",
     'type': 'input',
+    'visible': True,
     'title': 'Element receive keys'
 }
 
 default_config["highlight"]["on_assertion_failure"] = {
     'default': "background: red; border: 2px solid black;",
     'type': 'input',
+    'visible': True,
     'title': 'On assertion failure'
 }
 
 default_config["highlight"]["on_assertion_success"] = {
     'default': "background: green; border: 2px solid black;",
     'type': 'input',
+    'visible': True,
     'title': 'On assertion success style'
 }
 
 default_config["highlight"]["element_is_visible"] = {
     'default': "background: purple; border: 2px solid black;",
     'type': 'input',
+    'visible': True,
     'title': 'Element is visible style'
 }
 
 default_config["highlight"]["use_highlight"] = {
     'default': False,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Use highlight'
 }
 
 default_config["runner"]["embed_on_assertion_success"] = {
     'default': False,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Embed on assertion success'
 }
 
 default_config["runner"]["embed_on_assertion_failure"] = {
     'default': False,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Embed on assertion failure'
 }
 
 default_config["runner"]["embed_on_test_crash"] = {
     'default': False,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Embed on test crash'
 }
 
 default_config["runner"]["play_sound_on_test_crash"] = {
     'default': False,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Play sound on test crash'
 }
 
 default_config["runner"]["play_sound_on_assertion_success"] = {
     'default': False,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Play sound on assertion success'
 }
 
 default_config["runner"]["play_sound_on_assertion_failure"] = {
     'default': False,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Play sound on assertion failure'
 }
 
 default_config["runner"]["play_sound_on_test_finished"] = {
     'default': False,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Play sound on test batch finished'
 }
 
 default_config["runner"]["play_sound_on_ipython_embed"] = {
     'default': False,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Play sound on ipython embed'
 }
 
 default_config["runner"]["play_sound_on_pdb"] = {
     'default': False,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Play sound on pdb'
 }
 
 default_config["runner"]["sound_on_test_crash"] = {
     'default': 'Crash',
     'type': 'input',
+    'visible': True,
     'title': 'Sound on test crash'
 }
 
 default_config["runner"]["sound_on_assertion_success"] = {
     'default': "{testid} succeeded",
     'type': 'input',
+    'visible': True,
     'title': 'sound on assertion success'
 }
 
 default_config["runner"]["sound_on_assertion_failure"] = {
     'default': "{testid} failed",
     'type': 'input',
+    'visible': True,
     'title': 'Sound on assertion failure'
 }
 
 default_config["runner"]["sound_on_test_finished"] = {
     'default': "Test finished",
     'type': 'input',
+    'visible': True,
     'title': 'Sound on test batch finished'
 }
 
 default_config["runner"]["sound_on_ipython_embed"] = {
     'default': "Attention required",
     'type': 'input',
+    'visible': True,
     'title': 'Sound on ipython embed'
 }
 
 default_config["runner"]["sound_on_pdb"] = {
     'default': "Attention required",
     'type': 'input',
+    'visible': True,
     'title': 'Sound on pdb'
 }
 
 default_config["runner"]["cache_screenshot"] = {
     'default': False,
     'type': 'checkbox',
+    'visible': True,
     'title': 'Use the cache screenshot'
 }
 
 default_config["database"]["sqlalchemy.url"] = {
     'default': "",
     'type': 'input',
+    'visible': True,
     'title': 'Sqlalchemy url'
+}
+
+default_config["webserver"]["SQLALCHEMY_DATABASE_URI"] = {
+    'default': "",
+    'type': 'input',
+    'visible': False,
+    'title': 'Sqlalchemy url',
+}
+
+default_config["webserver"]["CACHE_TYPE"] = {
+    'default': "simple",
+    'type': 'input',
+    'visible': True,
+    'title': 'Cache type',
+}
+
+default_config["webserver"]["ASSETS_DEBUG"] = {
+    'default': True,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Assets debug',
+}
+
+default_config["webserver"]["DEBUG"] = {
+    'default': True,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Assets debug',
+}
+
+default_config["webserver"]["DEBUG_TB_INTERCEPT_REDIRECTS"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Debug tb intercept redirects',
+}
+
+default_config["webserver"]["DEBUG_TB_ENABLED"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Debug toolbar enabled',
+}
+
+default_config["webserver"]["SECRET_KEY"] = {
+    'default': '',
+    'type': 'password',
+    'visible': True,
+    'title': 'Secret key',
+}
+
+default_config["webserver"]["DEBUG"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Flask debug',
 }

@@ -3,31 +3,47 @@
 {% block content %}
 <script type="text/javascript">
     $(function() {
-         $('#testprogress').puiprogressbar();
+        {% if data['test_batch'].ending_timestamp is none %}
+            $('#testprogress').puiprogressbar();
+        {% endif %}
      
-         setInterval(function() {
-              var val = $('#testprogress').puiprogressbar('option', 'value') + 10;
-              $('#testprogress').puiprogressbar('option', 'value', val);
-         }, 4000);
-
         $('#accordion').puiaccordion({multiple:true});
         $('#accordion').puiaccordion('select', 1);
+
+        {% if data['test_batch'].ending_timestamp is none %}
+            var interval_id = setInterval(function() {
+                Sijax.request('update_info', [{{ testbatch_id }}, interval_id]);
+            }, 2000);
+        {% endif %}
+
     });
 </script>
 <div>
-    <a class="btn btn-danger" title="Delete this test batch" style="float: right; margin-right: 10px;">
-        <i class="fa fa-remove"></i>
-    </a>
-    {% if data['is_running'] %}
-        <a class="btn btn-danger" title="Stop this test batch" style="float: right; margin-right: 10px;">
+    {% if data['test_batch'].ending_timestamp is none %}
+        <a class="btn btn-danger" href="javascript://" onclick="Sijax.request('stop_test_batch', [{{ testbatch_id }}]);" title="Stop this test batch" style="float: right; margin-right: 10px;">
            <i class="fa fa-stop"></i>
+        </a>
+    {% else %}
+        <a class="btn btn-danger" href="javascript://" onclick="Sijax.request('delete_test_batch', [{{ testbatch_id }}]); window.location = '{{ url_for("testbatch.list") }}';" title="Delete this test batch" style="float: right; margin-right: 10px;">
+            <i class="fa fa-remove"></i>
         </a>
     {% endif %}
     <h1>Test Batch id: {{ testbatch_id }}</h1>
 </div>
 <div>
-    <label>Test batch progress:</label>
-    <div id="testprogress"></div>
+    {% if data['test_batch'].ending_timestamp is none %}
+        <div id="testprogressdiv">
+            <label>Test batch progress:</label>
+            <div id="testprogress"></div>
+        </div>
+    {% endif %}
+    <div class="container-fluid">
+        <div class="row-fluid text-center">
+                <strong style="padding-left:20px;">Total tests:</strong> <span>{{ data['test_batch'].total_tests}}</span>
+                <strong style="padding-left:20px;">Total finished tests:</strong> <span id="total_finished_tests">{{ data['test_batch'].total_finished_tests }}</span>
+                <strong style="padding-left:20px;">Total executing tests:</strong> <span id="total_executing_tests">{{ data['test_batch'].total_executing_tests}}</span>
+        </div>
+    </div>
 </div>
 <div id="accordion">
     <h3>Report:</h3>
@@ -37,22 +53,24 @@
                 <!-- <button class="btn btn-link" onclick="location.href='{{ url_for('testbatch.videocapture', testbatch_id = testbatch_id) }}'"><i class="fa fa-television"></i> Video captures</a> -->
             </li>
             <li>
-                <button class="btn btn-link" onclick="location.href='{{ url_for('testbatch.screenshot', testbatch_id = testbatch_id) }}'"><i class="fa fa-file-image-o"></i> Screenshots</a>
+                <button class="btn btn-link" onclick="location.href='{{ url_for('testbatch.screenshot', testbatch_id = testbatch_id) }}'"><i class="fa fa-file-image-o"></i> Screenshots (<span id="total_screenshots">{{ data['test_batch'].total_screenshots}}</span>)</a>
             </li>
             <li>
-                <button class="btn btn-link" onclick="location.href='{{ url_for('testbatch.testresult', testbatch_id = testbatch_id) }}'"><i class="fa fa-bar-chart"></i> Test results</a>
+                <button class="btn btn-link" onclick="location.href='{{ url_for('testbatch.testresult', testbatch_id = testbatch_id) }}'"><i class="fa fa-bar-chart"></i> Test results (<span id="total_test_results">{{ data['test_batch'].total_test_results}}</span>)</a>
             </li>
             <li>
-                <button class="btn btn-link" onclick="location.href='{{ url_for('testbatch.crash', testbatch_id = testbatch_id) }}'"><i class="fa fa-exclamation-triangle"></i> Crash reports</a>
+                <button class="btn btn-link" onclick="location.href='{{ url_for('testbatch.crash', testbatch_id = testbatch_id) }}'"><i class="fa fa-exclamation-triangle"></i> Crash reports (<span id="total_crashes">{{ data['test_batch'].total_crashes}}</span>)</a>
             </li>
         </ul>
     </div>
  
     <h3>Runner's log:</h3>
     <div>
-        <p>Total tests: 12</p>
-        <p>Total finished tests: 2</p>
-        <p>Total crash: 0</p>
+        <div id="runnerlog">
+            {% for line in data['runner_log'] %}
+                <h6>{{ line }}</h6>
+            {% endfor %}
+        </div>
     </div>
  
     <h3>Test instance's log:</h3>

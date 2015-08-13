@@ -2,8 +2,12 @@
 
 import os
 from glob import glob
+import shutil
+import psutil
+from datetime import datetime
 
 from brome.core.model.test_batch import TestBatch
+from brome.core.model.test_instance import TestInstance
 from brome.core.model.test_result import TestResult
 from brome.webserver.extensions import db
 
@@ -11,6 +15,79 @@ def get_test_batch_list():
     data = db.session.query(TestBatch).order_by(TestBatch.id.desc()).all()
 
     return data
+
+def get_test_batch_result_dir(app, testbatch_id):
+    return os.path.join(
+        app.brome.get_config_value("project:test_batch_result_path"),
+        'tb_%s'%testbatch_id
+    )
+
+def delete_test_batch(app, testbatch_id):
+    test_batch = get_test_batch(testbatch_id)
+
+    db.session.delete(test_batch)
+    db.session.commit()
+
+    shutil.rmtree(get_test_batch_result_dir(app, testbatch_id))
+
+def stop_test_batch(app, testbatch_id):
+    test_batch = get_test_batch(testbatch_id)
+
+    test_batch.killed = True
+    ret = psutil.pid_exists(test_batch.pid)
+    if not ret and test_batch.ending_timestamp is None:
+        test_batch.ending_timestamp = datetime.now()
+
+    db.session.commit()
+
+def get_test_batch(testbatch_id):
+    data = db.session.query(TestBatch).filter(TestBatch.id == testbatch_id).one()
+
+    return data
+
+def get_test_batch_detail(app, testbatch_id):
+    data = db.session.query(TestBatch).filter(TestBatch.id == testbatch_id).one()
+
+    data.total_crashes = get_total_crashes(app, testbatch_id)
+    data.total_executing_tests = get_total_executing_tests(testbatch_id)
+    data.total_finished_tests = get_total_finished_tests(testbatch_id)
+    data.total_tests = get_total_tests(testbatch_id)
+    data.total_screenshots = get_test_batch_screenshot(app, testbatch_id, only_total = True)
+    data.total_test_results = get_test_batch_test_result(app, testbatch_id, only_total = True)
+
+    return data
+
+def get_total_tests(testbatch_id):
+    return get_test_batch(testbatch_id).total_tests
+
+def get_total_crashes(app, testbatch_id):
+    relative_logs_dir = os.path.join(
+        "tb_%s"%testbatch_id,
+        "crashes"
+    )
+
+    abs_logs_dir = os.path.join(
+        app.brome.get_config_value('project:test_batch_result_path'),
+        relative_logs_dir
+    )
+
+    return len(glob(os.path.join(abs_logs_dir, '*.log')))
+
+def get_total_finished_tests(testbatch_id):
+    count = db.session.query(TestInstance)\
+        .filter(TestInstance.test_batch_id == testbatch_id)\
+        .filter(TestInstance.ending_timestamp != None)\
+        .count()
+
+    return count
+
+def get_total_executing_tests(testbatch_id):
+    count = db.session.query(TestInstance)\
+        .filter(TestInstance.test_batch_id == testbatch_id)\
+        .filter(TestInstance.ending_timestamp == None)\
+        .count()
+
+    return count
 
 def get_test_list(app):
     data = []
@@ -51,7 +128,7 @@ def get_browser_list(app):
 
     return data
 
-def get_test_batch_screenshot(app, testbatch_id):
+def get_test_batch_screenshot(app, testbatch_id, only_total = False):
     data = []
 
     relative_dir = os.path.join(
@@ -66,7 +143,12 @@ def get_test_batch_screenshot(app, testbatch_id):
 
     if os.path.isdir(abs_dir):
         for browser_dir in os.listdir(abs_dir):
-            for screenshot in os.listdir(os.path.join(abs_dir, browser_dir)):
+            screenshot_list = os.listdir(os.path.join(abs_dir, browser_dir))
+
+            if only_total:
+                return len(screenshot_list)
+
+            for screenshot in screenshot_list:
                 data.append({
                     'title': screenshot.split('.')[0].replace('_', ' '),
                     'broswer_id': browser_dir.replace('_', ' '),
@@ -75,15 +157,26 @@ def get_test_batch_screenshot(app, testbatch_id):
 
     return data
 
-    
+def get_test_batch_test_result(app, testbatch_id, only_total = False):
+    query_ = db.session.query(TestResult)\
+                .filter(TestResult.test_batch_id == testbatch_id)
 
-def get_test_batch_test_result(app, testbatch_id):
-    data = db.session.query(TestResult)\
-                .filter(TestResult.test_batch_id == testbatch_id)\
-                .order_by(TestResult.result)\
-                .all()
+    if only_total:
+        return query_.count()
+    else:
+        return query_.order_by(TestResult.result).all()
 
-    return data
+def get_test_batch_log(app, testbatch_id):
+    abs_logs_dir = os.path.join(
+        app.brome.get_config_value('project:test_batch_result_path'),
+        "tb_%s"%testbatch_id
+    )
+
+    runner_log = []
+    with open(os.path.join(abs_logs_dir, "brome_runner.log"), 'r') as f:
+        runner_log = f.read().splitlines()
+
+    return runner_log
 
 def get_test_batch_test_instance_log(app, testbatch_id, index):
     data = []

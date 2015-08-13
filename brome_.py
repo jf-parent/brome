@@ -1,6 +1,8 @@
 #! -*- coding: utf-8 -*-
 
+import os
 import argparse
+import shutil
 import re
 
 from brome.core.model.meta import Session
@@ -153,6 +155,13 @@ class Brome(object):
         )
 
         parser.add_argument(
+                            '--delete-test-results',
+                            dest = 'delete_test_result', 
+                            action = 'store_true',
+                            help = 'Delete all the test batch results'
+        )
+
+        parser.add_argument(
                             '--reset-database',
                             dest = 'reset_database', 
                             action = 'store_true',
@@ -177,6 +186,12 @@ class Brome(object):
 
         if parsed_args.create_database:
             create_database(self.get_config_value('database:sqlalchemy.url'))
+        elif parsed_args.delete_test_result:
+            if os.path.exists(self.get_config_value('project:test_batch_result_path')):
+                shutil.rmtree(self.get_config_value('project:test_batch_result_path'))
+                print 'Test batch result (%s) deleted!'%self.get_config_value('project:test_batch_result_path')
+            else:
+                print 'Nothing to delete'
         elif parsed_args.reset_database:
             delete_database(self.get_config_value('database:sqlalchemy.url'))
             create_database(self.get_config_value('database:sqlalchemy.url'))

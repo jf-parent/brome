@@ -30,7 +30,13 @@ class BaseRunner(object):
 
         self.session = Session()
 
+        current_pid = os.getpid()
+
+        self.tests = self.get_activated_tests()
+
         self.sa_test_batch = TestBatch(starting_timestamp = datetime.now())
+        self.sa_test_batch.pid = current_pid
+        self.sa_test_batch.total_tests = len(self.tests)
         self.session.add(self.sa_test_batch)
         self.session.commit()
 
@@ -50,8 +56,6 @@ class BaseRunner(object):
         if self.get_config_value('runner:cache_screenshot'):
             #Dictionary that contains all the screenshot name
             self.screenshot_cache = {}
-
-        self.tests = self.get_activated_tests()
 
     def kill_pid(self, pid):
         try:

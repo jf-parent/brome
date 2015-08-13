@@ -3,6 +3,7 @@
 import os
 
 from flask import Flask, render_template
+import flask_sijax
 
 from brome.core.model import *
 from brome.core.model.meta.base import Base
@@ -22,6 +23,9 @@ def create_app(brome):
     app.brome = brome
 
     app.config.update(brome.get_config_value("webserver:*"))
+
+    app.config["SIJAX_STATIC_PATH"] = os.path.join('.', os.path.dirname(__file__), 'static/libs/sijax/')
+    app.config["SIJAX_JSON_URI"] = '/static/libs/sijax/json2.js'
 
     app.temp_path = os.path.join(
         os.path.abspath(os.path.dirname(__file__)),
@@ -52,6 +56,8 @@ def register_extensions(app):
     login_manager.init_app(app)
 
     debug_toolbar.init_app(app)
+
+    flask_sijax.Sijax(app)
 
 def register_blueprints(app):
     app.register_blueprint(public.views.blueprint)

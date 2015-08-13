@@ -28,6 +28,10 @@
   {% endassets %}
 
     <!-- JavaScript -->
+     <script type="text/javascript" src="/static/libs/sijax/sijax.js"></script>
+     <script type="text/javascript">
+         {{ g.sijax.get_js()|safe }}
+     </script>
     {% assets "js_all" %}
         <script type="text/javascript" src="{{ ASSET_URL }}"></script>
     {% endassets %}

@@ -220,15 +220,11 @@ class GridRunner(BaseRunner):
         self.session.commit()
 
     def kill_test_batch_if_necessary(self):
-        kill_file = os.path.join(
-            self.runner_dir,
-            "kill.txt"
-        )
-        if os.path.isfile(kill_file):
+        if self.sa_test_batch.killed:
             self.info_log("Killing itself")
             for t in [t for t in threading.enumerate() if type(t) != threading._MainThread]:
-                self.info_log("Killing: %s"%t.config.get('name'))
-                t.end()
+                self.info_log("Killing: %s"%t.test._name)
+                t.test.end()
 
             raise TestRunnerKilledException("Killed")
 

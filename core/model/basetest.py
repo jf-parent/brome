@@ -180,7 +180,7 @@ class BaseTest(object):
         return True
 
     def configure_logger(self):
-        logger_name = 'test'
+        logger_name = self._name
 
         self.test_log_dir = os.path.join(
             self._runner_dir,
@@ -202,7 +202,7 @@ class BaseTest(object):
         #File logger
         if self.get_config_value('logger_test:filelogger'):
             test_name = string_to_filename(self._name)
-            fh = logging.FileHandler('%s%s_%s.log'%(self.test_log_dir, test_name, self.pdriver.get_id()))
+            fh = logging.FileHandler(os.path.join(self.test_log_dir, "%s_%s.log"%(test_name, self.pdriver.get_id())))
             file_formatter = logging.Formatter(format_)
             fh.setFormatter(file_formatter)
             self._logger.addHandler(fh)

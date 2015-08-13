@@ -1,48 +1,67 @@
 
 {% extends "layout.html" %}
 {% block content %}
-<script type="text/javascript">
-    $(function() {
-        $(document).puitooltip();
-        $('#testbatchlist').puidatagrid({
-            paginator: {
-                rows: 9
-            },
-            header: 'Test Batchs',
-            datasource: [
-                {% for tb in data['testbatch_list'] %}
-                    {
-                        'id': '{{ tb.id }}',
-                        'starting_timestamp': '{{ tb.starting_timestamp }}',
-                        'ending_timestamp': {% if tb.ending_timestamp is none %}'is running...' {% else %}'{{ tb.ending_timestamp }}' {% endif %}
-                    },
-                {% endfor %}
-            ],
-            content: function(data) {
-                return $(
-                            '<div>' +
-                                '<div>' +
-                                    '<h3 class="text-center"><button class="btn btn-link" onclick="location.href=\'/tb/detail/' + data.id + '\'">Test batch id: ' + data.id + '</button></h3>' +
-                                '</div>' +
-                                '<div>' +
-                                    '<h5>' + data.starting_timestamp + '</h5>' +
-                                '</div>' +
-                                '<div>' +
-                                    '<h5>' + data.ending_timestamp + '</h5>' +
-                                '</div>' +
-                                '<div>' +
-                                    '<a class="btn btn-danger" title="Delete this test batch" style="margin-right: 10px;">' +
-                                        '<i class="fa fa-remove"></i>' + 
-                                    '</a>' +
-                                    '<a class="btn btn-danger" title="Stop this test batch" style="margin-right: 10px;">' + 
-                                        '<i class="fa fa-stop"></i>' +
-                                    '</a>' +
-                                '</div>' +
-                            '</div>'
-                        ).puipanel();
-            }
+{% if data['testbatch_list']|count %}
+    <script type="text/javascript">
+        $(function() {
+            $(document).puitooltip();
+            $('#testbatchlist').puidatagrid({
+                paginator: {
+                    rows: 9
+                },
+                header: 'Test Batchs',
+                datasource: [
+                    {% for tb in data['testbatch_list'] %}
+                        {
+                            'id': '{{ tb.id }}',
+                            'is_running': {% if tb.ending_timestamp is none %} true {% else %} false {% endif %},
+                            'killed': {{ tb.killed|lower }},
+                            'starting_timestamp': '{{ tb.starting_timestamp }}',
+                            'ending_timestamp': {% if tb.ending_timestamp is none %}'is running...' {% else %}'{{ tb.ending_timestamp }}' {% endif %}
+                        },
+                    {% endfor %}
+                ],
+                content: function(data) {
+                    var panel = '';
+
+                    panel += '<div>';
+                    panel += '<div>';
+                    panel += '<h3 class="text-center"><button class="btn btn-link" onclick="location.href=\'/tb/detail/' + data.id + '\'">Test batch id: ' + data.id + '</button></h3>';
+                    panel += '</div>';
+                    panel += '<div>';
+                    panel += '<h5>' + data.starting_timestamp + '</h5>';
+                    panel += '</div>';
+                    panel += '<div>';
+                    panel += '<h5>' + data.ending_timestamp + '</h5>';
+                    panel += '</div>';
+                    panel += '<div>';
+
+                    if (data.is_running & !data.killed) {
+                        panel += '<a class="btn btn-danger" href="javascript://" onclick="Sijax.request(\'stop_test_batch\', [' + data.id + ']); window.location = \'{{ url_for("testbatch.list") }}\';" title="Stop this test batch" style="margin-right: 10px;">';
+                        panel += '<i class="fa fa-stop"></i>';
+                        panel += '</a>';
+                    } else if (data.killed & data.is_running) {
+                        panel += "<p>killed</p>"
+                    } else {
+                        panel += '<a class="btn btn-danger" thref="javascript://" onclick="Sijax.request(\'delete_test_batch\', [' + data.id +']); window.location = \'{{ url_for("testbatch.list") }}\';" title="Delete this test batch" style="margin-right: 10px;">';
+                        panel += '<i class="fa fa-remove"></i>';
+                        panel += '</a>';
+                    }
+
+                    panel += '</div>';
+                    panel += '</div>';
+                    return $(panel).puipanel();
+                }
+            });
         });
-    });
-</script>
-<div id="testbatchlist"></div>
+    </script>
+{% endif %}
+{% if data['testbatch_list']|count %}
+    <div id="testbatchlist"></div>
+{% else %}
+    <div class="text-center">
+        <h1>There is no test batch yet!</h1>
+        <p><a class="btn btn-default" href="{{ url_for('testbatch.launch') }}">Launch a new test batch</a></p>
+    </div>
+{% endif %}
 {% endblock %}

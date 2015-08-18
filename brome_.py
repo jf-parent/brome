@@ -209,7 +209,7 @@ class Brome(object):
 
     def webserver(self, args):
         app = create_app(self)
-        app.run()
+        app.run(host = self.get_config_value("webserver:HOST"), port = self.get_config_value("webserver:PORT"))
 
     def get_config_value(self, config_name):
         config_list = [

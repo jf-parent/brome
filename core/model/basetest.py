@@ -114,7 +114,7 @@ class BaseTest(object):
 
     def get_state_pickle_path(self):
         #Extract the server name
-        server = urlparse(self.pdriver.current_url).netloc
+        server = self.pdriver.get_config_value("project:server")
 
         state_dir = os.path.join(
             self.get_config_value("project:absolute_path"),

@@ -27,6 +27,10 @@ class ProxyDriver(object):
     def __getattr__(self, funcname):
         return getattr(self._driver, funcname)
 
+    def get_javascript_error(self, **kwargs):
+        #TODO
+        pass
+
     def is_visible(self, selector, **kwargs):
         
         element = self.find(selector, raise_exception = False)

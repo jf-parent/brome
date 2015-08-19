@@ -26,7 +26,9 @@ class BrowserConfig(object):
         #LOCAL
         if self.location == 'localhost':
             if not 'browserName' in self.config.keys():
-                raise Exception("Add the 'browserName' in your local_config: e.g.: 'Firefox', 'Chrome', 'Safari'")
+                msg = "Add the 'browserName' in your local_config: e.g.: 'Firefox', 'Chrome', 'Safari'"
+                self.runner.critical_log(msg)
+                raise Exception(msg)
 
         #EC2
         elif self.location == 'ec2':
@@ -59,7 +61,9 @@ class BrowserConfig(object):
 
         for key in required_keys:
             if not key in self.config.keys():
-                raise Exception("Add the '%s' in your ec2_config"%key)
+                msg = "Add the '%s' in your ec2_config"%key
+                self.runner.critical_log(msg)
+                raise Exception(msg)
 
         optional_keys = {
             'terminate': True,

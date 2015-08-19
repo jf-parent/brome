@@ -21,7 +21,7 @@ class GridRunner(BaseRunner):
         super(GridRunner, self).__init__(*args)
 
         self.selenium_pid = None
-        self.instances_ip = []
+        self.instances_ip = {}
         self.instances = {}
         self.xvfb_pids = []
         self.browser_configs = {}
@@ -57,14 +57,14 @@ class GridRunner(BaseRunner):
                 else:
                     nb_instance_to_launch = max_number_of_instance
 
-                for j in enumerate(nb_instance_to_launch):
+                for j in range(nb_instance_to_launch):
                     ec2_instance = EC2Instance(
                         runner = self,
                         browser_config = browser_config,
                         index = j
                     )
 
-                    ec2_instance_thread = InstanceThread(ec2_instance, self)
+                    ec2_instance_thread = InstanceThread(ec2_instance)
                     ec2_instance_thread.start()
 
                     instance_threads.append(ec2_instance_thread)
@@ -102,7 +102,7 @@ class GridRunner(BaseRunner):
 
         finally:
             try:
-                #self.tear_down_instances()
+                self.tear_down_instances()
 
                 #Kill selenium server
                 if self.get_config_value('grid_runner:kill_selenium_server'):
@@ -290,11 +290,11 @@ class InstanceThread(threading.Thread):
 
     def run(self):
         success = self.instance.startup()
-        if success:
-            if not self.runner.instances.get(self.instance.browser_config.browser_id):
-                self.runner.instances[self.instance.browser_config.browser_id] = []
+        if not self.runner.instances.get(self.instance.browser_config.browser_id):
+            self.runner.instances[self.instance.browser_config.browser_id] = []
 
-            self.runner.instances[self.instance.browser_config.browser_id] = self.instance
+        if success:
+            self.runner.instances[self.instance.browser_config.browser_id].append(self.instance)
             self.runner.instances_ip[self.instance.get_ip()] = self.instance
 
 class TestThread(threading.Thread):

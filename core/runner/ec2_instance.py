@@ -3,7 +3,7 @@
 from subprocess import Popen
 
 import paramiko
-import boto
+import boto.ec2
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
@@ -58,7 +58,9 @@ class EC2Instance(BaseInstance):
             elif type(self.browser_config.get("security_group_ids")) == list:
                 security_group_ids = self.browser_config.get("security_group_ids")
             else:
-                raise Exception("The config security_group_ids must be a string or a list of string")
+                msg = "The config security_group_ids must be a string or a list of string"
+                self.critial_log(msg)
+                raise Exception(msg)
                 
             #LAUNCH INSTANCE
             ec2 = boto.ec2.connect_to_region(self.browser_config.get("region"))
@@ -79,7 +81,7 @@ class EC2Instance(BaseInstance):
             try:
                 instance = reservation.instances[0]
             except Exception as e:
-                self.error_log('Instance reservation exception: %s'%str(e))
+                self.critical_log('Instance reservation exception: %s'%str(e))
                 raise
 
             self.instance_id = instance.id
@@ -103,7 +105,7 @@ class EC2Instance(BaseInstance):
                 instance.add_tag("Name","%s-selenium-node-%s-%s"%(self.browser_config.get('platform'), self.browser_config.get('browserName'), self.index))
 
                 self.info_log(
-                    'New instance "%s" public ip "%s" private ip "%s"'%(
+                    "New instance '%s' public ip '%s' private ip '%s'"%(
                         instance.id,
                         instance.ip_address,
                         instance.private_ip_address
@@ -113,10 +115,11 @@ class EC2Instance(BaseInstance):
                 self.error_log("Instance status is %s and should be 'running'"%status)
                 raise Exception(status)
 
-            self.info_log('System_status: %s, instance_status: %s'%(status.system_status, status.instance_status))
             if self.runner.get_config_value("ec2:wait_until_system_and_instance_check_performed"):
                 for i in range(5*60):
                     try:
+                        if i == 1:
+                            self.info_log('System_status: %s, instance_status: %s'%(status.system_status, status.instance_status))
                         status = ec2.get_all_instance_status(instance_ids=[instance.id])[0]
                         if status.system_status.status == u'ok' and status.instance_status.status == u'ok':
                             self.info_log('system_status: %s, instance_status: %s'%(status.system_status, status.instance_status))
@@ -151,17 +154,16 @@ class EC2Instance(BaseInstance):
                 self.runner.xvfb_pids.append(process.pid)
 
             else:
-                raise Exception("The provided platform name is not supported: select either 'WINDOWS' or 'LINUX'")
+                msg = "The provided platform name is not supported: select either 'WINDOWS' or 'LINUX'"
+                self.critical_log(msg)
+                raise Exception(msg)
 
             self.ip = instance.private_ip_address
-            self.runner.remote_browser_dict[self.ip] = self
 
             return True
 
         except Exception as e:
-            self.runner.max_number_of_thread -= 1 * self.browser_config.get("nb_browser_by_instance")
             self.error_log('Startup exception: %s'%str(e))
-            self.warning_log('Max number of thread decremented')
             raise
 
     def tear_down(self):
@@ -173,6 +175,9 @@ class EC2Instance(BaseInstance):
         
         ec2 = boto.ec2.connect_to_region(self.browser_config.get("region"))
         ec2.terminate_instances(instance_ids=[self.instance_id])
+
+    def get_id(self):
+        return self.browser_config.browser_id
 
     def debug_log(self, msg):
         self.runner.debug_log("[%s]%s"%(self.get_id(), msg))

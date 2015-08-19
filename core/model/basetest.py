@@ -39,6 +39,9 @@ class BaseTest(object):
         #TEST BATCH DIRECTORY
         self._runner_dir = self._runner.runner_dir
 
+        #LOGGING
+        self.configure_logger()
+
         #DRIVER
         self.init_driver()
 
@@ -46,9 +49,6 @@ class BaseTest(object):
 
         #TEST KWARGS
         self._test_config = test_config_to_dict(self.get_config_value("runner:test_config"))
-
-        #LOGGING
-        self.configure_logger()
 
     def init_driver(self, retry = 10):
 
@@ -202,7 +202,10 @@ class BaseTest(object):
         #File logger
         if self.get_config_value('logger_test:filelogger'):
             test_name = string_to_filename(self._name)
-            fh = logging.FileHandler(os.path.join(self.test_log_dir, "%s_%s.log"%(test_name, self.pdriver.get_id())))
+            fh = logging.FileHandler(os.path.join(
+                self.test_log_dir,
+                "%s_%s.log"%(test_name, self._browser_config.browser_id)
+            ))
             file_formatter = logging.Formatter(format_)
             fh.setFormatter(file_formatter)
             self._logger.addHandler(fh)

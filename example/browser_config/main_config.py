@@ -12,7 +12,7 @@ chrome_ec2['available_in_webserver'] = True
 chrome_ec2['nb_instance'] = 3
 chrome_ec2['nb_browser_by_instance'] = 1
 chrome_ec2['max_number_of_instance'] = 20
-chrome_ec2['ec2_region'] = 'us-east-1'
+chrome_ec2['region'] = 'us-east-1'
 chrome_ec2['security_group_ids'] = ['sg-00487c65']
 chrome_ec2['instance_type'] = 't2.micro'
 chrome_ec2['selenium_command'] = "DISPLAY=:0 nohup java -jar selenium-server.jar -role node -hub http://{hub_ip}:4444/grid/register -browser browserName={browserName},maxInstances={nb_browser_by_instance},platform={platform} > node.log 2>&1 &"

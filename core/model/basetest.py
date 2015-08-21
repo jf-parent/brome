@@ -13,11 +13,15 @@ from brome.core.model.stateful import Stateful
 from brome.core.model.proxy_driver import ProxyDriver
 from brome.core.model.meta.base import Session
 from brome.core.model.test_instance import TestInstance
+from brome.core.model.test_result import TestResult
+from brome.core.model.test import Test
 from brome.core.model.configurator import get_config_value, parse_brome_config_from_browser_config, default_config, test_config_to_dict
 
 class BaseTest(object):
 
     def __init__(self, **kwargs):
+        self._crash_error = False
+
         self._runner = kwargs.get('runner')
         self._name = kwargs.get('name')
         self._index = kwargs.get('index')
@@ -204,7 +208,7 @@ class BaseTest(object):
             test_name = string_to_filename(self._name)
             fh = logging.FileHandler(os.path.join(
                 self.test_log_dir,
-                "%s_%s.log"%(test_name, self._browser_config.browser_id)
+                "%s_%s.log"%(test_name, self._browser_config.get_id())
             ))
             file_formatter = logging.Formatter(format_)
             fh.setFormatter(file_formatter)
@@ -288,6 +292,8 @@ class BaseTest(object):
         if self.get_config_value("runner:embed_on_test_crash"):
             self.pdriver.embed()
 
+        self._crash_error = '[!]%s %s crashed: %s'%(self._name, self._browser_config.get_id(), str(tb))
+
         self.create_crash_report(tb)
 
     def create_crash_report(self, tb):
@@ -353,3 +359,29 @@ class BaseTest(object):
             self.pdriver.get_id(join_char = '_')
         )
         create_dir_if_doesnt_exist(self._screenshot_dir)
+
+    def get_test_result_summary(self):
+        results = []
+
+        base_query = self._session.query(TestResult).filter(TestResult.test_instance_id == self._sa_test_instance.id).filter(TestResult.browser_id == self.pdriver.get_id())
+        total_test = base_query.count()
+        total_test_successful = base_query.filter(TestResult.result == True).count()
+        total_test_failed = base_query.filter(TestResult.result == False).count()
+        failed_tests = base_query.filter(TestResult.result == False).all()
+
+        results.append('Total_test: %s; Total_test_successful: %s; Total_test_failed: %s'%(total_test, total_test_successful, total_test_failed))
+
+        for failed_test in failed_tests:
+            test = self._session.query(Test).filter(Test.id == failed_test.test_id).one()
+            if self._runner.brome.test_dict.has_key(test.test_id):
+                test_config = self._runner.brome.test_dict[test.test_id]
+                if type(test_config) == dict:
+                    test_name = test_config.get('name')
+                else:
+                    test_name = test_config
+            else:
+                test_name = test.test_id
+
+            results.append('[%s]%s'%(test.test_id, test_name))
+
+        return results

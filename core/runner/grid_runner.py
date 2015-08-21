@@ -219,6 +219,8 @@ class GridRunner(BaseRunner):
         self.sa_test_batch.ending_timestamp = datetime.now()
         self.session.commit()
 
+        self.print_test_summary(executed_tests)
+
     def kill_test_batch_if_necessary(self):
         if self.sa_test_batch.killed:
             self.info_log("Killing itself")

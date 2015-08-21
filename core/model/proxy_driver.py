@@ -32,8 +32,13 @@ class ProxyDriver(object):
         pass
 
     def is_visible(self, selector, **kwargs):
+        self.debug_log("Is visible (%s)"%selector)
         
-        element = self.find(selector, raise_exception = False)
+        element = self.find(
+            selector,
+            raise_exception = False,
+            wait_until_visible = False
+        )
         if element:
             element.highlight(
                 style = self.get_config_value(
@@ -44,8 +49,28 @@ class ProxyDriver(object):
         else:
             return False
 
+    def is_displayed(self, selector, **kwargs):
+        self.debug_log("Is displayed (%s)"%selector)
+
+        element = self.find(
+            selector,
+            raise_exception = False,
+            wait_until_visible = False
+        )
+
+        if element:
+            if element.is_displayed():
+                element.highlight(
+                    style = self.get_config_value(
+                                'highlight:element_is_visible'
+                            )
+                )
+                return True
+
+        return False
+
     def find(self, selector, **kwargs):
-        self.info_log("Finding element with selector: %s"%selector)
+        self.debug_log("Finding element with selector: %s"%selector)
 
         elements = self.find_all(selector, **kwargs)
 
@@ -55,7 +80,7 @@ class ProxyDriver(object):
             return None
 
     def find_last(self, selector, **kwargs):
-        self.info_log("Finding last element with selector: %s"%selector)
+        self.debug_log("Finding last element with selector: %s"%selector)
 
         elements = self.find_all(selector, **kwargs)
 
@@ -65,7 +90,7 @@ class ProxyDriver(object):
             return None
 
     def find_all(self, selector, **kwargs):
-        self.info_log("Finding elements with selector: %s"%selector)
+        self.debug_log("Finding elements with selector: %s"%selector)
 
         raise_exception = kwargs.get(
                                     'raise_exception',
@@ -237,6 +262,32 @@ class ProxyDriver(object):
 
         return func, effective_selector
 
+    def wait_until_present(self, selector, **kwargs):
+        self.info_log("Waiting until present (%s)"%selector)
+        
+        timeout = kwargs.get(
+                            'timeout',
+                            self.get_config_value(
+                                'proxy_driver:default_timeout'
+                            )
+                        )
+        raise_exception = kwargs.get(
+                                    'raise_exception',
+                                    self.get_config_value(
+                                        'proxy_driver:raise_exception'
+                                    )
+                                )
+
+        func, effective_selector = self.selector_function_resolver(selector, function_type = 'by')
+        try:
+            el = WebDriverWait(self._driver, timeout).until(EC.presence_of_element_located((getattr(By, func), effective_selector[3:])))
+            return ProxyElement(el, selector, self)
+        except TimeoutException:
+            if raise_exception:
+                raise TimeoutException(effective_selector)
+            else:
+                return False
+
     def wait_until_visible(self, selector, **kwargs):
         self.info_log("Waiting until visible (%s)"%selector)
         
@@ -256,8 +307,8 @@ class ProxyDriver(object):
         func, effective_selector = self.selector_function_resolver(selector, function_type = 'by')
 
         try:
-            WebDriverWait(self._driver, timeout).until(EC.visibility_of_element_located((getattr(By, func), effective_selector[3:])))
-            return True
+            el = WebDriverWait(self._driver, timeout).until(EC.visibility_of_element_located((getattr(By, func), effective_selector[3:])))
+            return ProxyElement(el, selector, self)
         except TimeoutException:
             if raise_exception:
                 raise TimeoutException(effective_selector)
@@ -318,7 +369,7 @@ class ProxyDriver(object):
 
         if screenshot_path:
             self._driver.save_screenshot(screenshot_path)
-            self.info_log("Screenshot taken (%s)"%screenshot_path)
+            self.debug_log("Screenshot taken (%s)"%screenshot_path)
 
         elif screenshot_name:
             take_screenshot = True
@@ -335,7 +386,7 @@ class ProxyDriver(object):
                 self._driver.save_screenshot(
                     screenshot_path
                 )
-                self.info_log("Screenshot taken (%s)"%screenshot_path)
+                self.debug_log("Screenshot taken (%s)"%screenshot_path)
         else:
             screenshot_path = os.path.join(
                     self.test_instance._screenshot_dir,
@@ -344,14 +395,38 @@ class ProxyDriver(object):
             self._driver.save_screenshot(
                 screenshot_path
             )
-            self.info_log("Screenshot taken (%s)"%screenshot_path)
+            self.debug_log("Screenshot taken (%s)"%screenshot_path)
+
+    def assert_present(self, selector, testid = None, **kwargs):
+        self.info_log("Assert present selector(%s) testid(%s)"%(selector, testid))
+
+        element = self.wait_until_present(selector, raise_exception = False)
+        if element:
+            if testid is not None:
+                self.create_test_result(testid, True)
+
+            return True
+        else:
+            if testid is not None:
+                self.create_test_result(testid, False)
+
+            return False
 
     def assert_visible(self, selector, testid = None, **kwargs):
         self.info_log("Assert visible selector(%s) testid(%s)"%(selector, testid))
 
-        highlight = kwargs.get('highlight', True)
+        highlight = kwargs.get('highlight',
+                                self.get_config_value(
+                                    'highlight:highlight_on_assertion_success'
+                                )
+                            )
+        wait_until_visible = kwargs.get('wait_until_visible',
+                                    self.get_config_value(
+                                        'proxy_driver:wait_until_visible_before_assert_visible'
+                                    )
+                                )
 
-        element = self.find(selector, raise_exception = False)
+        element = self.find(selector, raise_exception = False, wait_until_visible = wait_until_visible)
         if element:
             if highlight:
                 element.highlight(
@@ -372,14 +447,26 @@ class ProxyDriver(object):
     def assert_not_visible(self, selector, testid = None, **kwargs):
         self.info_log("Assert not visible selector(%s) testid(%s)"%(selector, testid))
 
-        highlight = kwargs.get('highlight', True)
+        highlight = kwargs.get('highlight',
+                                self.get_config_value(
+                                    'highlight:highlight_on_assertion_failure'
+                                )
+                            )
+        wait_until_not_visible = kwargs.get('wait_until_not_visible',
+                                    self.get_config_value(
+                                        'proxy_driver:wait_until_not_visible_before_assert_not_visible'
+                                    )
+                                )
+
+        if wait_until_not_visible:
+            self.wait_until_not_visible(selector, raise_exception = False)
 
         element = self.find(selector, raise_exception = False)
         if element:
             if highlight:
                 element.highlight(
                     style = self.get_config_value(
-                                'highlight:on_assertion_failure'
+                                'highlight:style_on_assertion_failure'
                             )
                 )
             if testid is not None:
@@ -395,15 +482,24 @@ class ProxyDriver(object):
     def assert_text_equal(self, selector, value, testid = None, **kwargs):
         self.info_log("Assert text equal selector(%s) testid(%s)"%(selector, testid))
 
-        highlight = kwargs.get('highlight', True)
+        highlight = kwargs.get('highlight',
+                                self.get_config_value(
+                                    'highlight:highlight_on_assertion_success'
+                                )
+                            )
+        wait_until_visible = kwargs.get('wait_until_visible',
+                                    self.get_config_value(
+                                        'proxy_driver:wait_until_visible_before_assert_visible'
+                                    )
+                                )
 
-        element = self.find(selector, raise_exception = False)
+        element = self.find(selector, raise_exception = False, wait_until_visible = wait_until_visible)
         if element:
             if element.text == value:
                 if highlight:
                     element.highlight(
                         style = self.get_config_value(
-                                    'highlight:on_assertion_success'
+                                    'highlight:style_on_assertion_success'
                                 )
                     )
                 if testid is not None:
@@ -414,7 +510,7 @@ class ProxyDriver(object):
                 if highlight:
                     element.highlight(
                         style = self.get_config_value(
-                                    'highlight:on_assertion_failure'
+                                    'highlight:style_on_assertion_failure'
                                 )
                     )
                 if testid is not None:
@@ -430,15 +526,24 @@ class ProxyDriver(object):
     def assert_text_not_equal(self, selector, value, testid = None, **kwargs):
         self.info_log("Assert text not equal selector(%s) testid(%s)"%(selector, testid))
 
-        highlight = kwargs.get('highlight', True)
+        highlight = kwargs.get('highlight',
+                                self.get_config_value(
+                                    'highlight:highlight_on_assertion_success'
+                                )
+                            )
+        wait_until_visible = kwargs.get('wait_until_visible',
+                                    self.get_config_value(
+                                        'proxy_driver:wait_until_visible_before_assert_visible'
+                                    )
+                                )
 
-        element = self.find(selector, raise_exception = False)
+        element = self.find(selector, raise_exception = False, wait_until_visible = wait_until_visible)
         if element:
             if element.text != value:
                 if highlight:
                     element.highlight(
                         style = self.get_config_value(
-                                    'highlight:on_assertion_success'
+                                    'highlight:style_on_assertion_success'
                                 )
                     )
                 if testid is not None:
@@ -449,7 +554,7 @@ class ProxyDriver(object):
                 if highlight:
                     element.highlight(
                         style = self.get_config_value(
-                                    'highlight:on_assertion_failure'
+                                    'highlight:style_on_assertion_failure'
                                 )
                     )
                 if testid is not None:
@@ -480,8 +585,11 @@ class ProxyDriver(object):
                     test_name = test_config['name']
             else:
                 test_name = test_config
+
+            embed_title = '[%s] %s'%(testid, test_name)
         else:
             test_name = testid
+            embed_title = test_name
 
         if result:
             #SCREENSHOT
@@ -507,7 +615,7 @@ class ProxyDriver(object):
 
             #EMBED
             if self.get_config_value("runner:embed_on_assertion_success") and embed:
-                self.embed(title = test_name)
+                self.embed(title = embed_title, stack_depth = 4)
         else:
             #SCREENSHOT
             if self.get_config_value("proxy_driver:take_screenshot_on_assertion_success"):
@@ -532,7 +640,7 @@ class ProxyDriver(object):
 
             #EMBED
             if self.get_config_value("runner:embed_on_assertion_failure") and embed:
-                self.embed(title = test_name)
+                self.embed(title = embed_title, stack_depth = 4)
 
         sa_test_result = TestResult(
             result = result,

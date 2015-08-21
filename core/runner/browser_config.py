@@ -37,6 +37,9 @@ class BrowserConfig(object):
         elif self.location == 'virtualbox':
             pass
 
+    def get_id(self):
+        return self.browser_id
+
     def get(self, key, *args):
         return self.config.get(key, *args)
 

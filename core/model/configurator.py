@@ -302,6 +302,20 @@ default_config["proxy_driver"]["raise_exception"] = {
     'title': 'Raise exception'
 }
 
+default_config["proxy_driver"]["wait_until_not_visible_before_assert_not_visible"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Wait until not visible before assert not visible'
+}
+
+default_config["proxy_driver"]["wait_until_visible_before_assert_visible"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Wait until visible before assert visible'
+}
+
 default_config["proxy_driver"]["wait_until_visible_before_find"] = {
     'default': False,
     'type': 'checkbox',
@@ -358,35 +372,70 @@ default_config["browser"]["maximize_window"] = {
     'title': 'Maximize window'
 }
 
-default_config["highlight"]["element_is_clicked"] = {
+default_config["highlight"]["highlight_on_assertion_success"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Highlight on assertion success'
+}
+
+default_config["highlight"]["highlight_on_assertion_failure"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Highlight on assertion failure'
+}
+
+default_config["highlight"]["highlight_when_element_is_clicked"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Highlight when element is clicked'
+}
+
+default_config["highlight"]["highlight_when_element_receive_keys"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Highlight when element received keys'
+}
+
+default_config["highlight"]["highlight_when_element_is_visible"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Highlight when element is visible'
+}
+
+default_config["highlight"]["style_when_element_is_clicked"] = {
     'default': "background: yellow; border: 2px solid red;",
     'type': 'input',
     'visible': True,
     'title': 'Element is clicked'
 }
 
-default_config["highlight"]["element_receive_keys"] = {
+default_config["highlight"]["style_when_element_receive_keys"] = {
     'default': "background: yellow; border: 2px solid red;",
     'type': 'input',
     'visible': True,
     'title': 'Element receive keys'
 }
 
-default_config["highlight"]["on_assertion_failure"] = {
+default_config["highlight"]["style_on_assertion_failure"] = {
     'default': "background: red; border: 2px solid black;",
     'type': 'input',
     'visible': True,
     'title': 'On assertion failure'
 }
 
-default_config["highlight"]["on_assertion_success"] = {
+default_config["highlight"]["style_on_assertion_success"] = {
     'default': "background: green; border: 2px solid black;",
     'type': 'input',
     'visible': True,
     'title': 'On assertion success style'
 }
 
-default_config["highlight"]["element_is_visible"] = {
+default_config["highlight"]["style_when_element_is_visible"] = {
     'default': "background: purple; border: 2px solid black;",
     'type': 'input',
     'visible': True,

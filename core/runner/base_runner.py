@@ -11,7 +11,10 @@ import psutil
 
 from brome.core.model.configurator import ini_to_dict, runner_args_to_dict, get_config_value, default_config
 from brome.core.model.meta import *
+from brome.core.model.test import Test
 from brome.core.model.test_batch import TestBatch
+from brome.core.model.test_result import TestResult
+from brome.core.model.test_instance import TestInstance
 from brome.core.model.utils import *
 
 class BaseRunner(object):
@@ -88,6 +91,9 @@ class BaseRunner(object):
         for test in tests:
             module_test = test.split(os.sep)[-1][:-3]
             available_tests.append(__import__('tests.%s'%module_test, fromlist = ['']))
+
+        if not len(available_tests):
+            self.info_log("No test found with the provided query: %s"%search_query)
         
         return available_tests
 
@@ -147,6 +153,69 @@ class BaseRunner(object):
             self.logger.addHandler(fh)
 
         self.logger.setLevel(getattr(logging, self.get_config_value('logger_runner:level')))
+
+    def print_test_summary(self, executed_tests):
+        separator = '---------------------'
+
+        #TITLE
+        self.info_log('******* TEST BATCH SUMMARY ********')
+
+        #TOTAL NUMBER OF EXECUTED TESTS
+        base_query = self.session.query(TestResult).filter(TestResult.test_batch_id == self.sa_test_batch.id)
+        total_test = base_query.count()
+        total_test_successful = base_query.filter(TestResult.result == True).count()
+        total_test_failed = base_query.filter(TestResult.result == False).count()
+        self.info_log('Total_test: %s; Total_test_successful: %s; Total_test_failed: %s'%(total_test, total_test_successful, total_test_failed))
+
+        #EXECUTION TIME
+        self.info_log("Total execution time: %s"%(self.sa_test_batch.ending_timestamp - self.sa_test_batch.starting_timestamp))
+
+        #SEPARATOR
+        self.info_log(separator)
+
+        self.info_log('Failed tests')
+
+        #FAILED TESTS
+        failed_test_list = []
+        for test_result in self.sa_test_batch.test_results:
+            if not test_result.result and not test_result.test in failed_test_list:
+                test = self.session.query(Test).filter(Test.id == test_result.test_id).one()
+                failed_test_list.append(test_result.test)
+                self.info_log("[%s] %s"%(test.test_id, test.name))
+
+        if not failed_test_list:
+            self.info_log('No test failed!')
+        
+        #SEPARATOR
+        self.info_log(separator)
+
+        #TEST INSTANCE REPORT
+        for test in executed_tests:
+            #TITLE
+            self.info_log('%s %s'%(test._name, test.pdriver.get_id()))
+
+            #TEST EXECUTION TIME
+            try:
+                self.info_log("Test execution time: %s"%(test._sa_test_instance.ending_timestamp - test._sa_test_batch.starting_timestamp))
+            except TypeError:
+                self.info_log("Test execution time exception")
+
+            #TEST INSTANCE SUMMARY
+            results = test.get_test_result_summary()
+            for result in results:
+                self.info_log(result)
+
+            #CRASH REPORT
+            if test._crash_error:
+                self.info_log(test._crash_error)
+            else:
+                self.info_log('No crash!')
+
+            #SEPARATOR
+            self.info_log(separator)
+
+        #END
+        self.info_log('Finished')
 
     def get_logger_dict(self):
         return {'batchid': self.sa_test_batch.id}

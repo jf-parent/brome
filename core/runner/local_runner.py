@@ -21,16 +21,19 @@ class LocalRunner(BaseRunner):
 
         try:
             self.run()
+        except KeyboardInterrupt:
+            self.info_log("Interrupted")
+
         except:
             tb = traceback.format_exc()
             self.error_log("Exception in run of the grid runner: %s"%str(tb))
             raise
-
+        
         finally:
             self.terminate()
 
     def run(self):
-        executed_tests = []
+        self.executed_tests = []
 
         for test in self.tests:
             
@@ -41,10 +44,13 @@ class LocalRunner(BaseRunner):
                 index = 1
             )
             test_.execute()
-            executed_tests.append(test_)
+            self.executed_tests.append(test_)
 
     def terminate(self):
+
         self.info_log('The test batch is finished.')
 
         self.sa_test_batch.ending_timestamp = datetime.now()
         self.session.commit()
+
+        self.print_test_summary(self.executed_tests)

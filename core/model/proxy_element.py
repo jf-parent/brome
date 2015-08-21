@@ -17,7 +17,7 @@ class ProxyElement(object):
     def click(self):
         self.highlight(
             style = self.pdriver.get_config_value(
-                        'highlight:element_is_clicked'
+                        'highlight:style_when_element_is_clicked'
                     )
         )
 
@@ -26,7 +26,7 @@ class ProxyElement(object):
     def send_keys(self, value, **kwargs):
         self.highlight(
             style = self.pdriver.get_config_value(
-                        'highlight:element_receive_keys'
+                        'highlight:style_when_element_receive_keys'
                     )
         )
 

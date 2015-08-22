@@ -44,24 +44,19 @@ def launch():
 @flask_sijax.route(blueprint, "/detail/<int:testbatch_id>")
 @login_required
 def detail(testbatch_id):
-    def update_info(obj_response, testbatch_id, interval_id):
+    def update_info(obj_response, testbatch_id, interval_id, runner_log_length):
         test_batch = data_controller.get_test_batch_detail(blueprint.app, testbatch_id)
         test_batch_log = data_controller.get_test_batch_log(blueprint.app, testbatch_id)
 
-        obj_response.script("""
-            var current_length = $('#runnerlog > h6').length,
-                log_length = %s;
+        if runner_log_length < len(test_batch_log):
+            obj_response.script("""
+                    var logs = "%s".split("|");
 
-            if (current_length < log_length) {
-                var logs = "%s".split("|"),
-                    new_logs = logs.slice(current_length);
+                    logs.forEach(function(log) {
+                        $('#runnerlog').append('<h6>' + log + '</h6>');
+                    });
+            """%("|".join(test_batch_log[runner_log_length:])))
 
-                new_logs.forEach(function(log) {
-                    $('#runnerlog').append('<h6>' + log + '</h6>');
-                });
-
-            }
-        """%(len(test_batch_log), "|".join(test_batch_log)))
         if test_batch.ending_timestamp:
             obj_response.script("clearInterval(%s);"%interval_id)
             obj_response.script("$('#testprogressdiv').remove();")

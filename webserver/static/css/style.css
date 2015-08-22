@@ -28,6 +28,9 @@ textarea {
 }
 
 /* Specifics */
+a.unlink {
+  color: #005580;
+}
 
 .brome-field {
     margin-bottom:20px;

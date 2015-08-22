@@ -171,6 +171,7 @@ class GridRunner(BaseRunner):
                                 name = test.Test.name,
                                 index = test_index_by_browser_id[browser_id]
                             )
+                            test_.pdriver.embed_disabled = True
 
                             thread = TestThread(test_)
                             thread.start()

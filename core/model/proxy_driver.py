@@ -23,6 +23,8 @@ class ProxyDriver(object):
 
         self.brome = self.runner.brome
         self.selector_dict = self.brome.selector_dict
+
+        self.embed_disabled = False
     
     def __getattr__(self, funcname):
         return getattr(self._driver, funcname)
@@ -349,6 +351,10 @@ class ProxyDriver(object):
         set_trace()
 
     def embed(self, title = '', stack_depth = 2):
+        if self.embed_disabled:
+            self.warning_log("Embed are disabled when runned from the grid runner because of the multithreading")
+            return False
+            
         from IPython.terminal.embed import InteractiveShellEmbed
 
         if self.get_config_value("runner:play_sound_on_ipython_embed"):

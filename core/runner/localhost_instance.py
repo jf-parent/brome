@@ -3,4 +3,6 @@
 from .base_instance import BaseInstance
 
 class LocalhostInstance(BaseInstance):
-    pass
+
+    def tear_down(self):
+        print 'Tear down'

@@ -53,7 +53,7 @@ class LaunchForm(object):
             "--test-file",
             test_file_path
         ]
-        #print 'command', command
+        self.app.logger.info("Starting test bach with the following command: %s"%command)
         subprocess.Popen(command)
 
         return True, ''

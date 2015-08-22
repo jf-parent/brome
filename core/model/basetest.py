@@ -33,7 +33,7 @@ class BaseTest(object):
         self._sa_test_instance = TestInstance(
             starting_timestamp = datetime.now(),
             name = self._name,
-            testbatch_id = self._test_batch_id
+            test_batch_id = self._test_batch_id
         )
 
         self._session.add(self._sa_test_instance)

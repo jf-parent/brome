@@ -41,19 +41,23 @@ firefox_localhost['browserName'] = 'Firefox'
 firefox_localhost['highlight:use_highlight']= False
 firefox_localhost['browser:window_width'] = 200
 firefox_localhost['browser:window_height'] = 200
+firefox_localhost['available_in_webserver'] = True
 
 #LOCALHOST CHROME
 chrome_localhost = {}
 chrome_localhost['browserName'] = 'Chrome'
+chrome_localhost['available_in_webserver'] = True
 
 #LOCALHOST PHANTOMJS
 phantomjs_localhost = {}
 phantomjs_localhost['browserName'] = 'PhantomJS'
 phantomjs_localhost['max_number_of_instance'] = 1
+phantomjs_localhost['available_in_webserver'] = True
 
 phantomjs_localhost2 = {}
 phantomjs_localhost2['browserName'] = 'PhantomJS'
 phantomjs_localhost2['max_number_of_instance'] = 3
+phantomjs_localhost2['available_in_webserver'] = True
 
 #MAIN CONFIG
 browsers_config = {}

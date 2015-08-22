@@ -575,6 +575,28 @@ default_config["webserver"]["SQLALCHEMY_DATABASE_URI"] = {
     'title': 'Sqlalchemy url',
 }
 
+default_config["webserver"]["level"] = {
+    'default': "INFO",
+    'type': 'dropdown',
+    'options': ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
+    'visible': True,
+    'title': 'Logger level'
+}
+
+default_config["webserver"]["streamlogger"] = {
+    'default': True,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Use stream logger'
+}
+
+default_config["webserver"]["filelogger"] = {
+    'default': True,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Use file logger'
+}
+
 default_config["webserver"]["CACHE_TYPE"] = {
     'default': "simple",
     'type': 'input',

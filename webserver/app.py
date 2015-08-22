@@ -44,6 +44,23 @@ def create_app(brome):
 
     return app
 
+def configure_logging(app):
+    logger_name = 'brome_webserver'
+
+    app.logger = logging.getLogger(logger_name)
+
+    #Stream logger 
+    if app.brome.get_config_value('webserver:streamlogger'):
+        sh = logging.StreamHandler()
+        app.logger.addHandler(sh)
+
+    #File logger
+    if app.brome.get_config_value('webserver:filelogger'):
+        fh = logging.FileHandler(os.path.join(app.runner_dir, '%s.log'%logger_name))
+        app.logger.addHandler(fh)
+
+    brome.logger.setLevel(getattr(logging, self.get_config_value('webserver:logger_level')))
+
 def register_extensions(app):
     assets.init_app(app)
 

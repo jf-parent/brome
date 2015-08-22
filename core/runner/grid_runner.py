@@ -179,14 +179,6 @@ class GridRunner(BaseRunner):
 
                             executed_tests.append(test_)
 
-                            self.info_log(
-                                "%s / %s = %s%%"%(
-                                    current_index,
-                                    len(self.tests) * len(self.browsers_id),
-                                    (round(float(current_index) / float(len(self.tests) * len(self.browsers_id)) *100, 0))
-                                )
-                            )
-
                 active_thread = threading.active_count() - 1
                 if active_thread:
                     try:

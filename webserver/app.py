@@ -18,6 +18,9 @@ from brome.webserver.extensions import (
 from brome.webserver import public, admin, testbatch
 from brome.core.model.utils import create_dir_if_doesnt_exist
 
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 def create_app(brome):
     app = Flask(__name__)
     app.brome = brome

@@ -87,7 +87,7 @@
                 <ul class="list-unstyled">
                     {% for log in data['logs'] %}
                         <li>
-                            <a class="unlink" target="_blank" href="{{ url_for('testbatch.test_batch_report_file', filename = log['path']) }}"><i class="fa fa-sticky-note"></i> {{ log['name'] }}</button>
+                            <a class="unlink" target="_blank" href="{{ url_for('testbatch.test_batch_report_file', filename = log['path']) }}"><i class="fa fa-sticky-note"></i> {{ log['name'] }}</a>
                         </li>
                     {% endfor %}
                 </ul>

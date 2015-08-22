@@ -9,6 +9,7 @@ from lxml.cssselect import CSSSelector
 from cssselect.parser import SelectorSyntaxError
 
 from brome.core.model.utils import *
+from brome.core.model.meta.base import Session
 from brome.core.model.test import Test
 from brome.core.model.test_result import TestResult
 from brome.core.model.proxy_element import ProxyElement
@@ -594,10 +595,12 @@ class ProxyDriver(object):
         screenshot_relative_path = ''
         extra_data = ''
 
-        if not self.test_instance._session.query(Test).filter(Test.test_id == testid).count():
+        session = Session()
+
+        if not session.query(Test).filter(Test.test_id == testid).count():
             test = None
         else:
-            test = self.test_instance._session.query(Test).filter(Test.test_id == testid).one()
+            test = session.query(Test).filter(Test.test_id == testid).one()
 
         if self.brome.test_dict.has_key(testid):
             test_config = self.brome.test_dict[testid]
@@ -676,8 +679,9 @@ class ProxyDriver(object):
             testinstance = self.test_instance._sa_test_instance,
             testbatch = self.runner.sa_test_batch
         )
-        self.test_instance._session.add(sa_test_result)
-        self.test_instance._session.commit()
+        session.add(sa_test_result)
+        session.commit()
+        session.close()
 
     def debug_log(self, msg):
         self.test_instance.debug_log(msg)

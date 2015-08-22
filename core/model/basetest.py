@@ -28,7 +28,7 @@ class BaseTest(object):
         self._browser_config = kwargs.get('browser_config')
         self._test_batch_id = kwargs.get('test_batch_id')
 
-        self._session = Session()
+        session = Session()
 
         self._sa_test_instance = TestInstance(
             starting_timestamp = datetime.now(),
@@ -36,8 +36,9 @@ class BaseTest(object):
             test_batch_id = self._test_batch_id
         )
 
-        self._session.add(self._sa_test_instance)
-        self._session.commit()
+        session.add(self._sa_test_instance)
+        session.commit()
+        session.close()
 
         #TEST BATCH DIRECTORY
         self._runner_dir = self._runner.runner_dir
@@ -268,8 +269,10 @@ class BaseTest(object):
         if self.get_config_value("runner:play_sound_on_test_finished"):
             say(self.get_config_value("runner:sound_on_test_finished"))
 
+        session = Session()
         self._sa_test_instance.ending_timestamp = datetime.now()
-        self._session.commit()
+        session.commit()
+        session.close()
 
     def quit_driver(self):
         self.info_log("Quitting the browser...")
@@ -362,7 +365,9 @@ class BaseTest(object):
     def get_test_result_summary(self):
         results = []
 
-        base_query = self._session.query(TestResult).filter(TestResult.test_instance_id == self._sa_test_instance.id).filter(TestResult.browser_id == self.pdriver.get_id())
+        session = Session()
+
+        base_query = session.query(TestResult).filter(TestResult.test_instance_id == self._sa_test_instance.id).filter(TestResult.browser_id == self.pdriver.get_id())
         total_test = base_query.count()
         total_test_successful = base_query.filter(TestResult.result == True).count()
         total_test_failed = base_query.filter(TestResult.result == False).count()
@@ -371,7 +376,7 @@ class BaseTest(object):
         results.append('Total_test: %s; Total_test_successful: %s; Total_test_failed: %s'%(total_test, total_test_successful, total_test_failed))
 
         for failed_test in failed_tests:
-            test = self._session.query(Test).filter(Test.id == failed_test.test_id).one()
+            test = session.query(Test).filter(Test.id == failed_test.test_id).one()
             if self._runner.brome.test_dict.has_key(test.test_id):
                 test_config = self._runner.brome.test_dict[test.test_id]
                 if type(test_config) == dict:
@@ -382,5 +387,7 @@ class BaseTest(object):
                 test_name = test.test_id
 
             results.append('[%s]%s'%(test.test_id, test_name))
+
+        session.close()
 
         return results

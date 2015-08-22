@@ -105,7 +105,7 @@ class EC2Instance(BaseInstance):
                 instance.add_tag("Name","%s-selenium-node-%s-%s"%(self.browser_config.get('platform'), self.browser_config.get('browserName'), self.index))
 
                 self.info_log(
-                    "New instance (%s) public ip (%s) private ip '%s'"%(
+                    "New instance (%s) public ip (%s) private ip (%s)"%(
                         instance.id,
                         instance.ip_address,
                         instance.private_ip_address

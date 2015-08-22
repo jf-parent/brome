@@ -676,8 +676,8 @@ class ProxyDriver(object):
             extra_data = extra_data,
             title = test_name,
             test = test,
-            testinstance = self.test_instance._sa_test_instance,
-            testbatch = self.runner.sa_test_batch
+            test_instance_id = self.test_instance.test_instance_id,
+            test_batch_id = self.runner.test_batch_id
         )
         session.add(sa_test_result)
         session.commit()

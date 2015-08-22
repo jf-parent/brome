@@ -109,22 +109,23 @@ def get_browser_list(app):
     data = []
 
     for key, browser in app.brome.browsers_config.iteritems():
-        browser_config = {}
-        browser_config['id'] = key
-        browser_config['name'] = browser['browserName']
+        if browser.get('available_in_webserver', False):
+            browser_config = {}
+            browser_config['id'] = key
+            browser_config['name'] = browser['browserName']
 
-        icon = "fa-%s"%browser_config['name'].lower().replace(' ', '-')
-        if browser_config.has_key('deviceName'):
-            if 'android' in browser_config['deviceName'].lower():
-                icon = "fa-android"
-            elif 'iphone' in browser_config['deviceName'].lower():
-                icon = "fa-mobile"
-            elif 'ipad' in browser_config['deviceName'].lower():
-                icon = "fa-tablet"
+            icon = "fa-%s"%browser_config['name'].lower().replace(' ', '-')
+            if browser_config.has_key('deviceName'):
+                if 'android' in browser_config['deviceName'].lower():
+                    icon = "fa-android"
+                elif 'iphone' in browser_config['deviceName'].lower():
+                    icon = "fa-mobile"
+                elif 'ipad' in browser_config['deviceName'].lower():
+                    icon = "fa-tablet"
 
-        browser_config['icon'] = icon
+            browser_config['icon'] = icon
 
-        data.append(browser_config)
+            data.append(browser_config)
 
     return data
 

@@ -30,14 +30,17 @@ class BaseTest(object):
 
         session = Session()
 
-        self._sa_test_instance = TestInstance(
+        sa_test_instance = TestInstance(
             starting_timestamp = datetime.now(),
             name = self._name,
             test_batch_id = self._test_batch_id
         )
 
-        session.add(self._sa_test_instance)
+        session.add(sa_test_instance)
         session.commit()
+
+        self.test_instance_id = _sa_test_instance.id
+
         session.close()
 
         #TEST BATCH DIRECTORY
@@ -270,7 +273,8 @@ class BaseTest(object):
             say(self.get_config_value("runner:sound_on_test_finished"))
 
         session = Session()
-        self._sa_test_instance.ending_timestamp = datetime.now()
+        sa_test_instance =  session.query(TestInstance).filter(TestInstance.id == self.test_instance_id).one()
+        sa_test_instance.ending_timestamp = datetime.now()
         session.commit()
         session.close()
 
@@ -367,7 +371,7 @@ class BaseTest(object):
 
         session = Session()
 
-        base_query = session.query(TestResult).filter(TestResult.test_instance_id == self._sa_test_instance.id).filter(TestResult.browser_id == self.pdriver.get_id())
+        base_query = session.query(TestResult).filter(TestResult.test_instance_id == self.test_instance_id).filter(TestResult.browser_id == self.pdriver.get_id())
         total_test = base_query.count()
         total_test_successful = base_query.filter(TestResult.result == True).count()
         total_test_failed = base_query.filter(TestResult.result == False).count()

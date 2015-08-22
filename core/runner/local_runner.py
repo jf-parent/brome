@@ -6,6 +6,7 @@ from brome.core.model.utils import *
 from brome.core.model.meta.base import Session
 from brome.core.runner.base_runner import BaseRunner
 from brome.core.runner.browser_config import BrowserConfig
+from brome.core.model.test_batch import TestBatch
 
 class LocalRunner(BaseRunner):
     def __init__(self, *args):
@@ -50,7 +51,10 @@ class LocalRunner(BaseRunner):
 
         self.info_log('The test batch is finished.')
 
-        self.sa_test_batch.ending_timestamp = datetime.now()
-        self.session.commit()
+        session = Session()
+        sa_test_batch = Session.query(TestBatch).filter(TestBatch.id == self.test_batch_id).one()
+        sa_test_batch.ending_timestamp = datetime.now()
+        session.commit()
+        session.close()
 
         self.print_test_summary(self.executed_tests)

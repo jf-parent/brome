@@ -14,7 +14,6 @@ from brome.core.model.meta import *
 from brome.core.model.test import Test
 from brome.core.model.test_batch import TestBatch
 from brome.core.model.test_result import TestResult
-from brome.core.model.test_instance import TestInstance
 from brome.core.model.utils import *
 
 class BaseRunner(object):
@@ -31,26 +30,28 @@ class BaseRunner(object):
 
         setup_database(self.get_config_value('database:*'))
 
-        self.session = Session()
+        session = Session()
 
         current_pid = os.getpid()
 
         self.tests = self.get_activated_tests()
 
-        self.sa_test_batch = TestBatch(starting_timestamp = datetime.now())
-        self.sa_test_batch.pid = current_pid
-        self.sa_test_batch.total_tests = len(self.tests)
-        self.session.add(self.sa_test_batch)
-        self.session.commit()
+        sa_test_batch = TestBatch(starting_timestamp = datetime.now())
+        sa_test_batch.pid = current_pid
+        sa_test_batch.total_tests = len(self.tests)
+        session.add(sa_test_batch)
+        session.commit()
+        self.test_batch_id = self.sa_test_batch.id
+        session.close()
 
         #RUNNER LOG DIR
         self.root_test_result_dir = self.get_config_value("project:test_batch_result_path")
 
         self.runner_dir = os.path.join(
             self.root_test_result_dir,
-            "tb_%s"%self.sa_test_batch.id
+            "tb_%s"%self.test_batch_id
         )
-        self.relative_runner_dir = "tb_%s"%self.sa_test_batch.id
+        self.relative_runner_dir = "tb_%s"%self.test_batch_id
         create_dir_if_doesnt_exist(self.runner_dir)
 
         #LOGGING
@@ -161,7 +162,8 @@ class BaseRunner(object):
         self.info_log('******* TEST BATCH SUMMARY ********')
 
         #TOTAL NUMBER OF EXECUTED TESTS
-        base_query = self.session.query(TestResult).filter(TestResult.test_batch_id == self.sa_test_batch.id)
+        session = Session()
+        base_query = session.query(TestResult).filter(TestResult.test_batch_id == self.test_batch_id)
         total_test = base_query.count()
         total_test_successful = base_query.filter(TestResult.result == True).count()
         total_test_failed = base_query.filter(TestResult.result == False).count()
@@ -179,7 +181,7 @@ class BaseRunner(object):
         failed_test_list = []
         for test_result in self.sa_test_batch.test_results:
             if not test_result.result and not test_result.test in failed_test_list:
-                test = self.session.query(Test).filter(Test.id == test_result.test_id).one()
+                test = session.query(Test).filter(Test.id == test_result.test_id).one()
                 failed_test_list.append(test_result.test)
                 self.info_log("[%s] %s"%(test.test_id, test.name))
 
@@ -218,7 +220,7 @@ class BaseRunner(object):
         self.info_log('Finished')
 
     def get_logger_dict(self):
-        return {'batchid': self.sa_test_batch.id}
+        return {'batchid': self.test_batch_id}
 
     def debug_log(self, msg):
         self.logger.debug("[debug]%s"%msg, extra=self.get_logger_dict())

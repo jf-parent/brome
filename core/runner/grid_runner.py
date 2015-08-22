@@ -15,6 +15,7 @@ from brome.core.runner.ec2_instance import EC2Instance
 from brome.core.runner.virtualbox_instance import VirtualboxInstance
 from brome.core.runner.localhost_instance import LocalhostInstance
 from brome.core.runner.browser_config import BrowserConfig
+from brome.core.model.test_batch import TestBatch
 
 class GridRunner(BaseRunner):
     def __init__(self, *args):
@@ -218,8 +219,11 @@ class GridRunner(BaseRunner):
             tb = traceback.format_exc()
             self.error_log("Run exception: %s"%str(tb))
 
-        self.sa_test_batch.ending_timestamp = datetime.now()
-        self.session.commit()
+        session = Session()
+        sa_test_batch = Session.query(TestBatch).filter(TestBatch.id == self.test_batch_id).one()
+        sa_test_batch.ending_timestamp = datetime.now()
+        session.commit()
+        session.close()
 
         self.print_test_summary(executed_tests)
 

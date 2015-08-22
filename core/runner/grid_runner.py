@@ -167,7 +167,7 @@ class GridRunner(BaseRunner):
 
                             test_ = test.Test(
                                 runner = self,
-                                test_batch_id = self.sa_test_batch.id,
+                                test_batch_id = sa_test_batch.id,
                                 browser_config = self.browser_configs[browser_id],
                                 name = test.Test.name,
                                 index = test_index_by_browser_id[browser_id]
@@ -202,7 +202,7 @@ class GridRunner(BaseRunner):
                         self.error_log("print active exception: %s"% str(e))
 
                 #TIMEOUT
-                if (self.sa_test_batch.starting_timestamp - datetime.now()).total_seconds() >\
+                if (self.starting_timestamp - datetime.now()).total_seconds() >\
                     self.get_config_value("grid_runner:max_running_time"):
 
                     self.error_log("max_running_time reached... terminating!")
@@ -228,7 +228,11 @@ class GridRunner(BaseRunner):
         self.print_test_summary(executed_tests)
 
     def kill_test_batch_if_necessary(self):
-        if self.sa_test_batch.killed:
+        session = Session()
+        sa_test_batch = Session.query(TestBatch).filter(TestBatch.id == self.test_batch_id).one()
+        session.close()
+
+        if sa_test_batch.killed:
             self.info_log("Killing itself")
             for t in [t for t in threading.enumerate() if type(t) != threading._MainThread]:
                 self.info_log("Killing: %s"%t.test._name)

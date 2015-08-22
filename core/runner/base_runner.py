@@ -36,7 +36,8 @@ class BaseRunner(object):
 
         self.tests = self.get_activated_tests()
 
-        sa_test_batch = TestBatch(starting_timestamp = datetime.now())
+        self.starting_timestamp = datetime.now()
+        sa_test_batch = TestBatch(starting_timestamp = self.starting_timestamp)
         sa_test_batch.pid = current_pid
         sa_test_batch.total_tests = len(self.tests)
         session.add(sa_test_batch)

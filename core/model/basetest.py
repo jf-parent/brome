@@ -39,7 +39,7 @@ class BaseTest(object):
         session.add(sa_test_instance)
         session.commit()
 
-        self.test_instance_id = _sa_test_instance.id
+        self.test_instance_id = sa_test_instance.id
 
         session.close()
 

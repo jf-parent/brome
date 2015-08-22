@@ -177,7 +177,7 @@ class EC2Instance(BaseInstance):
         ec2.terminate_instances(instance_ids=[self.instance_id])
 
     def get_id(self):
-        return self.browser_config.browser_id
+        return '%s - %s'%(self.browser_config.browser_id, self.index)
 
     def debug_log(self, msg):
         self.runner.debug_log("[%s]%s"%(self.get_id(), msg))

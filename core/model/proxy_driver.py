@@ -412,6 +412,21 @@ class ProxyDriver(object):
 
             return False
 
+    def assert_not_present(self, selector, testid = None, **kwargs):
+        self.info_log("Assert not present selector(%s) testid(%s)"%(selector, testid))
+
+        element = self.wait_until_present(selector, raise_exception = False)
+        if element:
+            if testid is not None:
+                self.create_test_result(testid, False)
+
+            return False
+        else:
+            if testid is not None:
+                self.create_test_result(testid, True)
+
+            return True
+
     def assert_visible(self, selector, testid = None, **kwargs):
         self.info_log("Assert visible selector(%s) testid(%s)"%(selector, testid))
 

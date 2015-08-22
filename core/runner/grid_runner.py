@@ -166,6 +166,7 @@ class GridRunner(BaseRunner):
 
                             test_ = test.Test(
                                 runner = self,
+                                test_batch_id = self.sa_test_batch.id,
                                 browser_config = self.browser_configs[browser_id],
                                 name = test.Test.name,
                                 index = test_index_by_browser_id[browser_id]

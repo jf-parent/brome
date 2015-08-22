@@ -26,6 +26,7 @@ class BaseTest(object):
         self._name = kwargs.get('name')
         self._index = kwargs.get('index')
         self._browser_config = kwargs.get('browser_config')
+        self._test_batch_id = kwargs.get('test_batch_id')
 
         self._sa_test_batch = self._runner.sa_test_batch
 
@@ -217,7 +218,7 @@ class BaseTest(object):
         self._logger.setLevel(getattr(logging, self.get_config_value('logger_test:level')))
 
     def get_logger_dict(self):
-        return {'batchid': self._runner.sa_test_batch.id, 'testname': "%s"%self._name}
+        return {'batchid': self._test_batch_id, 'testname': "%s"%self._name}
 
     def debug_log(self, msg):
         self._logger.debug("[debug]%s"%msg, extra=self.get_logger_dict())

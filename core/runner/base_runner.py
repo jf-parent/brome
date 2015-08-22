@@ -41,7 +41,7 @@ class BaseRunner(object):
         sa_test_batch.total_tests = len(self.tests)
         session.add(sa_test_batch)
         session.commit()
-        self.test_batch_id = self.sa_test_batch.id
+        self.test_batch_id = sa_test_batch.id
         session.close()
 
         #RUNNER LOG DIR
@@ -158,11 +158,14 @@ class BaseRunner(object):
     def print_test_summary(self, executed_tests):
         separator = '---------------------'
 
+        session = Session()
+
+        sa_test_batch = session.query(TestBatch).filter(TestBatch.id == self.test_batch_id).one()
+
         #TITLE
         self.info_log('******* TEST BATCH SUMMARY ********')
 
         #TOTAL NUMBER OF EXECUTED TESTS
-        session = Session()
         base_query = session.query(TestResult).filter(TestResult.test_batch_id == self.test_batch_id)
         total_test = base_query.count()
         total_test_successful = base_query.filter(TestResult.result == True).count()
@@ -170,7 +173,7 @@ class BaseRunner(object):
         self.info_log('Total_test: %s; Total_test_successful: %s; Total_test_failed: %s'%(total_test, total_test_successful, total_test_failed))
 
         #EXECUTION TIME
-        self.info_log("Total execution time: %s"%(self.sa_test_batch.ending_timestamp - self.sa_test_batch.starting_timestamp))
+        self.info_log("Total execution time: %s"%(sa_test_batch.ending_timestamp - sa_test_batch.starting_timestamp))
 
         #SEPARATOR
         self.info_log(separator)
@@ -179,7 +182,7 @@ class BaseRunner(object):
 
         #FAILED TESTS
         failed_test_list = []
-        for test_result in self.sa_test_batch.test_results:
+        for test_result in sa_test_batch.test_results:
             if not test_result.result and not test_result.test in failed_test_list:
                 test = session.query(Test).filter(Test.id == test_result.test_id).one()
                 failed_test_list.append(test_result.test)

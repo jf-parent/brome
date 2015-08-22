@@ -591,6 +591,7 @@ class ProxyDriver(object):
     def create_test_result(self, testid, result, **kwargs):
         embed = True
         videocapture_path = ''
+        screenshot_relative_path = ''
         extra_data = ''
 
         if not self.test_instance._session.query(Test).filter(Test.test_id == testid).count():

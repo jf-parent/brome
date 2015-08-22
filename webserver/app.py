@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import logging
 
 from flask import Flask, render_template
 import flask_sijax

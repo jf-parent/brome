@@ -148,6 +148,13 @@ class Brome(object):
         parser = argparse.ArgumentParser(description='Brome admin')
 
         parser.add_argument(
+                            '--reset',
+                            dest = 'reset', 
+                            action = 'store_true',
+                            help = 'Reset the database + delete the test batch results + update the test table'
+        )
+
+        parser.add_argument(
                             '--create-database',
                             dest = 'create_database', 
                             action = 'store_true',
@@ -184,20 +191,18 @@ class Brome(object):
 
         parsed_args = parser.parse_args(args)
 
-        if parsed_args.create_database:
+        def reset_database():
+            delete_database(self.get_config_value('database:sqlalchemy.url'))
             create_database(self.get_config_value('database:sqlalchemy.url'))
-        elif parsed_args.delete_test_result:
+
+        def delete_test_batch_result():
             if os.path.exists(self.get_config_value('project:test_batch_result_path')):
                 shutil.rmtree(self.get_config_value('project:test_batch_result_path'))
                 print 'Test batch result (%s) deleted!'%self.get_config_value('project:test_batch_result_path')
             else:
                 print 'Nothing to delete'
-        elif parsed_args.reset_database:
-            delete_database(self.get_config_value('database:sqlalchemy.url'))
-            create_database(self.get_config_value('database:sqlalchemy.url'))
-        elif parsed_args.delete_database:
-            delete_database(self.get_config_value('database:sqlalchemy.url'))
-        elif parsed_args.update_test:
+
+        def _update_test():
             setup_database(self.get_config_value('database:*'))
 
             session = Session()
@@ -206,6 +211,22 @@ class Brome(object):
                 update_test(session, self.test_dict)
             else:
                 raise Exception("No test dictionary provided")
+
+        if parsed_args.create_database:
+            create_database(self.get_config_value('database:sqlalchemy.url'))
+        elif parsed_args.reset:
+            reset_database()
+            delete_test_batch_result()
+            _update_test()
+        elif parsed_args.delete_test_result:
+            delete_test_batch_result()
+        elif parsed_args.reset_database:
+            delete_database(self.get_config_value('database:sqlalchemy.url'))
+            create_database(self.get_config_value('database:sqlalchemy.url'))
+        elif parsed_args.delete_database:
+            delete_database(self.get_config_value('database:sqlalchemy.url'))
+        elif parsed_args.update_test:
+            _update_test()
 
     def webserver(self, args):
         app = create_app(self)

@@ -196,7 +196,7 @@ class BaseRunner(object):
 
             #TEST EXECUTION TIME
             try:
-                self.info_log("Test execution time: %s"%(test._sa_test_instance.ending_timestamp - test._sa_test_batch.starting_timestamp))
+                self.info_log("Test execution time: %s"%(test._sa_test_instance.ending_timestamp - test._sa_test_instance.starting_timestamp))
             except TypeError:
                 self.info_log("Test execution time exception")
 

@@ -13,6 +13,7 @@ from brome.core.model.configurator import ini_to_dict, runner_args_to_dict, get_
 from brome.core.model.meta import *
 from brome.core.model.test import Test
 from brome.core.model.test_batch import TestBatch
+from brome.core.model.test_instance import TestInstance
 from brome.core.model.test_result import TestResult
 from brome.core.model.utils import *
 
@@ -200,9 +201,11 @@ class BaseRunner(object):
             #TITLE
             self.info_log('%s %s'%(test._name, test.pdriver.get_id()))
 
+            sa_test_instance = session.query(TestInstance).filter(TestInstance.id == test.test_instance_id).one()
+
             #TEST EXECUTION TIME
             try:
-                self.info_log("Test execution time: %s"%(test._sa_test_instance.ending_timestamp - test._sa_test_instance.starting_timestamp))
+                self.info_log("Test execution time: %s"%(sa_test_instance.ending_timestamp - sa_test_instance.starting_timestamp))
             except TypeError:
                 self.info_log("Test execution time exception")
 

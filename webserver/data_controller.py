@@ -99,7 +99,7 @@ def get_test_list(app):
 
     if os.path.isdir(tests_dir):
         tests = glob(os.path.join(tests_dir, 'test_*.py'))
-        for test in tests:
+        for test in sorted(tests):
             name = test.split(os.sep)[-1][len('test_'):-3]
             data.append({'name': name})
 

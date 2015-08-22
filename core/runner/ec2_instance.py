@@ -105,14 +105,14 @@ class EC2Instance(BaseInstance):
                 instance.add_tag("Name","%s-selenium-node-%s-%s"%(self.browser_config.get('platform'), self.browser_config.get('browserName'), self.index))
 
                 self.info_log(
-                    "New instance '%s' public ip '%s' private ip '%s'"%(
+                    "New instance (%s) public ip (%s) private ip '%s'"%(
                         instance.id,
                         instance.ip_address,
                         instance.private_ip_address
                     )
                 )
             else:
-                self.error_log("Instance status is %s and should be 'running'"%status)
+                self.error_log("Instance status is %s and should be (running)"%status)
                 raise Exception(status)
 
             if self.runner.get_config_value("ec2:wait_until_system_and_instance_check_performed"):
@@ -154,7 +154,7 @@ class EC2Instance(BaseInstance):
                 self.runner.xvfb_pids.append(process.pid)
 
             else:
-                msg = "The provided platform name is not supported: select either 'WINDOWS' or 'LINUX'"
+                msg = "The provided platform name is not supported: select either (WINDOWS) or (LINUX)"
                 self.critical_log(msg)
                 raise Exception(msg)
 

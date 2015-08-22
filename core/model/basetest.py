@@ -28,14 +28,12 @@ class BaseTest(object):
         self._browser_config = kwargs.get('browser_config')
         self._test_batch_id = kwargs.get('test_batch_id')
 
-        self._sa_test_batch = self._runner.sa_test_batch
-
         self._session = Session()
 
         self._sa_test_instance = TestInstance(
             starting_timestamp = datetime.now(),
             name = self._name,
-            testbatch = self._sa_test_batch
+            testbatch_id = self._test_batch_id
         )
 
         self._session.add(self._sa_test_instance)

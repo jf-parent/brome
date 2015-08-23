@@ -12,9 +12,10 @@
 
         {% if data['test_batch'].ending_timestamp is none %}
             var interval_id = setInterval(function() {
-                var runner_log_length = $('#runnerlog > h6').length;
+                var runner_log_length = $('#runnerlog > h6').length,
+                    current_progress = $('.pui-progressbar-label').html();
 
-                Sijax.request('update_info', [{{ testbatch_id }}, interval_id, runner_log_length]);
+                Sijax.request('update_info', [{{ testbatch_id }}, interval_id, runner_log_length, current_progress]);
 
             }, 2000);
         {% endif %}

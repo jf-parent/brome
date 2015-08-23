@@ -44,7 +44,7 @@ def launch():
 @flask_sijax.route(blueprint, "/detail/<int:testbatch_id>")
 @login_required
 def detail(testbatch_id):
-    def update_info(obj_response, testbatch_id, interval_id, runner_log_length):
+    def update_info(obj_response, testbatch_id, interval_id, runner_log_length, current_progress):
         test_batch = data_controller.get_test_batch_detail(blueprint.app, testbatch_id)
         test_batch_log = data_controller.get_test_batch_log(blueprint.app, testbatch_id)
 
@@ -62,7 +62,9 @@ def detail(testbatch_id):
             obj_response.script("$('#testprogressdiv').remove();")
         else:
             progress = int(float(test_batch.total_finished_tests) / float(test_batch.total_tests) * 100)
-            obj_response.script("$('#testprogress').puiprogressbar('option', 'value', %s);"%progress)
+            if progress != current_progress.replace('%', ''):
+                obj_response.script("$('#testprogress').puiprogressbar('option', 'value', %s);"%progress)
+
             obj_response.script("$('#total_crashes').html(%s)"%test_batch.total_crashes)
             obj_response.script("$('#total_executing_tests').html(%s)"%test_batch.total_executing_tests)
             obj_response.script("$('#total_finished_tests').html(%s)"%test_batch.total_finished_tests)

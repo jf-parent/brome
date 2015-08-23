@@ -34,7 +34,7 @@ class ProxyDriver(object):
         #TODO
         pass
 
-    def is_visible(self, selector, **kwargs):
+    def is_present(self, selector, **kwargs):
         self.debug_log("Is visible (%s)"%selector)
         
         element = self.find(

@@ -54,6 +54,8 @@ class BaseTest(object):
 
         self.configure_test_result_dir()
 
+        self.pdriver.configure_resolution()
+
         #TEST KWARGS
         self._test_config = test_config_to_dict(self.get_config_value("runner:test_config"))
 

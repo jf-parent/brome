@@ -14,21 +14,38 @@ class ProxyElement(object):
     def __getattr__(self, funcname):
         return getattr(self._element, funcname)
 
-    def click(self):
-        self.highlight(
-            style = self.pdriver.get_config_value(
-                        'highlight:style_when_element_is_clicked'
+    def click(self, **kwargs):
+        
+        highlight = kwargs.get( 
+                            'highlight',
+                            self.pdriver.get_config_value(
+                                'highlight:highlight_when_element_is_clicked'
+                            )
                     )
-        )
+
+        if highlight:
+            self.highlight(
+                style = self.pdriver.get_config_value(
+                            'highlight:style_when_element_is_clicked'
+                        )
+                )
 
         self._element.click()
 
     def send_keys(self, value, **kwargs):
-        self.highlight(
-            style = self.pdriver.get_config_value(
-                        'highlight:style_when_element_receive_keys'
+        highlight = kwargs.get( 
+                            'highlight',
+                            self.pdriver.get_config_value(
+                                'highlight:highlight_when_element_receive_keys'
+                            )
                     )
-        )
+
+        if highlight:
+            self.highlight(
+                style = self.pdriver.get_config_value(
+                            'highlight:style_when_element_receive_keys'
+                        )
+            )
 
         clear = kwargs.get('clear', False)
 

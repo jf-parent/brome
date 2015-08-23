@@ -175,7 +175,7 @@ def get_test_batch_log(app, testbatch_id):
 
     runner_log = []
     with open(os.path.join(abs_logs_dir, "brome_runner.log"), 'r') as f:
-        runner_log = f.read().splitlines()
+        runner_log = f.read().replace('"', '&quot;').replace("'", '&quot;').splitlines()
 
     return runner_log
 

@@ -62,7 +62,7 @@ def detail(testbatch_id):
             obj_response.script("$('#testprogressdiv').remove();")
         else:
             progress = int(float(test_batch.total_finished_tests) / float(test_batch.total_tests) * 100)
-            if progress != current_progress.replace('%', ''):
+            if str(progress) != current_progress.replace('%', ''):
                 obj_response.script("$('#testprogress').puiprogressbar('option', 'value', %s);"%progress)
 
             obj_response.script("$('#total_crashes').html(%s)"%test_batch.total_crashes)

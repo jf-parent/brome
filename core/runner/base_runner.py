@@ -96,7 +96,8 @@ class BaseRunner(object):
             available_tests.append(__import__('tests.%s'%module_test, fromlist = ['']))
 
         if not len(available_tests):
-            self.info_log("No test found with the provided query: %s"%search_query)
+            print "No test found with the provided query: %s"%search_query
+            exit(1)
         
         return available_tests
 

@@ -32,6 +32,8 @@ class ProxyElement(object):
 
         self._element.click()
 
+        return True
+
     def send_keys(self, value, **kwargs):
         highlight = kwargs.get( 
                             'highlight',
@@ -54,8 +56,12 @@ class ProxyElement(object):
 
         self._element.send_keys(value)
 
+        return True
+
     def clear(self):
         self._element.clear()
+
+        return True
 
     def highlight(self, **kwargs):
         """
@@ -82,6 +88,8 @@ class ProxyElement(object):
         except StaleElementReferenceException:
             return False
 
+        return True
+
     def scroll_into_view(self, **kwargs):
         raise_exception = kwargs.get(
                                     'raise_exception',
@@ -98,3 +106,6 @@ class ProxyElement(object):
             else:
                 tb = traceback.format_exc()
                 self.error_log('scroll_into_view WebDriverException: %s'%str(tb))
+                return False
+
+        return True

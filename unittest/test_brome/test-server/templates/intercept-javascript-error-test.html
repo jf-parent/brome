@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Intercept Javascript Error Test{% endblock %}
+{% block content %}
+<button id='error-btn'>I will create a error</button>
+<script type="text/javascript">
+    $("#error-btn").click(function() {
+        thiswillraiseanerror;
+    });
+</script>
+{% endblock %}

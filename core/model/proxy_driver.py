@@ -22,17 +22,65 @@ class ProxyDriver(object):
         self.test_instance = kwargs.get('test_instance')
         self.runner = kwargs.get('runner')
 
+        self.browser_config = self.test_instance._browser_config
         self.brome = self.runner.brome
         self.selector_dict = self.brome.selector_dict
 
         self.embed_disabled = False
+
+        self.no_javascript_error_string = 'No javascript error'
     
     def __getattr__(self, funcname):
         return getattr(self._driver, funcname)
 
+    def get(self, url):
+        self._driver.get(url)
+
+        if self.get_config_value("proxy_driver:intercept_javascript_error"):
+            self.init_javascript_error_interception()
+        
+        return True
+
+    def init_javascript_error_interception(self):
+        self.debug_log("Initializing javascript error interception")
+
+        self._driver.execute_script("""
+            window.jsErrors = [];
+            window.onerror = function (errorMessage, url, lineNumber) {
+                var message = 'Error: ' + errorMessage;
+                window.jsErrors.push(message);
+                return false;
+            };
+        """)
+
     def get_javascript_error(self, **kwargs):
-        #TODO
-        pass
+        """
+            kwargs:
+                return_type: 'string' | 'list'; default: 'string'
+        """
+        
+        return_type = kwargs.get('return_type', 'string')
+
+        js_errors = []
+        if self.get_config_value("proxy_driver:intercept_javascript_error"):
+            js_errors = self._driver.execute_script('return window.jsErrors; window.jsErrors = [];')
+
+            if not js_errors:
+                js_errors = []
+
+            if return_type == 'list':
+                if len(js_errors):
+                    return js_errors
+                else:
+                    return []
+            else:
+                if len(js_errors):
+                    return '\n'.join(js_errors)
+                else:
+                    return self.no_javascript_error_string
+        else:
+            self.warning_log("get_javascript_error was call but proxy_driver:intercept_javascript_error is set to False")
+            return None
 
     def is_present(self, selector, **kwargs):
         self.debug_log("Is visible (%s)"%selector)
@@ -717,6 +765,28 @@ class ProxyDriver(object):
 
     def get_config_value(self, value):
         return self.test_instance.get_config_value(value)
+
+    def get_ip_of_node(self, **kwargs):
+        if self.browser_config.location in ['localhost', 'appium']:
+            return '127.0.0.1'
+        elif self.browser_config.location == 'virtualbox':
+            #TODO
+            raise NotImplemented()
+
+        #EC2
+        elif self.browser_config.location == 'ec2':
+            exception_str = ''
+            try:
+                self._driver.execute_script("error")
+            except WebDriverException as e:
+                exception_str = str(e)
+
+            try:
+                return re.search("ip: '([^']*)", exception_str).group(1)
+            except AttributeError:
+                msg = "The ip address of the node could not be determined"
+                self.error_log(msg)
+                raise Exception(msg)
 
     def get_id(self, join_char = '-'):
         return join_char.join([

@@ -12,7 +12,6 @@ class LocalRunner(BaseRunner):
     def __init__(self, *args):
         super(LocalRunner, self).__init__(*args)
 
-
     def execute(self):
         self.browser_config = BrowserConfig(
             runner = self,
@@ -23,7 +22,7 @@ class LocalRunner(BaseRunner):
         try:
             self.run()
         except KeyboardInterrupt:
-            self.info_log("Interrupted")
+            self.info_log("Test batch interrupted")
 
         except:
             tb = traceback.format_exc()
@@ -34,6 +33,8 @@ class LocalRunner(BaseRunner):
             self.terminate()
 
     def run(self):
+        self.info_log("The test batch is ready.")
+
         self.executed_tests = []
 
         for test in self.tests:
@@ -42,6 +43,7 @@ class LocalRunner(BaseRunner):
                 runner = self,
                 browser_config = self.browser_config,
                 name = test.Test.name,
+                test_batch_id = self.test_batch_id,
                 index = 1
             )
             test_.execute()

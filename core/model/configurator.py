@@ -274,6 +274,13 @@ default_config["logger_test"]["format"] = {
     'title': 'Logger format'
 }
 
+default_config["proxy_driver"]["intercept_javascript_error"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Intercept javascript error'
+}
+
 default_config["proxy_driver"]["validate_xpath_selector"] = {
     'default': True,
     'type': 'checkbox',

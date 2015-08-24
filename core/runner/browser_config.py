@@ -43,6 +43,16 @@ class BrowserConfig(object):
     def get(self, key, *args):
         return self.config.get(key, *args)
 
+    def get_platform(self):
+        if self.config.has_key('platform'):
+            return self.config['platform']
+        elif self.config.has_key('platformName'):
+            return self.config['platformName']
+        else:
+            msg = "Platform could not be determined from the browser config"
+            self.runner.error_log(msg)
+            raise Exception(msg)
+
     def validate_ec2_browser_config(self):
         if self.config.get('launch', True):
             required_keys = [

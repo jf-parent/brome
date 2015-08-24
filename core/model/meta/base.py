@@ -70,7 +70,9 @@ def update_test(session, test_dict):
         else:
             test = session.query(Test).filter(Test.test_id == test_id).one()
             if test.name != name:
-                unittest.name = name
+                test.name = name
                 print 'Updated test id', test_id
 
     session.commit()
+
+    print 'Done!'

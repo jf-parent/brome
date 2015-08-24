@@ -28,6 +28,14 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+@app.route('/intercept-javascript-error-test')
+def intercept_javascript_error_test():
+    return render_template('intercept-javascript-error-test.html')
+
+@app.route('/select-all-test')
+def select_all_test():
+    return render_template('select-all-test.html')
+
 @app.route('/selector-test')
 def selector_test():
     return render_template('selector-test.html')
@@ -40,11 +48,11 @@ def click_test():
 def highlight_test():
     return render_template('highlight-test.html')
 
-@app.route('/wait_until_visible-test')
+@app.route('/wait-until-visible-test')
 def wait_until_visible_test():
     return render_template('wait_until_visible-test.html')
 
-@app.route('/wait_until_not_visible-test')
+@app.route('/wait-until-not_visible-test')
 def wait_until_not_visible_test():
     return render_template('wait_until_not_visible-test.html')
 

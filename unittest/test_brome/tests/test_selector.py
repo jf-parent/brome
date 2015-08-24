@@ -1,20 +1,19 @@
-#!/usr/bin/env python
+#! -*- coding: utf-8 -*-
 
-import unittest
-from selenium import webdriver
+from brome.core.model.utils import *
 
-from brome.core.models.utils import *
-from brome.core.models.proxy_driver import ProxyDriver
+from model.basetest import BaseTest
 
-class Test(unittest.TestCase):
-    def setUp(self):
-        self.pdriver = ProxyDriver(webdriver.Firefox())
+class Test(BaseTest):
 
-    def tearDown(self):
-        self.pdriver.close()
+    name = 'Selector'
 
-    def test_selector(self):
-        self.pdriver.get("localhost:7777/selector-test")
+    def run(self, **kwargs):
+
+        self.info_log("Running...")
+
+        #TEST
+        self.pdriver.get("%s/selector-test"%self.pdriver.get_config_value("project:base_url"))
 
         ###TAG NAME
         #FIND ALL BY TAG NAME
@@ -34,7 +33,11 @@ class Test(unittest.TestCase):
         assert element == None
 
         #FIND BY TAG NAME DOESNT EXIST RAISE EXCEPTION
-        self.assertRaises(NoSuchElementException, lambda: self.pdriver.find("tn:thisdoesntexist", wait_until_visible = False))
+        try:
+            self.pdriver.find("tn:thisdoesntexist", wait_until_visible = False)
+            assert False
+        except NoSuchElementException:
+            assert True
 
         ###NAME
         #FIND ALL BY NAME
@@ -54,7 +57,11 @@ class Test(unittest.TestCase):
         assert element == None
 
         #FIND BY NAME DOESNT EXIST RAISE EXCEPTION
-        self.assertRaises(NoSuchElementException, lambda: self.pdriver.find("nm:thisdoesntexist", wait_until_visible = False))
+        try:
+            self.pdriver.find("nm:thisdoesntexist", wait_until_visible = False)
+            assert False
+        except NoSuchElementException:
+            assert True
 
         ###CLASS NAME
         #FIND ALL BY CLASS NAME
@@ -74,7 +81,11 @@ class Test(unittest.TestCase):
         assert element == None
 
         #FIND BY CLASS NAME DOESNT EXIST RAISE EXCEPTION
-        self.assertRaises(NoSuchElementException, lambda: self.pdriver.find("cn:thisdoesntexist", wait_until_visible = False))
+        try:
+            self.pdriver.find("cn:thisdoesntexist", wait_until_visible = False)
+            assert False
+        except NoSuchElementException:
+            assert True
 
         ###ID
         #FIND ALL BY ID
@@ -94,7 +105,11 @@ class Test(unittest.TestCase):
         assert element == None
 
         #FIND BY ID DOESNT EXIST RAISE EXCEPTION
-        self.assertRaises(NoSuchElementException, lambda: self.pdriver.find("id:thisdoesntexist", wait_until_visible = False))
+        try:
+            self.pdriver.find("id:thisdoesntexist", wait_until_visible = False)
+            assert False
+        except NoSuchElementException:
+            assert True
 
         ###XPATH
         #FIND ALL BY XPATH
@@ -110,11 +125,15 @@ class Test(unittest.TestCase):
         assert element.get_attribute('id') == '2'
 
         #FIND BY XPATH DOESNT EXIST
-        element = self.pdriver.find("xp://*[@class = 'thisdoesntexist')]", raise_exception = False, wait_until_visible = False)
+        element = self.pdriver.find("xp://*[@class = 'thisdoesntexist']", raise_exception = False, wait_until_visible = False)
         assert element == None
 
         #FIND BY XPATH DOESNT EXIST RAISE EXCEPTION
-        self.assertRaises(NoSuchElementException, lambda: self.pdriver.find("xp://*[@class = 'thisdoesntexist')]", wait_until_visible = False))
+        try:
+            self.pdriver.find("xp://*[@class = 'thisdoesntexist']", wait_until_visible = False)
+            assert False
+        except NoSuchElementException:
+            assert True
 
         ###CSS
         #FIND ALL BY CSS
@@ -134,7 +153,11 @@ class Test(unittest.TestCase):
         assert element == None
 
         #FIND BY CSS DOESNT EXIST RAISE EXCEPTION
-        self.assertRaises(NoSuchElementException, lambda: self.pdriver.find("cs:.thisdoesntexist", wait_until_visible = False))
+        try:
+            self.pdriver.find("cs:.thisdoesntexist", wait_until_visible = False)
+            assert False
+        except NoSuchElementException:
+            assert True
 
         ###LINK TEXT
         #FIND ALL BY LINK TEXT
@@ -154,7 +177,11 @@ class Test(unittest.TestCase):
         assert element == None
 
         #FIND BY LINK TEXT DOESNT EXIST RAISE EXCEPTION
-        self.assertRaises(NoSuchElementException, lambda: self.pdriver.find("lt:thisdoesntexit", wait_until_visible = False))
+        try:
+            self.pdriver.find("lt:thisdoesntexit", wait_until_visible = False)
+            assert False
+        except NoSuchElementException:
+            assert True
 
         ###PARTIAL LINK TEXT
         #FIND ALL BY PARTIAL LINK TEXT
@@ -174,52 +201,8 @@ class Test(unittest.TestCase):
         assert element == None
 
         #FIND BY PARTIAL LINK TEXT DOESNT EXIST RAISE EXCEPTION
-        self.assertRaises(NoSuchElementException, lambda: self.pdriver.find("pl:thisdoesntexit", wait_until_visible = False))
-
-    def test_highlight(self):
-        self.pdriver.get("localhost:7777/highlight-test")
-
-        element = self.pdriver.find("id:1")
-
-        element.highlight(highlight_time = 2)
-
-    def test_click(self):
-        self.pdriver.get("localhost:7777/click-test")
-
-        element = self.pdriver.find("id:1")
-
-        element.click()
-
-        result = self.pdriver.find("xp://*[contains(text(), 'clicked')]")
-
-        assert result != None
-
-    def test_wait_until_visible(self):
-        self.pdriver.get("localhost:7777/wait_until_visible-test")
-
-        element = self.pdriver.find("id:2", raise_exception = False)
-        assert element.get_attribute('id') == '2'
-
-        element.highlight()
-
-        element = self.pdriver.find("id:3", raise_exception = False)
-        assert element == None
-
-    def test_wait_until_not_visible(self):
-        self.pdriver.get("localhost:7777/wait_until_not_visible-test")
-
-        self.pdriver.wait_until_not_visible("id:2", raise_exception = False)
-
-        element = self.pdriver.find("id:2", raise_exception = False)
-        assert element == None
-
-    def test_wait_until_not_visible_hidden(self):
-        self.pdriver.get("localhost:7777/wait_until_not_visible-test")
-
-        self.pdriver.wait_until_not_visible("id:4", raise_exception = False)
-
-        element = self.pdriver.find("id:4", raise_exception = False)
-        assert element == None
-
-if __name__ == "__main__":
-    unittest.main()
+        try:
+            self.pdriver.find("pl:thisdoesntexit", wait_until_visible = False)
+            assert False
+        except NoSuchElementException:
+            assert True

@@ -16,6 +16,16 @@ def get_test_batch_list():
 
     return data
 
+def get_total_execution_time(app, testbatch_id):
+    test_batch = get_test_batch(testbatch_id)
+
+    if test_batch.ending_timestamp:
+        total_execution_time = test_batch.ending_timestamp - test_batch.starting_timestamp
+    else:
+        total_execution_time = 'still running...'
+
+    return total_execution_time
+
 def get_test_batch_result_dir(app, testbatch_id):
     return os.path.join(
         app.brome.get_config_value("project:test_batch_result_path"),
@@ -54,6 +64,7 @@ def get_test_batch_detail(app, testbatch_id):
     data.total_tests = get_total_tests(testbatch_id)
     data.total_screenshots = get_test_batch_screenshot(app, testbatch_id, only_total = True)
     data.total_test_results = get_test_batch_test_result(app, testbatch_id, only_total = True)
+    data.total_execution_time = get_total_execution_time(app, testbatch_id)
 
     return data
 

@@ -1,11 +1,24 @@
-
 {% extends "layout.html" %}
 {% block content %}
 {% if data['result_list']|count %}
 <script type="text/javascript">
+    function showScreenshot(screenshotPath, title) {
+        $("#screenshotImg").attr("src", screenshotPath);
+        $("#screenshotPreview").attr("title", title);
+        $("#screenshotPreview").dialog({
+                                        minHeight: 500,
+                                        maxHeight: 800,
+                                        minWidth: 500
+        });
+    };
+
     $(function() {
+
         $('#testresult').puidatatable({
             caption: 'Test Result',
+            paginator: {
+                rows: 20
+            },
             columns: [
                 {field:'testid', headerText: 'id', headerStyle: 'width: 60px;', sortable: false},
                 {field:'testname', headerText: 'Test name', headerStyle: 'width: 50%;', sortable: false},
@@ -21,27 +34,26 @@
                         'browserid': '{{ result.browser_id }}',
                         'result': '<div class="text-center"><span class="label label-{% if result.result %}success{% else %}danger{% endif %}"> {% if result.result %} <i class="fa fa-check"></i> {% else %} <i class="fa fa-exclamation"></i> {% endif %}</span></div>',
                         'screenshot': '<div id="{{ result.id }}">' +
-                                            '<a href="#">' +
+                                    {% if result.screenshot_path != '' %}
+                                            '<button class="btn btn-link" onclick="showScreenshot(\'{{ url_for('testbatch.test_batch_report_file', filename = result.screenshot_path) }}\', \'{{ result.title }}\');" >' +
                                                 'View screenshot' +
-                                            '</a>' +
-                                            '<div class="ui-helper-hidden text-center">' +
-                                                '<img height="80%" width="80%" src="{{ url_for('testbatch.test_batch_report_file', filename = result.screenshot_path) }}" /> ' +
-                                            '</div>' +
+                                            '</button>' +
+                                    {% else %}
+                                        '<p class="text-center"> N/A </p>' +
+                                    {% endif %}
                                         '</div>'
                     },
                 {% endfor %}
             ]
         });
-
-        {% for result in data['result_list'] %}
-            $('#{{ result.id }}').puilightbox();
-        {% endfor %}
-
     });
 </script>
 {% endif %}
 <div>
     <h1>Test Result for Test Batch id: {{ testbatch_id }}</h1>
+</div>
+<div id="screenshotPreview" title="">
+    <img id="screenshotImg" src="" /> 
 </div>
 {% if data['result_list']|count %}
     <div id="testresult"></div>

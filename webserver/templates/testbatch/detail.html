@@ -41,6 +41,12 @@
             <div id="testprogress"></div>
         </div>
     {% endif %}
+    <div id="testexecutiontimediv" {%if data['test_batch'].ending_timestamp is none %} style="display: none;" {% endif %}>
+        <label>Total execution time:</label>
+        <span id="testexecutiontimespan">
+            <strong>{{ data['test_batch'].total_execution_time }}</strong>
+        </span>
+    </div>
     <div class="container-fluid">
         <div class="row-fluid text-center">
                 <strong style="padding-left:20px;">Total tests:</strong> <span>{{ data['test_batch'].total_tests}}</span>

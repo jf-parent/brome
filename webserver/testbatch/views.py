@@ -58,8 +58,12 @@ def detail(testbatch_id):
             """%("|".join(test_batch_log[runner_log_length:])))
 
         if test_batch.ending_timestamp:
+            total_execution_time = data_controller.get_total_execution_time(blueprint.app, testbatch_id)
+
             obj_response.script("clearInterval(%s);"%interval_id)
             obj_response.script("$('#testprogressdiv').remove();")
+            obj_response.script("$('#testexecutiontimespan > strong').html('%s');"%total_execution_time)
+            obj_response.script("$('#testexecutiontimediv').show();")
         else:
             progress = int(float(test_batch.total_finished_tests) / float(test_batch.total_tests) * 100)
             if str(progress) != current_progress.replace('%', ''):

@@ -323,7 +323,7 @@ default_config["proxy_driver"]["wait_until_visible_before_assert_visible"] = {
     'title': 'Wait until visible before assert visible'
 }
 
-default_config["proxy_driver"]["wait_until_visible_before_find"] = {
+default_config["proxy_driver"]["wait_until_present_before_find"] = {
     'default': False,
     'type': 'checkbox',
     'visible': True,

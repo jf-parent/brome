@@ -83,12 +83,12 @@ class ProxyDriver(object):
             return None
 
     def is_present(self, selector, **kwargs):
-        self.debug_log("Is visible (%s)"%selector)
+        self.debug_log("Is present (%s)"%selector)
         
         element = self.find(
             selector,
             raise_exception = False,
-            wait_until_visible = False
+            wait_until_present = False
         )
         if element:
             element.highlight(
@@ -106,7 +106,7 @@ class ProxyDriver(object):
         element = self.find(
             selector,
             raise_exception = False,
-            wait_until_visible = False
+            wait_until_present = False
         )
 
         if element:
@@ -149,17 +149,17 @@ class ProxyDriver(object):
                                         'proxy_driver:raise_exception'
                                     )
                                 )
-        wait_until_visible = kwargs.get(
-                                        'wait_until_visible',
+        wait_until_present = kwargs.get(
+                                        'wait_until_present',
                                         self.get_config_value(
-                                            'proxy_driver:wait_until_visible_before_find'
+                                            'proxy_driver:wait_until_present_before_find'
                                         )
                                     )
 
         func, effective_selector = self.selector_function_resolver(selector)
 
-        if wait_until_visible:
-            ret = self.wait_until_visible(selector, raise_exception = raise_exception)
+        if wait_until_present:
+            ret = self.wait_until_present(selector, raise_exception = raise_exception)
             if not ret:
                 return []
 

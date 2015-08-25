@@ -80,20 +80,24 @@ class BaseRunner(object):
                 self.info_log('[pid:%s][name:%s] killed'%(proc.pid, proc.name()))
                 proc.kill()
 
-    def get_available_tests(self, search_query):
-
-        tests_path = os.path.join(
-            self.get_config_value('project:absolute_path'), 
-            'tests',
-            'test_%s.py'%search_query
-        )
-        tests = sorted(glob.glob(tests_path))
+    def get_available_tests(self, search_query = None, test_name = None):
 
         available_tests = []
+        if search_query:
+            tests_path = os.path.join(
+                self.get_config_value('project:absolute_path'), 
+                'tests',
+                'test_%s.py'%search_query
+            )
+            tests = sorted(glob.glob(tests_path))
 
-        for test in tests:
-            module_test = test.split(os.sep)[-1][:-3]
-            available_tests.append(__import__('tests.%s'%module_test, fromlist = ['']))
+            for test in tests:
+                module_test = test.split(os.sep)[-1][:-3]
+                available_tests.append(__import__('tests.%s'%module_test, fromlist = ['']))
+        elif test_name:
+            if test_name.endswith('.py'):
+                test_name = test_name[:-3]
+            available_tests.append(__import__('tests.%s'%test_name, fromlist = ['']))
 
         if not len(available_tests):
             print "No test found with the provided query: %s"%search_query
@@ -112,6 +116,8 @@ class BaseRunner(object):
                 for test in test_list:
                     tests.append(self.get_available_tests(test)[0])
 
+        elif self.get_config_value('runner:test_name'):
+            tests = self.get_available_tests(test_name = self.get_config_value('runner:test_name'))
         else:
             test_search_query = self.get_config_value('runner:test_search_query')
 

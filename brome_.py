@@ -4,8 +4,10 @@ import os
 import argparse
 import shutil
 import re
+from glob import glob
 
 from brome.core.model.meta import Session
+from brome.core.model.grep import grep_files
 from brome.core.runner.local_runner import LocalRunner
 from brome.core.runner.grid_runner import GridRunner
 from brome.core.model.meta import create_database, delete_database, setup_database, update_test
@@ -26,7 +28,7 @@ class Brome(object):
             exit(1)
 
     def print_usage(self):
-        print 'brome_runner.py [admin | run | webserver]'
+        print 'brome_runner.py [admin | run | webserver | list | find]'
         exit(1)
 
     def execute(self, args):
@@ -39,6 +41,10 @@ class Brome(object):
             self.generate(args[2:])
         elif args[1] == 'admin':
             self.admin(args[2:])
+        elif args[1] == 'find':
+            self.find(args[2:])
+        elif args[1] == 'list':
+            self.list_(args[2:])
         elif args[1] == 'webserver':
             self.webserver(args[2:])
         else:
@@ -54,6 +60,13 @@ class Brome(object):
                             dest = 'test_search_query', 
                             default = '*',
                             help = 'The search query used to activate tests'
+        )
+        #TEST NAME
+        parser.add_argument(
+                            '--name',
+                            '-n',
+                            dest = 'test_name', 
+                            help = 'The test name to be executed'
         )
 
         #TEST FILE
@@ -140,9 +153,6 @@ class Brome(object):
         #ERROR
         else:
             print 'Select either -l "{browser_id}" or -r "{browser_id}"'
-
-    def generate(self, args):
-        print 'generate'
 
     def admin(self, args):
         parser = argparse.ArgumentParser(description='Brome admin')
@@ -231,6 +241,54 @@ class Brome(object):
     def webserver(self, args):
         app = create_app(self)
         app.run(host = self.get_config_value("webserver:HOST"), port = self.get_config_value("webserver:PORT"))
+
+    def list_(self, args):
+        query = os.path.join(
+                        self.get_config_value("project:absolute_path"),
+                        "tests",
+                        "test_*.py"
+                    )
+
+        tests = glob(query)
+        print "[index]\t|test name|"
+        for index, test in enumerate(tests):
+            test_name = test.split(os.sep)[-1][5:-3]
+            print "[%s]\t%s"%(index, test_name)
+
+    def find(self, args):
+        parser = argparse.ArgumentParser(description='Brome find')
+
+        parser.add_argument(
+                            '--test-id',
+                            dest = 'test_id', 
+                            help = 'Find a test_id in model and test directory'
+        )
+
+        parser.add_argument(
+                            '--selector',
+                            dest = 'selector', 
+                            help = 'Find a selector in model and test directory'
+        )
+
+        parsed_args = parser.parse_args(args)
+
+        if parsed_args.test_id:
+            pattern = "driver\.(assert_.*|create_test_result)+\(.*[\'\"]+(%s)+[\'\"]+"%parsed_args.test_id
+        elif parsed_args.selector:
+            pattern = "driver\..*\(+[\'\"]+.*(%s)+.*[\'\"]+"%parsed_args.selector
+
+        paths = [
+            os.path.join(
+                self.get_config_value("project:absolute_path"),
+                "tests"
+            ),
+            os.path.join(
+                self.get_config_value("project:absolute_path"),
+                "model"
+            ),
+        ]
+
+        grep_files(paths, pattern, True)
 
     def get_config_value(self, config_name):
         config_list = [

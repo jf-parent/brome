@@ -24,7 +24,7 @@ class LaunchForm(object):
     def start_test_batch(self, data):
         runner_path = os.path.join(
             self.app.brome.get_config_value('project:absolute_path'),
-            'brome_runner.py'
+            'bro'
         )
 
         requested_browsers = [b[len("browser_"):] for b in dict(data).keys() if b.startswith("browser_")]

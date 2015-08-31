@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from time import sleep
+import subprocess
 
 from flask import Blueprint, render_template, flash, redirect, url_for, request, send_from_directory, g
 import flask_sijax
 from flask.ext.login import login_required
 
 from brome.webserver.testbatch.forms import LaunchForm
+from brome.core.model.utils import *
 from brome.webserver import data_controller
 
 blueprint = Blueprint("testbatch", __name__, url_prefix='/tb',
@@ -19,6 +21,28 @@ def delete_test_batch(obj_response, testbatch_id):
 def stop_test_batch(obj_response, testbatch_id):
     data_controller.stop_test_batch(blueprint.app, testbatch_id)
     obj_response.alert('The test batch (%s) will be stop as soon as possible...'%testbatch_id)
+
+@blueprint.route("/vnc/<string:host>")
+@login_required
+def vnc(host):
+    websockify_exe = blueprint.app.brome.get_config_value('webserver:WEBSOCKIFY_EXE')
+    
+    src_addr = 'localhost'
+    src_port = 6880
+    dest_addr = host
+    dest_port = 5900
+
+    kill_by_found_string_in_cmdline('Python', 'websockify')
+
+    command = [
+        websockify_exe,
+        '%s:%s'%(src_addr, src_port),
+        '%s:%s'%(dest_addr, dest_port)
+    ]
+    #print command
+    subprocess.Popen(command)
+
+    return render_template("testbatch/vnc.html", title = 'Test')
 
 @blueprint.route("/file/<path:filename>")
 @login_required

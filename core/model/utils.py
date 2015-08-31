@@ -1,6 +1,7 @@
 #! -*- coding: utf-8 -*-
 
 from urlparse import urlparse
+import psutil
 import string
 import os
 from pudb import set_trace
@@ -38,3 +39,16 @@ if sys.platform == 'win32':
     devnull = open('log-null', 'w')
 else:
     devnull = open('/dev/null', 'w')
+
+def kill_by_name(procname):
+    for proc in psutil.process_iter():
+        if proc.name() == procname:
+            self.log('[pid:%s][name:%s] killed'%(proc.pid, proc.name()))
+            proc.kill()
+
+def kill_by_found_string_in_cmdline(procname, string):
+    for proc in psutil.process_iter():
+        if proc.name() == procname:
+            for cmd in proc.cmdline():
+                if cmd.find(string) != -1:
+                    proc.kill()

@@ -100,8 +100,8 @@ class ProxyDriver(object):
         else:
             return False
 
-    def is_displayed(self, selector, **kwargs):
-        self.debug_log("Is displayed (%s)"%selector)
+    def is_visible(self, selector, **kwargs):
+        self.debug_log("Is visible (%s)"%selector)
 
         element = self.find(
             selector,
@@ -496,8 +496,11 @@ class ProxyDriver(object):
                                     )
                                 )
 
-        element = self.find(selector, raise_exception = False, wait_until_visible = wait_until_visible)
-        if element:
+        if wait_until_visible:
+            self.wait_until_visible(selector, raise_exception = False)
+
+        element = self.find(selector, raise_exception = False)
+        if element and element.is_displayed():
             if highlight:
                 element.highlight(
                     style = self.get_config_value(
@@ -532,7 +535,7 @@ class ProxyDriver(object):
             self.wait_until_not_visible(selector, raise_exception = False)
 
         element = self.find(selector, raise_exception = False)
-        if element:
+        if element and element.is_displayed():
             if highlight:
                 element.highlight(
                     style = self.get_config_value(
@@ -691,7 +694,7 @@ class ProxyDriver(object):
                 self.embed(title = embed_title, stack_depth = 4)
         else:
             #SCREENSHOT
-            if self.get_config_value("proxy_driver:take_screenshot_on_assertion_success"):
+            if self.get_config_value("proxy_driver:take_screenshot_on_assertion_failure"):
                 screenshot_name = 'failed_%s_%s_%s.png'%(
                     string_to_filename(testid),
                     get_timestamp(),

@@ -132,9 +132,10 @@ class BaseTest(object):
         )
         create_dir_if_doesnt_exist(state_dir)
 
+        #TODO should be configurable
         state_pickle = os.path.join(
             state_dir,
-            string_to_filename('%s_%s_%s.pkl'%(self._name.replace(' ', '_'), server, self._index))
+            string_to_filename('%s_%s.pkl'%(self._name.replace(' ', '_'), server))
         )
 
         return  state_pickle

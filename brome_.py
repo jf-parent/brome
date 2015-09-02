@@ -1,5 +1,7 @@
 #! -*- coding: utf-8 -*-
 
+import pickle
+import hashlib
 import os
 import argparse
 import shutil
@@ -128,6 +130,9 @@ class Brome(object):
 
         self.parsed_args = parser.parse_args(args)
 
+        if self.test_dict:
+            self.auto_update_test()
+
         if self.parsed_args.localhost_runner:
             browsers_id = [self.parsed_args.localhost_runner]
         elif self.parsed_args.remote_runner:
@@ -212,22 +217,12 @@ class Brome(object):
             else:
                 print 'Nothing to delete'
 
-        def _update_test():
-            setup_database(self.get_config_value('database:*'))
-
-            session = Session()
-
-            if self.test_dict:
-                update_test(session, self.test_dict)
-            else:
-                raise Exception("No test dictionary provided")
-
         if parsed_args.create_database:
             create_database(self.get_config_value('database:sqlalchemy.url'))
         elif parsed_args.reset:
             reset_database()
             delete_test_batch_result()
-            _update_test()
+            self.update_test()
         elif parsed_args.delete_test_result:
             delete_test_batch_result()
         elif parsed_args.reset_database:
@@ -298,3 +293,37 @@ class Brome(object):
         value = get_config_value(config_list,config_name)
 
         return value
+
+    def update_test(self):
+        setup_database(self.get_config_value('database:*'))
+
+        session = Session()
+
+        if self.test_dict:
+            update_test(session, self.test_dict)
+        else:
+            raise Exception("No test dictionary provided")
+
+    def auto_update_test(self):
+        old_hash = None
+
+        brome_memory_pickle_path = os.path.join(
+            self.get_config_value("project:absolute_path"),
+            ".brome.pkl"
+        )
+
+        new_hash = hashlib.sha1(self.test_dict.__repr__()).hexdigest()
+
+        if os.path.isfile(brome_memory_pickle_path): 
+            with open(brome_memory_pickle_path, "rb") as fd:
+                data = pickle.load(fd)
+
+            if data.has_key('test_dict_hash'):
+                if data['test_dict_hash'] != new_hash:
+                    self.update_test()
+        else:
+            data = {}
+            data['test_dict_hash'] = new_hash
+
+            with open(brome_memory_pickle_path, "wb") as fd:
+                pickle.dump(data, fd)

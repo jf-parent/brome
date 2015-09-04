@@ -162,6 +162,8 @@ class BaseTest(object):
         def set_pdriver(value):
             if Stateful in value.__class__.__bases__:
                 value.pdriver = self.pdriver
+                if hasattr(value, 'after_load'):
+                    value.after_load()
             elif type(value) is list:
                 for v in value:
                     set_pdriver(v)

@@ -88,7 +88,7 @@ class EC2Instance(BaseInstance):
 
             self.info_log('Waiting for the instance to start...')
 
-            for i in range(0, 30):
+            for i in range(60*5):
                 try:
                     status = instance.update()
                     if status == 'running':

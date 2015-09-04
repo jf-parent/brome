@@ -117,7 +117,7 @@ class Brome(object):
                 re.match("([^:]+:[^=]+=[^,]+,?)+", value).group(0)
                 return value
             except AttributeError:
-                print "--brome-config '%s' does not match required format (section:key=value,section1:key1:value1)"%(value)
+                print "--brome-config '%s' does not match required format (section:key=value,section1:key1=value1)"%(value)
                 exit(1)
 
         #BROME CONFIG KWARGS
@@ -321,6 +321,10 @@ class Brome(object):
             if data.has_key('test_dict_hash'):
                 if data['test_dict_hash'] != new_hash:
                     self.update_test()
+
+                    data['test_dict_hash'] = new_hash
+                    with open(brome_memory_pickle_path, "wb") as fd:
+                        pickle.dump(data, fd)
         else:
             data = {}
             data['test_dict_hash'] = new_hash

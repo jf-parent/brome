@@ -55,6 +55,7 @@ def setup_database(config):
 
 def update_test(session, test_dict):
     from brome.core.model.test import Test
+    print 'Updating the test'
     for test_id, test_config in test_dict.iteritems():
         if type(test_config) == dict:
             name = test_config['name']

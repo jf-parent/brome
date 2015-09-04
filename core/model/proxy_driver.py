@@ -747,7 +747,7 @@ class ProxyDriver(object):
         self.test_instance.error_log(msg)
 
     def critical_log(self, msg):
-        self.test_instance.critial_log(msg)
+        self.test_instance.critical_log(msg)
 
     def configure_resolution(self):
         #Maximaze window

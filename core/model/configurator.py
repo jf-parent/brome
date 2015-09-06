@@ -1,23 +1,23 @@
 #! -*- coding: utf-8 -*-
 
-import ConfigParser
+import yaml
 
-def save_brome_config(brome_config_path, fields):
-    config = ConfigParser.RawConfigParser()
+from IPython import embed
 
-    for section_id, section in fields.iteritems():
-        config.add_section(section_id)
-        for field_id, field in section.iteritems():
-            if field_id.lower() == 'sqlalchemy_database_uri':
-                continue
-            value = field['value']
-            if type(value) in [str, unicode]:
-                value = field['value'].replace('%', '%%')
+def save_brome_config(brome_config_path, config):
+    with open(brome_config_path, 'w') as fd:
+        yaml.dump(config, fd, default_flow_style = False)
 
-            config.set(section_id, field_id, value)
+def generate_brome_config(brome_config_path):
+    config = {}
+    for key in default_config.iterkeys():
+        for inner_key, value in default_config[key].iteritems():
+            if not config.has_key(key):
+                config[key] = {}
 
-    with open(brome_config_path, 'wb') as configfile:
-        config.write(configfile)
+            config[key][inner_key] = value['default']
+
+    save_brome_config(brome_config_path, config)
 
 def get_config_value(dict_list, config_name):
     try:
@@ -47,32 +47,11 @@ def test_config_to_dict(test_config_string):
 
     return test_config
 
-def ini_to_dict(ini_path):
+def load_brome_config(config_path):
     config = {}
 
-    config_parser = ConfigParser.SafeConfigParser()
-
-    config_parser.read(ini_path)
-
-    for section in config_parser.sections():
-        config[section] = {}
-        for option in config_parser.options(section):
-            value = config_parser.get(section, option)
-
-            if section == 'webserver':
-                option = option.upper()
-
-            effective_value = value
-            if value.lower() in ['false', 'true']:
-                 effective_value = config_parser.getboolean(section, option)
-            #NOTE will only work with positive integer;
-            #not a problem for now since we only have positive integer
-            elif value.isdigit():
-                effective_value = config_parser.getint(section, option)
-
-            config[section][option] = effective_value
-
-    config['webserver']['SQLALCHEMY_DATABASE_URI'] = config['database']['sqlalchemy.url']
+    with open(config_path, 'r') as fd:
+        config = yaml.load(fd)
 
     return config
 
@@ -239,7 +218,7 @@ default_config["logger_runner"]["filelogger"] = {
 }
 
 default_config["logger_runner"]["format"] = {
-    'default': "[%%(batchid)s]%%(message)s",
+    'default': "[%(batchid)s]%(message)s",
     'type': 'input',
     'visible': True,
     'title': 'Logger format'
@@ -268,7 +247,7 @@ default_config["logger_test"]["filelogger"] = {
 }
 
 default_config["logger_test"]["format"] = {
-    'default': "[%%(batchid)s](%%(testname)s):%%(message)s",
+    'default': "[%(batchid)s](%(testname)s):%(message)s",
     'type': 'input',
     'visible': True,
     'title': 'Logger format'
@@ -534,28 +513,28 @@ default_config["runner"]["sound_on_assertion_success"] = {
 }
 
 default_config["runner"]["sound_on_assertion_failure"] = {
-    'default': "{testid} failed",
+    'default': '{testid} failed',
     'type': 'input',
     'visible': True,
     'title': 'Sound on assertion failure'
 }
 
 default_config["runner"]["sound_on_test_finished"] = {
-    'default': "Test finished",
+    'default': 'Test finished',
     'type': 'input',
     'visible': True,
     'title': 'Sound on test batch finished'
 }
 
 default_config["runner"]["sound_on_ipython_embed"] = {
-    'default': "Attention required",
+    'default': 'Attention required',
     'type': 'input',
     'visible': True,
     'title': 'Sound on ipython embed'
 }
 
 default_config["runner"]["sound_on_pdb"] = {
-    'default': "Attention required",
+    'default': 'Attention required',
     'type': 'input',
     'visible': True,
     'title': 'Sound on pdb'
@@ -569,21 +548,21 @@ default_config["runner"]["cache_screenshot"] = {
 }
 
 default_config["database"]["sqlalchemy.url"] = {
-    'default': "",
+    'default': '',
     'type': 'input',
     'visible': True,
     'title': 'Sqlalchemy url'
 }
 
 default_config["webserver"]["SQLALCHEMY_DATABASE_URI"] = {
-    'default': "",
+    'default': '',
     'type': 'input',
     'visible': False,
     'title': 'Sqlalchemy url',
 }
 
 default_config["webserver"]["level"] = {
-    'default': "INFO",
+    'default': 'INFO',
     'type': 'dropdown',
     'options': ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
     'visible': True,
@@ -605,7 +584,7 @@ default_config["webserver"]["filelogger"] = {
 }
 
 default_config["webserver"]["CACHE_TYPE"] = {
-    'default': "simple",
+    'default': 'simple',
     'type': 'input',
     'visible': True,
     'title': 'Cache type',
@@ -651,4 +630,32 @@ default_config["webserver"]["DEBUG"] = {
     'type': 'checkbox',
     'visible': True,
     'title': 'Flask debug',
+}
+
+default_config["webserver"]["CLOSED_REGISTRATION"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'closed registration',
+}
+
+default_config["webserver"]["REGISTRATION_TOKEN"] = {
+    'default': '',
+    'type': 'input',
+    'visible': True,
+    'title': 'registration token',
+}
+
+default_config["webserver"]["PORT"] = {
+    'default': 5000,
+    'type': 'number',
+    'visible': True,
+    'title': 'webserver port',
+}
+
+default_config["webserver"]["HOST"] = {
+    'default': 'localhost',
+    'type': 'input',
+    'visible': True,
+    'title': 'webserver ip',
 }

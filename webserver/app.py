@@ -28,6 +28,7 @@ def create_app(brome):
 
     app.config.update(brome.get_config_value("webserver:*"))
 
+    app.config['SQLALCHEMY_DATABASE_URI'] = brome.get_config_value('database:sqlalchemy.url')
     app.config["SIJAX_STATIC_PATH"] = os.path.join('.', os.path.dirname(__file__), 'static/libs/sijax/')
     app.config["SIJAX_JSON_URI"] = '/static/libs/sijax/json2.js'
 

@@ -14,7 +14,7 @@ from brome.core.model.grep import grep_files
 from brome.core.runner.local_runner import LocalRunner
 from brome.core.runner.grid_runner import GridRunner
 from brome.core.model.meta import create_database, delete_database, setup_database, update_test
-from brome.core.model.configurator import ini_to_dict, get_config_value, default_config
+from brome.core.model.configurator import load_brome_config, get_config_value, default_config, generate_brome_config
 from brome.webserver.app import create_app
 
 class Brome(object):
@@ -23,7 +23,7 @@ class Brome(object):
         self.selector_dict = kwargs.get('selector_dict', {})
         self.test_dict = kwargs.get('test_dict', {})
         self.browsers_config = kwargs.get('browsers_config')
-        self.config = ini_to_dict(self.config_path)
+        self.config = load_brome_config(self.config_path)
         self.config['project']['absolute_path'] = kwargs.get('absolute_path')
 
         if not self.browsers_config:
@@ -164,6 +164,13 @@ class Brome(object):
         parser = argparse.ArgumentParser(description='Brome admin')
 
         parser.add_argument(
+                            '--generate-config',
+                            dest = 'generate_config', 
+                            action = 'store_true',
+                            help = 'Generate the default brome config'
+        )
+
+        parser.add_argument(
                             '--reset',
                             dest = 'reset', 
                             action = 'store_true',
@@ -250,6 +257,8 @@ class Brome(object):
             delete_test_batch_result()
             self.update_test()
             delete_test_states()
+        elif parsed_args.generate_config:
+            generate_brome_config(self.config_path)
         elif parsed_args.delete_test_result:
             delete_test_batch_result()
         elif parsed_args.delete_test_states:

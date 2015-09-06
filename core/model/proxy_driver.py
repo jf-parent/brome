@@ -339,6 +339,32 @@ class ProxyDriver(object):
             else:
                 return False
 
+    def wait_until_not_present(self, selector, **kwargs):
+        self.info_log("Waiting until not present (%s)"%selector)
+        
+        timeout = kwargs.get(
+                            'timeout',
+                            self.get_config_value(
+                                'proxy_driver:default_timeout'
+                            )
+                        )
+        raise_exception = kwargs.get(
+                                    'raise_exception',
+                                    self.get_config_value(
+                                        'proxy_driver:raise_exception'
+                                    )
+                                )
+
+        func, effective_selector = self.selector_function_resolver(selector, function_type = 'by')
+        try:
+            WebDriverWait(self._driver, timeout).until(EC.invisibility_of_element_located((getattr(By, func), effective_selector[3:])))
+            return True
+        except TimeoutException:
+            if raise_exception:
+                raise TimeoutException(effective_selector)
+            else:
+                return False
+
     def wait_until_visible(self, selector, **kwargs):
         self.info_log("Waiting until visible (%s)"%selector)
         
@@ -470,17 +496,17 @@ class ProxyDriver(object):
     def assert_not_present(self, selector, testid = None, **kwargs):
         self.info_log("Assert not present selector(%s) testid(%s)"%(selector, testid))
 
-        element = self.wait_until_present(selector, raise_exception = False)
-        if element:
-            if testid is not None:
-                self.create_test_result(testid, False)
-
-            return False
-        else:
+        ret = self.wait_until_not_present(selector, raise_exception = False)
+        if ret:
             if testid is not None:
                 self.create_test_result(testid, True)
 
             return True
+        else:
+            if testid is not None:
+                self.create_test_result(testid, False)
+
+            return False
 
     def assert_visible(self, selector, testid = None, **kwargs):
         self.info_log("Assert visible selector(%s) testid(%s)"%(selector, testid))

@@ -6,7 +6,7 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length
 from IPython import embed
 
 from brome.webserver.extensions import db
-from brome.core.model.configurator import default_config, ini_to_dict, save_brome_config
+from brome.core.model.configurator import default_config, load_brome_config, save_brome_config
 from brome.core.model.user import User
 
 class RegisterForm(Form):
@@ -55,7 +55,7 @@ class ConfigForm(object):
 
     def get_fields(self):
         data = default_config
-        config = ini_to_dict(self.app.brome.config_path)
+        config = load_brome_config(self.app.brome.config_path)
         
         for section_key, section_item in config.iteritems():
 

@@ -9,7 +9,7 @@ import yaml
 
 import psutil
 
-from brome.core.model.configurator import ini_to_dict, runner_args_to_dict, get_config_value, default_config
+from brome.core.model.configurator import runner_args_to_dict, get_config_value, default_config
 from brome.core.model.meta import *
 from brome.core.model.test import Test
 from brome.core.model.test_batch import TestBatch

@@ -1,5 +1,6 @@
 #! -*- coding: utf-8 -*-
 
+import shutil
 import pickle
 import hashlib
 import os
@@ -166,7 +167,7 @@ class Brome(object):
                             '--reset',
                             dest = 'reset', 
                             action = 'store_true',
-                            help = 'Reset the database + delete the test batch results + update the test table'
+                            help = 'Reset the database + delete the test batch results + update the test table + delete all the test state'
         )
 
         parser.add_argument(
@@ -174,6 +175,13 @@ class Brome(object):
                             dest = 'create_database', 
                             action = 'store_true',
                             help = 'Create the project database'
+        )
+
+        parser.add_argument(
+                            '--delete-test-states',
+                            dest = 'delete_test_states', 
+                            action = 'store_true',
+                            help = 'Delete all the test states'
         )
 
         parser.add_argument(
@@ -210,6 +218,24 @@ class Brome(object):
             delete_database(self.get_config_value('database:sqlalchemy.url'))
             create_database(self.get_config_value('database:sqlalchemy.url'))
 
+        def delete_test_states():
+            states_dir = os.path.join(
+                self.get_config_value("project:absolute_path"),
+                "tests",
+                "states"
+            )
+            try:
+                shutil.rmtree(states_dir)
+            except OSError:
+                pass
+
+            try:
+                os.makedirs(states_dir)
+            except OSError:
+                pass
+
+            print 'States deleted'
+
         def delete_test_batch_result():
             if os.path.exists(self.get_config_value('project:test_batch_result_path')):
                 shutil.rmtree(self.get_config_value('project:test_batch_result_path'))
@@ -223,8 +249,11 @@ class Brome(object):
             reset_database()
             delete_test_batch_result()
             self.update_test()
+            delete_test_states()
         elif parsed_args.delete_test_result:
             delete_test_batch_result()
+        elif parsed_args.delete_test_states:
+            delete_test_states()
         elif parsed_args.reset_database:
             delete_database(self.get_config_value('database:sqlalchemy.url'))
             create_database(self.get_config_value('database:sqlalchemy.url'))

@@ -56,6 +56,7 @@ class LaunchForm(object):
         self.app.logger.info("Starting test bach with the following command: %s"%command)
 
         subprocess.Popen(
+                command,
                 stdout=open(os.devnull, 'a'),
                 stderr=open('runner.log', 'a'),
         )

@@ -12,7 +12,7 @@ class Test(BaseTest):
 
         self.info_log("Running...")
 
-        self.pdriver.get("%s/click-test"%self.pdriver.get_config_value("project:base_url"))
+        self.app.go_to("click_test")
 
         element = self.pdriver.find("id:1")
 

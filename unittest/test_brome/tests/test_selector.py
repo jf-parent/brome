@@ -13,7 +13,7 @@ class Test(BaseTest):
         self.info_log("Running...")
 
         #TEST
-        self.pdriver.get("%s/selector-test"%self.pdriver.get_config_value("project:base_url"))
+        self.app.go_to("selector_test")
 
         ###TAG NAME
         #FIND ALL BY TAG NAME

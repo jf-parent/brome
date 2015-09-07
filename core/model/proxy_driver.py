@@ -91,13 +91,10 @@ class ProxyDriver(object):
             wait_until_present = False
         )
         if element:
-            element.highlight(
-                style = self.get_config_value(
-                            'highlight:element_is_visible'
-                        )
-            )
+            self.debug_log("is present: True")
             return True
         else:
+            self.debug_log("is present: False")
             return False
 
     def is_visible(self, selector, **kwargs):
@@ -116,8 +113,10 @@ class ProxyDriver(object):
                                 'highlight:element_is_visible'
                             )
                 )
+                self.debug_log("is visible: True")
                 return True
 
+        self.debug_log("is visible: False")
         return False
 
     def find(self, selector, **kwargs):
@@ -126,8 +125,10 @@ class ProxyDriver(object):
         elements = self.find_all(selector, **kwargs)
 
         if len(elements):
+            self.debug_log("find: Element found")
             return elements[0]
         else:
+            self.debug_log("find: No element found")
             return None
 
     def find_last(self, selector, **kwargs):
@@ -136,8 +137,10 @@ class ProxyDriver(object):
         elements = self.find_all(selector, **kwargs)
 
         if len(elements):
+            self.debug_log("find_last: element found")
             return elements[-1]
         else:
+            self.debug_log("find_last: No element found")
             return None
 
     def find_all(self, selector, **kwargs):
@@ -161,11 +164,13 @@ class ProxyDriver(object):
         if wait_until_present:
             ret = self.wait_until_present(selector, raise_exception = raise_exception)
             if not ret:
+                self.debug_log("find_all: No element found")
                 return []
 
         try:
             elements = getattr(self._driver, func)(effective_selector[3:])
         except NoSuchElementException:
+            self.debug_log("find_all: No element found")
             if raise_exception:
                 raise NoSuchElementException(effective_selector)
             else:
@@ -173,13 +178,16 @@ class ProxyDriver(object):
 
         if type(elements) == list:
             if len(elements):
+                self.debug_log("find_all: Element found")
                 return ProxyElementList(elements, selector, self)
             else:
+                self.debug_log("find_all: No element found")
                 if raise_exception:
                     raise NoSuchElementException(effective_selector)
                 else:
                     return []
         else:
+            self.debug_log("find_all: Element found")
             return [ProxyElement(elements, selector, self)]
 
     def selector_function_resolver(self, selector, **kwargs):
@@ -322,18 +330,22 @@ class ProxyDriver(object):
                                 'proxy_driver:default_timeout'
                             )
                         )
+        self.debug_log("timeout: %d"%timeout)
         raise_exception = kwargs.get(
                                     'raise_exception',
                                     self.get_config_value(
                                         'proxy_driver:raise_exception'
                                     )
                                 )
+        self.debug_log("raise_exception: %d"%raise_exception)
 
         func, effective_selector = self.selector_function_resolver(selector, function_type = 'by')
         try:
             el = WebDriverWait(self._driver, timeout).until(EC.presence_of_element_located((getattr(By, func), effective_selector[3:])))
+            self.debug_log("wait_until_present: element is present")
             return ProxyElement(el, selector, self)
         except TimeoutException:
+            self.debug_log("wait_until_present: element is not present")
             if raise_exception:
                 raise TimeoutException(effective_selector)
             else:
@@ -358,8 +370,10 @@ class ProxyDriver(object):
         func, effective_selector = self.selector_function_resolver(selector, function_type = 'by')
         try:
             WebDriverWait(self._driver, timeout).until(EC.invisibility_of_element_located((getattr(By, func), effective_selector[3:])))
+            self.debug_log("wait_until_present: element is not present")
             return True
         except TimeoutException:
+            self.debug_log("wait_until_present: element is present")
             if raise_exception:
                 raise TimeoutException(effective_selector)
             else:
@@ -385,8 +399,10 @@ class ProxyDriver(object):
 
         try:
             el = WebDriverWait(self._driver, timeout).until(EC.visibility_of_element_located((getattr(By, func), effective_selector[3:])))
+            self.debug_log("wait_until_present: element is visible")
             return ProxyElement(el, selector, self)
         except TimeoutException:
+            self.debug_log("wait_until_present: element is not visible")
             if raise_exception:
                 raise TimeoutException(effective_selector)
             else:
@@ -412,8 +428,10 @@ class ProxyDriver(object):
 
         try:
             WebDriverWait(self._driver, timeout).until(EC.invisibility_of_element_located((getattr(By, func), effective_selector[3:])))
+            self.debug_log("wait_until_present: element is not visible")
             return True
         except TimeoutException:
+            self.debug_log("wait_until_present: element is visible")
             if raise_exception:
                 raise TimeoutException(selector)
             else:
@@ -481,7 +499,18 @@ class ProxyDriver(object):
     def assert_present(self, selector, testid = None, **kwargs):
         self.info_log("Assert present selector(%s) testid(%s)"%(selector, testid))
 
-        element = self.wait_until_present(selector, raise_exception = False)
+        wait_until_present = kwargs.get('wait_until_present',
+                                    self.get_config_value(
+                                        'proxy_driver:wait_until_present_before_assert_present'
+                                    )
+                                )
+        self.debug_log("wait_until_present: %s"%wait_until_present)
+
+        if wait_until_present:
+            element = self.wait_until_present(selector, raise_exception = False)
+        else:
+            element = self.is_present(selector)
+
         if element:
             if testid is not None:
                 self.create_test_result(testid, True)
@@ -496,7 +525,17 @@ class ProxyDriver(object):
     def assert_not_present(self, selector, testid = None, **kwargs):
         self.info_log("Assert not present selector(%s) testid(%s)"%(selector, testid))
 
-        ret = self.wait_until_not_present(selector, raise_exception = False)
+        wait_until_not_present = kwargs.get('wait_until_not_present',
+                                    self.get_config_value(
+                                        'proxy_driver:wait_until_not_present_before_assert_not_present'
+                                    )
+                                )
+
+        if wait_until_not_present:
+            ret = self.wait_until_not_present(selector, raise_exception = False)
+        else:
+            ret = not self.is_present(selector)
+
         if ret:
             if testid is not None:
                 self.create_test_result(testid, True)

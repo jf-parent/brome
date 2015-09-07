@@ -12,4 +12,17 @@ class Test(BaseTest):
 
         self.info_log("Running...")
 
-        #TODO
+        self.app.go_to("wait_until_present_test")
+
+        el = self.pdriver.wait_until_present("id:1", raise_exception = False, timeout = 6)
+        assert el.get_attribute('id') == '1'
+
+        el = self.pdriver.wait_until_present("id:2", raise_exception = False)
+        assert not el
+
+        el = self.pdriver.wait_until_present("id:3")
+        assert el.get_attribute('id') == '3'
+
+        el = self.pdriver.wait_until_present("id:2", raise_exception = False, timeout = 11)
+        assert el.get_attribute('id') == '2'
+

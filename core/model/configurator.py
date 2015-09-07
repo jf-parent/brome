@@ -288,6 +288,20 @@ default_config["proxy_driver"]["raise_exception"] = {
     'title': 'Raise exception'
 }
 
+default_config["proxy_driver"]["wait_until_present_before_assert_present"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Wait until not present before assert present'
+}
+
+default_config["proxy_driver"]["wait_until_not_present_before_assert_not_present"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Wait until not present  before assert not present'
+}
+
 default_config["proxy_driver"]["wait_until_not_visible_before_assert_not_visible"] = {
     'default': False,
     'type': 'checkbox',

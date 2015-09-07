@@ -6,15 +6,17 @@ from model.basetest import BaseTest
 
 class Test(BaseTest):
 
-    name = 'Highlight'
+    name = 'Is visible'
 
     def run(self, **kwargs):
 
         self.info_log("Running...")
 
         #TEST
-        self.app.go_to("highlight_test")
+        self.app.go_to("wait_until_visible_test")
 
-        element = self.pdriver.find("id:1")
+        ret = self.pdriver.is_visible("id:3")
+        assert ret
 
-        element.highlight(highlight_time = 2)
+        ret = self.pdriver.is_visible("id:1")
+        assert not ret

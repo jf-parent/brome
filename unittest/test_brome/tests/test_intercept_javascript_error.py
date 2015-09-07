@@ -13,7 +13,7 @@ class Test(BaseTest):
         self.info_log("Running...")
 
         #TEST
-        self.app.go_to('intercept-javascript-error-test')
+        self.app.go_to('intercept_javascript_error_test')
 
         #4 = "get_javascript_error return_type list return [] when there is not javascript error."
         js_error = self.pdriver.get_javascript_error(return_type = 'list')

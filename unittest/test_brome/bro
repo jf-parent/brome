@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
     HERE = os.path.abspath(os.path.dirname(__file__))
     brome = Brome(
-        config_path = os.path.join(HERE, "config", "brome.ini"),
+        config_path = os.path.join(HERE, "config", "brome.yml"),
         selector_dict = selector_dict,
         test_dict = test_dict,
         browsers_config = browsers_config,

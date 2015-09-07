@@ -13,7 +13,7 @@ class Test(BaseTest):
         self.info_log("Running...")
 
         #TEST
-        self.pdriver.get("%s/select-all-test"%self.pdriver.get_config_value("project:base_url"))
+        self.app.go_to("select-all-test")
         
         self.pdriver.find("id:selectme").select_all()
 

@@ -1,5 +1,7 @@
 #! -*- coding: utf-8 -*-
 
+from IPython import embed
+
 from brome.core.model.proxy_element import ProxyElement
 
 class ProxyElementList(list):
@@ -9,7 +11,10 @@ class ProxyElementList(list):
         self.pdriver = pdriver
 
     def __getslice__(self, i, j):
-        return ProxyElementList(self._elements[i:j], self._selector, self.pdriver)
+        return self.__getitem__(slice(i, j))
+
+    def __reversed__(self):
+        return self.__getitem__(slice(None, None, -1))
 
     def __len__(self):
         return len(self._elements)
@@ -19,4 +24,7 @@ class ProxyElementList(list):
             yield ProxyElement(element, self._selector, self.pdriver)
 
     def __getitem__(self, index):
-        return ProxyElement(self._elements[index], self._selector, self.pdriver)
+        if isinstance(index, slice):
+            return ProxyElementList(self._elements[index.start: index.stop: index.step], self._selector, self.pdriver)
+        else:
+            return ProxyElement(self._elements[index], self._selector, self.pdriver)

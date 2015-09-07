@@ -13,7 +13,7 @@ class Test(BaseTest):
         self.info_log("Running...")
 
         #TEST
-        self.pdriver.get("%s/wait_until_not_visible-test"%self.pdriver.get_config_value("project:base_url"))
+        self.app.go_to("wait_until_not_visible_test")
 
         self.pdriver.wait_until_not_visible("id:2", raise_exception = False)
 

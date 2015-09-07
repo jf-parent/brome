@@ -13,7 +13,7 @@ class Test(BaseTest):
         self.info_log("Running...")
 
         #TEST
-        self.app.go_to("wait-until-visible-test")
+        self.app.go_to("wait_until_visible_test")
 
         #2 = "Finding element with waiting until visible should return None if that element is not visible."
         element = self.pdriver.find("id:1", raise_exception = False, wait_until_visible = True)

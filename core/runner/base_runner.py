@@ -5,8 +5,8 @@ import logging
 import os
 import copy
 import os.path
-import yaml
 
+import yaml
 import psutil
 
 from brome.core.model.configurator import runner_args_to_dict, get_config_value, default_config

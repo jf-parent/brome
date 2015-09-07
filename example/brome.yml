@@ -73,11 +73,10 @@ runner:
 webserver:
   ASSETS_DEBUG: true
   CACHE_TYPE: simple
-  DEBUG: false
+  DEBUG: true
   DEBUG_TB_ENABLED: false
   DEBUG_TB_INTERCEPT_REDIRECTS: false
-  SECRET_KEY: ''
-  SQLALCHEMY_DATABASE_URI: ''
+  SECRET_KEY: 'tkekstlkejlkjklejktje'
   filelogger: true
   level: INFO
   streamlogger: true

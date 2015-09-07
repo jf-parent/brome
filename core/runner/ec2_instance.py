@@ -18,7 +18,7 @@ class EC2Instance(BaseInstance):
         self.index = kwargs.get('index')
         
     def get_ip(self):
-        return self.ip
+        return self.private_ip
 
     def execute_command(self, command):
         self.info_log("executing command: %s"%command)
@@ -27,7 +27,7 @@ class EC2Instance(BaseInstance):
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
             k = paramiko.RSAKey.from_private_key_file(self.browser_config.get('ssh_key_path'))
-            ssh.connect(self.ip, username = self.browser_config.get('username'), pkey = k)
+            ssh.connect(self.private_ip, username = self.browser_config.get('username'), pkey = k)
 
             stdin, stdout, stderr = ssh.exec_command(command)
 
@@ -158,7 +158,9 @@ class EC2Instance(BaseInstance):
                 self.critical_log(msg)
                 raise Exception(msg)
 
-            self.ip = instance.private_ip_address
+            self.private_ip = instance.private_ip_address
+            self.public_dns = instance.public_dns_name
+            self.public_ip = instance.ip_address
 
             return True
 

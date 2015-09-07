@@ -8,6 +8,7 @@ class TestInstance(SurrogatePK, Base):
 
     starting_timestamp = Column(DateTime())
     ending_timestamp = Column(DateTime())
+    extra_data = Column(Text())
 
     test_batch_id = Column(Integer, ForeignKey('testbatch.id'))
     test_results = relationship("TestResult", backref="testinstance")

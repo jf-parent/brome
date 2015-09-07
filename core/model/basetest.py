@@ -1,5 +1,6 @@
 #! -*- coding: utf-8 -*-
 
+import json
 import logging
 import os.path
 import os
@@ -28,21 +29,6 @@ class BaseTest(object):
         self._browser_config = kwargs.get('browser_config')
         self._test_batch_id = kwargs.get('test_batch_id')
 
-        session = Session()
-
-        sa_test_instance = TestInstance(
-            starting_timestamp = datetime.now(),
-            name = self._name,
-            test_batch_id = self._test_batch_id
-        )
-
-        session.add(sa_test_instance)
-        session.commit()
-
-        self.test_instance_id = sa_test_instance.id
-
-        session.close()
-
         #TEST BATCH DIRECTORY
         self._runner_dir = self._runner.runner_dir
 
@@ -58,6 +44,29 @@ class BaseTest(object):
 
         #TEST KWARGS
         self._test_config = test_config_to_dict(self.get_config_value("runner:test_config"))
+
+        session = Session()
+
+        extra_data = {} 
+        if self._browser_config.location == 'ec2':
+            private_ip = self.pdriver.get_ip_of_node()
+            extra['instance_private_ip'] = self._runner.instances_ip[private_ip].private_ip
+            extra['instance_public_ip'] = self._runner.instances_ip[private_id].public_ip
+            extra['instance_public_dns'] = self._runner.instances_ip[private_id].public_dns
+
+        sa_test_instance = TestInstance(
+            starting_timestamp = datetime.now(),
+            name = self._name,
+            test_batch_id = self._test_batch_id,
+            extra_data = json.dumps(extra_data)
+        )
+
+        session.add(sa_test_instance)
+        session.commit()
+
+        self.test_instance_id = sa_test_instance.id
+
+        session.close()
 
     def init_driver(self, retry = 10):
 

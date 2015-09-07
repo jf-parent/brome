@@ -541,7 +541,7 @@ default_config["runner"]["sound_on_pdb"] = {
 }
 
 default_config["runner"]["cache_screenshot"] = {
-    'default': False,
+    'default': True,
     'type': 'checkbox',
     'visible': True,
     'title': 'Use the cache screenshot'

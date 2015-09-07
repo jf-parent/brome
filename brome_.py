@@ -342,6 +342,9 @@ class Brome(object):
         else:
             raise Exception("No test dictionary provided")
 
+        Session.remove()
+        session.close()
+
     def auto_update_test(self):
         old_hash = None
 

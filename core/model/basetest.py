@@ -51,8 +51,8 @@ class BaseTest(object):
         if self._browser_config.location == 'ec2':
             private_ip = self.pdriver.get_ip_of_node()
             extra_data['instance_private_ip'] = self._runner.instances_ip[private_ip].private_ip
-            extra_data['instance_public_ip'] = self._runner.instances_ip[private_id].public_ip
-            extra_data['instance_public_dns'] = self._runner.instances_ip[private_id].public_dns
+            extra_data['instance_public_ip'] = self._runner.instances_ip[private_ip].public_ip
+            extra_data['instance_public_dns'] = self._runner.instances_ip[private_ip].public_dns
 
         sa_test_instance = TestInstance(
             starting_timestamp = datetime.now(),

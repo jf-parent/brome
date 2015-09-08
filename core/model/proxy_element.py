@@ -97,7 +97,12 @@ class ProxyElement(object):
         if clear:
             self.clear()
 
-        self._element.send_keys(value)
+        try:
+            self._element.send_keys(value)
+        except StaleElementReferenceException:
+            sleep(1)
+            self._element = self.pdriver.find(self.selector)
+            self._element.send_keys(value)
 
         return True
 

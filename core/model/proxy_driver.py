@@ -335,6 +335,37 @@ class ProxyDriver(object):
 
         return func, effective_selector
 
+    def wait_until_clickable(self, selector, **kwargs):
+        self.info_log("Waiting until clickable (%s)"%selector)
+        
+        timeout = kwargs.get(
+                            'timeout',
+                            self.get_config_value(
+                                'proxy_driver:default_timeout'
+                            )
+                        )
+        self.debug_log("timeout: %d"%timeout)
+
+        raise_exception = kwargs.get(
+                                    'raise_exception',
+                                    self.get_config_value(
+                                        'proxy_driver:raise_exception'
+                                    )
+                                )
+        self.debug_log("raise_exception: %d"%raise_exception)
+
+        func, effective_selector = self.selector_function_resolver(selector, function_type = 'by')
+        try:
+            WebDriverWait(self._driver, timeout).until(EC.element_to_be_clickable((getattr(By, func), effective_selector[3:])))
+            self.debug_log("wait_until_clickable: element is clickable")
+            return True
+        except TimeoutException:
+            self.debug_log("wait_until_clickable: element is still not clickable")
+            if raise_exception:
+                raise TimeoutException(effective_selector)
+            else:
+                return False
+
     def wait_until_present(self, selector, **kwargs):
         self.info_log("Waiting until present (%s)"%selector)
         

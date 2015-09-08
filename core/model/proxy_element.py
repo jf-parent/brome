@@ -14,6 +14,32 @@ class ProxyElement(object):
     def __getattr__(self, funcname):
         return getattr(self._element, funcname)
 
+    def is_displayed(self, **kwargs):
+        self.pdriver.debug_log("Is displayed")
+
+        raise_exception = kwargs.get(
+                                    'raise_exception',
+                                    self.pdriver.get_config_value(
+                                        'proxy_driver:raise_exception'
+                                    )
+                                )
+        retry = kwargs.get('retry', True)
+
+        try:
+            is_displayed = self._element.is_displayed()
+            self.pdriver.debug_log("Proxy_element: is displayed")
+            return is_displayed
+        except StaleElementReferenceException:
+            if retry:
+                #NOTE this is an imperfect solution since we can have found the element with find_last
+                #TODO find a better way to handle this edge case
+                self.pdriver.debug_log("Proxy_element: StaleElementReferenceException; retrying...")
+                self._element = self.pdriver.find(self.selector)
+                return self.is_displayed(retry = False)
+            else:
+                self.pdriver.debug_log("Proxy_element: StaleElementReferenceException; raising...")
+                raise
+
     def click(self, **kwargs):
         self.pdriver.debug_log("Clicking on element found by selector(%s)"%self.selector)
         
@@ -23,6 +49,16 @@ class ProxyElement(object):
                                 'highlight:highlight_when_element_is_clicked'
                             )
                     )
+        wait_until_clickable = kwargs.get(
+                            'wait_until_clickable',
+                            self.pdriver.get_config_value(
+                                'proxy_element:wait_until_clickable'
+                            )
+                    )
+
+        if wait_until_clickable:
+            #TODO manage the raise exception better
+            self.pdriver.wait_until_clickable(self.selector, raise_exception = True)
 
         if highlight:
             self.highlight(

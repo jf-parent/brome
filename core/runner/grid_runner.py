@@ -24,6 +24,7 @@ class GridRunner(BaseRunner):
         self.selenium_pid = None
         self.instances_ip = {}
         self.instances = {}
+        self.alive_instances = []
         self.xvfb_pids = []
         self.browser_configs = {}
 
@@ -235,9 +236,8 @@ class GridRunner(BaseRunner):
     def tear_down_instances(self):
         self.info_log('Tearing down all instances...')
 
-        for key, value in self.instances.iteritems():
-            for browser_instance in value:
-                browser_instance.tear_down()
+        for instance in self.instances.iteritems():
+            instance.tear_down()
 
         self.info_log('[Done]Tearing down all instances')
 
@@ -300,6 +300,8 @@ class InstanceThread(threading.Thread):
         if success:
             self.runner.instances[self.instance.browser_config.browser_id].append(self.instance)
             self.runner.instances_ip[self.instance.get_ip()] = self.instance
+
+        self.runner.alive_instances.append(self.instance)
 
 class TestThread(threading.Thread):
 

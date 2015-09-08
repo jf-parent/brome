@@ -253,6 +253,13 @@ default_config["logger_test"]["format"] = {
     'title': 'Logger format'
 }
 
+default_config["proxy_driver"]["wait_until_visible_before_find"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Wait until visible before find'
+}
+
 default_config["proxy_driver"]["intercept_javascript_error"] = {
     'default': False,
     'type': 'checkbox',

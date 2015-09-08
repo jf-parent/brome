@@ -88,7 +88,8 @@ class ProxyDriver(object):
         element = self.find(
             selector,
             raise_exception = False,
-            wait_until_present = False
+            wait_until_present = False,
+            wait_until_visible = False
         )
         if element:
             self.debug_log("is present: True")
@@ -103,7 +104,8 @@ class ProxyDriver(object):
         element = self.find(
             selector,
             raise_exception = False,
-            wait_until_present = False
+            wait_until_present = False,
+            wait_until_visible = False
         )
 
         if element:
@@ -158,12 +160,24 @@ class ProxyDriver(object):
                                             'proxy_driver:wait_until_present_before_find'
                                         )
                                     )
+        wait_until_visible = kwargs.get(
+                                        'wait_until_visible',
+                                        self.get_config_value(
+                                            'proxy_driver:wait_until_visible_before_find'
+                                        )
+                                    )
 
         func, effective_selector = self.selector_function_resolver(selector)
 
-        if wait_until_present:
-            ret = self.wait_until_present(selector, raise_exception = raise_exception)
-            if not ret:
+        found = False 
+        if wait_until_visible:
+            #we don't raise exception here otherwise none visible element will always raise exception
+            #TODO find a good way to make it configurable
+            found = self.wait_until_visible(selector, raise_exception = False)
+
+        if wait_until_present and not found:
+            found = self.wait_until_present(selector, raise_exception = raise_exception)
+            if not found:
                 self.debug_log("find_all: No element found")
                 return []
 
@@ -331,6 +345,7 @@ class ProxyDriver(object):
                             )
                         )
         self.debug_log("timeout: %d"%timeout)
+
         raise_exception = kwargs.get(
                                     'raise_exception',
                                     self.get_config_value(

@@ -72,8 +72,8 @@ class ProxyElement(object):
 
         try:
             self._element.click()
-        except WebDriverException:
-            sleep(1)
+        except (InvalidElementStateException, WebDriverException):
+            sleep(2)
             self._element.click()
 
         return True
@@ -102,8 +102,8 @@ class ProxyElement(object):
 
         try:
             self._element.send_keys(value)
-        except StaleElementReferenceException:
-            sleep(1)
+        except (InvalidElementStateException, StaleElementReferenceException):
+            sleep(2)
             self._element = self.pdriver.find(self.selector)
             self._element.send_keys(value)
 
@@ -112,7 +112,11 @@ class ProxyElement(object):
     def clear(self):
         self.pdriver.debug_log("Clearing element found by selector(%s)"%self.selector)
 
-        self._element.clear()
+        try:
+            self._element.clear()
+        except (InvalidElementStateException, WebDriverException):
+            sleep(2)
+            self._element.clear()
 
         return True
 

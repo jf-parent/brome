@@ -67,7 +67,11 @@ class ProxyElement(object):
                         )
                 )
 
-        self._element.click()
+        try:
+            self._element.click()
+        except WebDriverException:
+            sleep(1)
+            self._element.click()
 
         return True
 

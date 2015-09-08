@@ -112,21 +112,30 @@ class EC2Instance(BaseInstance):
                     )
                 )
             else:
-                self.error_log("Instance status is %s and should be (running)"%status)
-                raise Exception(status)
+                msg = "Instance status is %s and should be (running)"%status
+                self.error_log(msg)
+                raise Exception(msg)
 
             if self.runner.get_config_value("ec2:wait_until_system_and_instance_check_performed"):
+                check_successful = False
                 for i in range(5*60):
                     try:
-                        if i == 1:
+                        if not i%60:
                             self.info_log('System_status: %s, instance_status: %s'%(status.system_status, status.instance_status))
                         status = ec2.get_all_instance_status(instance_ids=[instance.id])[0]
                         if status.system_status.status == u'ok' and status.instance_status.status == u'ok':
                             self.info_log('system_status: %s, instance_status: %s'%(status.system_status, status.instance_status))
+                            check_successful = True
                             break
+
                     except Exception as e:
                         self.error_log('Waiting instance ready exception: %s'%str(e))
                     sleep(1)
+
+                if not check_successful:
+                    msg = "System and instance check were not successful"
+                    self.warning_log(msg)
+                    raise Exception(msg)
             else:
                 self.warning_log("Skipping wait until system and instance check performed")
 

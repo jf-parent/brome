@@ -57,7 +57,7 @@ class LaunchForm(object):
 
         subprocess.Popen(
                 command,
-                stdout=open(os.devnull, 'a'),
+                stdout=open(os.devnull, 'w'),
                 stderr=open('runner.log', 'a'),
         )
 

@@ -109,7 +109,7 @@ class ProxyDriver(object):
         )
 
         if element:
-            if element.is_displayed():
+            if element.is_displayed(raise_exception = False):
                 element.highlight(
                     style = self.get_config_value(
                                 'highlight:element_is_visible'
@@ -611,7 +611,7 @@ class ProxyDriver(object):
             self.wait_until_visible(selector, raise_exception = False)
 
         element = self.find(selector, raise_exception = False)
-        if element and element.is_displayed():
+        if element and element.is_displayed(raise_exception = False):
             if highlight:
                 element.highlight(
                     style = self.get_config_value(
@@ -646,7 +646,7 @@ class ProxyDriver(object):
             self.wait_until_not_visible(selector, raise_exception = False)
 
         element = self.find(selector, raise_exception = False)
-        if element and element.is_displayed():
+        if element and element.is_displayed(raise_exception = False):
             if highlight:
                 element.highlight(
                     style = self.get_config_value(

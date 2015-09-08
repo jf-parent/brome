@@ -37,8 +37,11 @@ class ProxyElement(object):
                 self._element = self.pdriver.find(self.selector)
                 return self.is_displayed(retry = False)
             else:
-                self.pdriver.debug_log("Proxy_element: StaleElementReferenceException; raising...")
-                raise
+                if raise_exception:
+                    self.pdriver.debug_log("Proxy_element: StaleElementReferenceException; raising...")
+                    raise
+                else:
+                    return False
 
     def click(self, **kwargs):
         self.pdriver.debug_log("Clicking on element found by selector(%s)"%self.selector)

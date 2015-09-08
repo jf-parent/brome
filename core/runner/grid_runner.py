@@ -236,7 +236,7 @@ class GridRunner(BaseRunner):
     def tear_down_instances(self):
         self.info_log('Tearing down all instances...')
 
-        for instance in self.instances.iteritems():
+        for instance in self.alive_instances.iteritems():
             instance.tear_down()
 
         self.info_log('[Done]Tearing down all instances')

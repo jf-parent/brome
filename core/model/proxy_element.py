@@ -72,8 +72,14 @@ class ProxyElement(object):
 
         try:
             self._element.click()
-        except (InvalidElementStateException, WebDriverException):
+        except (InvalidElementStateException, WebDriverException) as e:
+            self.pdriver.debug_log("proxy_element(%s):click exception: %s"%(self.selector, e))
             sleep(2)
+            self._element.click()
+        except StaleElementReferenceException as e:
+            self.pdriver.debug_log("proxy_element(%s):click exception StaleElementReferenceException: %s"%(self.selector, e))
+            sleep(2)
+            self._element = self.pdriver.find(self.selector)
             self._element.click()
 
         return True
@@ -102,9 +108,14 @@ class ProxyElement(object):
 
         try:
             self._element.send_keys(value)
-        except (InvalidElementStateException, StaleElementReferenceException):
+        except StaleElementReferenceException as e:
+            self.pdriver.debug_log("proxy_element(%s):send_keys exception StaleElementReferenceException: %s"%(self.selector, e))
             sleep(2)
             self._element = self.pdriver.find(self.selector)
+            self._element.send_keys(value)
+        except (InvalidElementStateException, WebDriverException) as e:
+            self.pdriver.debug_log("proxy_element(%s):send_keys exception: %s"%(self.selector, e))
+            sleep(2)
             self._element.send_keys(value)
 
         return True
@@ -114,8 +125,14 @@ class ProxyElement(object):
 
         try:
             self._element.clear()
-        except (InvalidElementStateException, WebDriverException):
+        except (InvalidElementStateException, WebDriverException) as e:
+            self.pdriver.debug_log("proxy_element(%s):send_keys exception: %s"%(self.selector, e))
             sleep(2)
+            self._element.clear()
+        except StaleElementReferenceException as e:
+            self.pdriver.debug_log("proxy_element(%s):send_keys exception StaleElementReferenceException: %s"%(self.selector, e))
+            sleep(2)
+            self._element = self.pdriver.find(self.selector)
             self._element.clear()
 
         return True

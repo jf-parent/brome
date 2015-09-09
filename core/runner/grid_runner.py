@@ -293,7 +293,11 @@ class InstanceThread(threading.Thread):
         self.runner = self.instance.runner
 
     def run(self):
-        success = self.instance.startup()
+        try:
+            success = self.instance.startup()
+        except Exception as e:
+            self.runner.critical_log("Exception in InstanceThread instance startup: %s"%unicode(e))
+
         if not self.runner.instances.get(self.instance.browser_config.browser_id):
             self.runner.instances[self.instance.browser_config.browser_id] = []
 

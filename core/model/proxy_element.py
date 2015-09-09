@@ -93,6 +93,16 @@ class ProxyElement(object):
                                 'highlight:highlight_when_element_receive_keys'
                             )
                     )
+        wait_until_clickable = kwargs.get(
+                            'wait_until_clickable',
+                            self.pdriver.get_config_value(
+                                'proxy_element:wait_until_clickable'
+                            )
+                    )
+
+        if wait_until_clickable:
+            #TODO manage the raise exception better
+            self.pdriver.wait_until_clickable(self.selector, raise_exception = True)
 
         if highlight:
             self.highlight(

@@ -215,16 +215,16 @@ class ProxyDriver(object):
         resolved_selector_list = []
         for selector in selector_list:
 
-            selector_type = selector[:2]
+            selector_type = selector[:3]
             current_selector = selector
 
-            if selector_type == 'nm':
+            if selector_type == 'nm:':
                 if function_type == 'find_by':
                     func = 'find_elements_by_name'
                 elif 'by':
                     func = 'NAME'
 
-            elif selector_type == 'xp':
+            elif selector_type == 'xp:':
 
                 if self.get_config_value("proxy_driver:validate_xpath_selector"):
                     xpath_test = etree.parse(StringIO('<foo><bar></bar></foo>'))
@@ -238,19 +238,19 @@ class ProxyDriver(object):
                 elif 'by':
                     func = 'XPATH'
 
-            elif selector_type == 'cn':
+            elif selector_type == 'cn:':
                 if function_type == 'find_by':
                     func = 'find_elements_by_class_name'
                 elif 'by':
                     func = 'CLASS_NAME'
 
-            elif selector_type == 'id':
+            elif selector_type == 'id:':
                 if function_type == 'find_by':
                     func = 'find_element_by_id'
                 elif 'by':
                     func = 'ID'
 
-            elif selector_type == 'cs':
+            elif selector_type == 'cs:':
                 if self.get_config_value("proxy_driver:validate_css_selector"):
                     try:
                         CSSSelector(current_selector[3:])
@@ -262,25 +262,25 @@ class ProxyDriver(object):
                 elif 'by':
                     func = 'CSS_SELECTOR'
 
-            elif selector_type == 'tn':
+            elif selector_type == 'tn:':
                 if function_type == 'find_by':
                     func = 'find_elements_by_tag_name'
                 elif 'by':
                     func = 'TAG_NAME'
 
-            elif selector_type == 'lt':
+            elif selector_type == 'lt:':
                 if function_type == 'find_by':
                     func = 'find_elements_by_link_text'
                 elif 'by':
                     func = 'LINK_TEXT'
 
-            elif selector_type == 'pl':
+            elif selector_type == 'pl:':
                 if function_type == 'find_by':
                     func = 'find_elements_by_partial_link_text'
                 elif 'by':
                     func = 'PARTIAL_LINK_TEXT'
 
-            elif selector_type == 'sv':
+            elif selector_type == 'sv:':
                 if not self.selector_dict.has_key(current_selector[3:]):
                     raise Exception("Cannot find the selector variable (%s) in the selector dict"%current_selector[3:])
 

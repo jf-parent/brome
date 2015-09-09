@@ -306,9 +306,9 @@ class Brome(object):
         parsed_args = parser.parse_args(args)
 
         if parsed_args.test_id:
-            pattern = "driver\.(assert_.*|create_test_result)+\(.*[\'\"]+(%s)+[\'\"]+"%parsed_args.test_id
+            pattern = "\.(assert_.*|create_test_result)+\(.*[\'\"]+(%s)+[\'\"]+"%parsed_args.test_id
         elif parsed_args.selector:
-            pattern = "driver\..*\(+[\'\"]+.*(%s)+.*[\'\"]+"%parsed_args.selector
+            pattern = "\..*\(+[\'\"]+.*(%s)+.*[\'\"]+"%parsed_args.selector
 
         paths = [
             os.path.join(

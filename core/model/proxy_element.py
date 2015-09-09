@@ -37,8 +37,11 @@ class ProxyElement(object):
                 #NOTE this is an imperfect solution since we can have found the element with find_last
                 #TODO find a better way to handle this edge case
                 self.pdriver.debug_log("Proxy_element: StaleElementReferenceException; retrying...")
-                self._element = self.pdriver.find(self.selector)
-                return self.is_displayed(retry = False)
+                self._element = self.pdriver.find(self.selector, raise_exception = False)
+                if self._element:
+                    return self.is_displayed(retry = False)
+                else:
+                    return False
             else:
                 if raise_exception:
                     self.pdriver.debug_log("Proxy_element: StaleElementReferenceException; raising...")

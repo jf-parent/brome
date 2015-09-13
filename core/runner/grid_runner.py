@@ -293,6 +293,7 @@ class InstanceThread(threading.Thread):
         self.runner = self.instance.runner
 
     def run(self):
+        success = False
         try:
             success = self.instance.startup()
         except Exception as e:

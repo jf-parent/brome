@@ -94,6 +94,7 @@ class BaseRunner(object):
             for test in tests:
                 module_test = test.split(os.sep)[-1][:-3]
                 available_tests.append(__import__('tests.%s'%module_test, fromlist = ['']))
+
         elif test_name:
             if test_name.endswith('.py'):
                 test_name = test_name[:-3]
@@ -113,8 +114,9 @@ class BaseRunner(object):
             test_file_path = self.get_config_value('runner:test_file')
             with open(test_file_path, 'r') as f:
                 test_list = yaml.load(f)
-                for test in test_list:
-                    tests.append(self.get_available_tests(test)[0])
+
+            for test in test_list:
+                tests.append(self.get_available_tests(test)[0])
 
         elif self.get_config_value('runner:test_name'):
             tests = self.get_available_tests(test_name = self.get_config_value('runner:test_name'))

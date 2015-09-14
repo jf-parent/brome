@@ -195,6 +195,13 @@ default_config["project"]["test_batch_result_path"] = {
     'title': 'Test batch result path'
 }
 
+default_config["project"]["url"] = {
+    'default': "",
+    'type': 'input',
+    'visible': True,
+    'title': 'The url of the server on which the test run (must include the protocol) e.g.:https://the-internet.herokuapp.com/'
+}
+
 default_config["logger_runner"]["level"] = {
     'default': "INFO",
     'type': 'dropdown',

@@ -38,6 +38,10 @@ a.unlink {
 
 /* Primeui fixs */
 
+.pui-datatable tbody td {
+overflow: scroll !important;
+}
+
 /* Forms */
 
 .navbar-form input[type="text"],

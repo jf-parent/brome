@@ -81,7 +81,6 @@ class BrowserConfig(object):
         optional_keys = {
             'terminate': True,
             'launch': True,
-            'nb_instance': 1,
             'nb_browser_by_instance': 1,
             'max_number_of_instance': 1,
             'hub_ip': 'localhost'

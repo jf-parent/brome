@@ -5,9 +5,11 @@ import logging
 import os.path
 import os
 import pickle
+from urlparse import urlparse
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+#from browsermobproxy import Server
 
 from brome.core.model.utils import *
 from brome.core.model.stateful import Stateful
@@ -69,9 +71,28 @@ class BaseTest(object):
         session.close()
 
     def init_driver(self, retry = 10):
-
         #LOCAL
         if self._browser_config.location == 'localhost':
+            """
+            if self._browser_config.get('browserName').lower() in ['chrome', 'firefox'] \
+                and self._browser_config.get('use_broswermobproxy'):
+                    self.browsermobserver = Server(self._runner.brome.get_config_value("browsermobproxy:path"))
+                    self.browsermobserver.start()
+                    self.proxy = self.browsermobserver.create_proxy()
+
+                    if self._browser_config.get('browserName').lower() == 'firefox':
+                        profile  = webdriver.FirefoxProfile()
+                        profile.set_proxy(self.proxy.selenium_proxy())
+                        driver = webdriver.Firefox(firefox_profile=profile)
+                    elif self._browser_config.get('browserName').lower() == 'chrome':
+                        chrome_options = webdriver.ChromeOptions()
+                        chrome_options.add_argument("--proxy-server={0}".format(self.proxy.proxy))
+                        driver = webdriver.Chrome(chrome_options = chrome_options)
+
+                    self.proxy.new_har(self._runner.brome.get_config_value("project:url"), options = {'captureContent': True, 'captureHeaders': True})
+
+            else:
+            """
             try:
                 driver = getattr(webdriver, self._browser_config.get('browserName'))()
             except AttributeError:
@@ -132,7 +153,7 @@ class BaseTest(object):
 
     def get_state_pickle_path(self):
         #Extract the server name
-        server = self.pdriver.get_config_value("project:server")
+        server = urlparse(self.pdriver.get_config_value("project:url")).netloc
 
         state_dir = os.path.join(
             self.get_config_value("project:absolute_path"),
@@ -298,6 +319,14 @@ class BaseTest(object):
             self.pdriver.quit()
         except Exception as e:
             self.error_log('Exception driver.quit(): %s'%str(e))
+
+        """
+        if hasattr(self, 'browsermobserver'):
+            with open("temp.har", "w") as fd:
+                fd.write(json.dumps(self.proxy.har))
+
+            self.browsermobserver.stop()
+        """
 
     def before_run(self):
         pass

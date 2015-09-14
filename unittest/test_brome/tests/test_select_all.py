@@ -13,7 +13,7 @@ class Test(BaseTest):
         self.info_log("Running...")
 
         #TEST
-        self.app.go_to("select-all-test")
+        self.app.go_to("select_all_test")
         
         self.pdriver.find("id:selectme").select_all()
 

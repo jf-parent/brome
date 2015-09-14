@@ -68,7 +68,10 @@
                 <a class="unlink" href="{{ url_for('testbatch.screenshot', testbatch_id = testbatch_id) }}"><i class="fa fa-file-image-o"></i> Screenshots (<span id="total_screenshots">{{ data['test_batch'].total_screenshots}}</span>)</a>
             </li>
             <li>
-                <a class="unlink" href="{{ url_for('testbatch.testresult', testbatch_id = testbatch_id) }}"><i class="fa fa-bar-chart"></i> Test results (<span id="total_test_results">{{ data['test_batch'].total_test_results}}</span>)</a>
+                <a class="unlink" href="{{ url_for('testbatch.testresult', testbatch_id = testbatch_id) }}">
+                    <i class="fa fa-bar-chart"></i> 
+                    Test results (<span id="total_test_results">{{ data['test_batch'].total_test_results}}</span>) Failed (<span id="total_failed_tests" {% if data['test_batch'].total_failed_tests %} style="color:red;" {% else %}  style="color:green;" {% endif %}> {{ data['test_batch'].total_failed_tests }} </span>)
+                </a>
             </li>
             <li>
                 <a class="unlink" href="{{ url_for('testbatch.crash', testbatch_id = testbatch_id) }}"><i class="fa fa-exclamation-triangle"></i> Crash reports (<span id="total_crashes">{{ data['test_batch'].total_crashes}}</span>)</a>

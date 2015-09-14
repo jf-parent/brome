@@ -15,7 +15,18 @@ class ProxyElement(object):
         return getattr(self._element, funcname)
 
     def __repr__(self):
-        return "WebElement found with selector: %s"%self.selector
+        msg = ["WebElement (selector: '%s')"%self.selector]
+
+        if self._element.get_attribute('id'):
+            msg.append("(id: '%s')"%self._element.get_attribute('id'))
+        
+        if self._element.get_attribute('name'):
+            msg.append("(name: '%s')"%self._element.get_attribute('name'))
+
+        if self._element.get_attribute('class'):
+            msg.append("(class: '%s')"%self._element.get_attribute('class'))
+
+        return ' '.join(msg)
 
     def is_displayed(self, **kwargs):
         self.pdriver.debug_log("Is displayed")

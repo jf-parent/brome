@@ -16,14 +16,14 @@ class Test(BaseTest):
         self.app.go_to("wait_until_visible_test")
 
         #2 = "Finding element without waiting until visible should return None if that element is not visible."
-        element = self.pdriver.find("id:2", wait_until_visible = False)
+        element = self.pdriver.find("id:2", wait_until_present = False, wait_until_visible = False, raise_exception = False)
         if element:
             self.pdriver.create_test_result('#2', False)
         else:
             self.pdriver.create_test_result('#2', True)
 
         #1 = "Finding element with wait until visible should return that element if that element become visible before the timeout is reached"
-        element = self.pdriver.find("id:2")
+        element = self.pdriver.find("id:2", wait_until_visible = True, raise_exception = False)
         if element:
             self.pdriver.create_test_result('#1', True)
         else:

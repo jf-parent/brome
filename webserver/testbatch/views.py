@@ -98,6 +98,7 @@ def detail(testbatch_id):
             obj_response.script("$('#total_finished_tests').html(%s)"%test_batch.total_finished_tests)
             obj_response.script("$('#total_screenshots').html(%s)"%test_batch.total_screenshots)
             obj_response.script("$('#total_test_results').html(%s)"%test_batch.total_test_results)
+            obj_response.script("$('#total_failed_tests').html(%s)"%test_batch.total_failed_tests)
 
     if g.sijax.is_sijax_request:
         g.sijax.register_callback('delete_test_batch', delete_test_batch)

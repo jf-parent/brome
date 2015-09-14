@@ -9,6 +9,7 @@ from datetime import datetime
 from brome.core.model.test_batch import TestBatch
 from brome.core.model.test_instance import TestInstance
 from brome.core.model.test_result import TestResult
+from brome.core.model.test import Test
 from brome.webserver.extensions import db
 
 def get_test_batch_list():
@@ -64,6 +65,7 @@ def get_test_batch_detail(app, testbatch_id):
     data.total_tests = get_total_tests(testbatch_id)
     data.total_screenshots = get_test_batch_screenshot(app, testbatch_id, only_total = True)
     data.total_test_results = get_test_batch_test_result(app, testbatch_id, only_total = True)
+    data.total_failed_tests = get_test_batch_test_result(app, testbatch_id, only_failed_total = True)
     data.total_execution_time = get_total_execution_time(app, testbatch_id)
 
     return data
@@ -169,14 +171,17 @@ def get_test_batch_screenshot(app, testbatch_id, only_total = False):
 
     return data
 
-def get_test_batch_test_result(app, testbatch_id, only_total = False):
+def get_test_batch_test_result(app, testbatch_id, only_total = False, only_failed_total = False):
     query_ = db.session.query(TestResult)\
                 .filter(TestResult.test_batch_id == testbatch_id)
 
     if only_total:
         return query_.count()
+    elif only_failed_total:
+        return query_.filter(TestResult.result == False).count()
     else:
-        return query_.order_by(TestResult.result).all()
+        query_ = query_.join(Test, TestResult.test_id == Test.id)
+        return query_.order_by(TestResult.result, Test.test_id).all()
 
 def get_test_batch_log(app, testbatch_id):
     abs_logs_dir = os.path.join(
@@ -204,8 +209,11 @@ def get_test_batch_test_instance_log(app, testbatch_id, index):
     )
 
     def ls_(dir_):
+        """
         ctime = lambda f: os.stat(os.path.join(dir_, f)).st_ctime
         return [f for f in sorted(os.listdir(dir_), key=ctime)]
+        """
+        return [f for f in os.listdir(dir_)]
 
     if os.path.isdir(abs_logs_dir):
         for log in ls_(abs_logs_dir):

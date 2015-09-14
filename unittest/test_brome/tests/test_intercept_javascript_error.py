@@ -36,3 +36,5 @@ class Test(BaseTest):
 
         js_error = self.pdriver.get_javascript_error(return_type = 'string')
         self.pdriver.create_test_result('#7', js_error != self.pdriver.no_javascript_error_string)
+
+        self.pdriver.print_javascript_error()

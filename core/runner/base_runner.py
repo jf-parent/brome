@@ -98,10 +98,14 @@ class BaseRunner(object):
         elif test_name:
             if test_name.endswith('.py'):
                 test_name = test_name[:-3]
-            available_tests.append(__import__('tests.%s'%test_name, fromlist = ['']))
+            try:
+                available_tests.append(__import__('tests.%s'%test_name, fromlist = ['']))
+            except ImportError:
+                pass
 
         if not len(available_tests):
-            print "No test found with the provided query: %s"%search_query
+            query = search_query if search_query else test_name
+            print "No test found with the provided query: %s"%query
             exit(1)
         
         return available_tests

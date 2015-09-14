@@ -1,12 +1,11 @@
 selector_dict = {}
-selector_dict['example_find_by_tag_name'] = "tn:a"
-selector_dict['example_find_by_id'] = "id:1"
-selector_dict['example_find_by_xpath'] = "xp://*[@class = 'xpath']"
-selector_dict['example_find_by_partial_link_text'] = "pl:partial link text"
-selector_dict['example_find_by_link_text'] = "lt:link text"
-selector_dict['example_find_by_css_selector'] = "cs:.classname"
-selector_dict['example_find_by_classname'] = "cn:classname"
-selector_dict['example_find_by_name'] = "nm:name"
+selector_dict['test_1'] = "xp://*[@id = '1']"
+selector_dict['test_2'] = "zz://*[@id = '2']"
+selector_dict['test_3'] = "xp://*[@id = '3']"
+selector_dict['test_4'] = "xp://*[@id = '4']"
+selector_dict['test_5'] = "xp://*[@id = '5']"
+selector_dict['test_6'] = "xp://*[@id = '6']"
+selector_dict['test_7'] = "css:#5"
 selector_dict['example_multiple_selector'] = {
     "default" : "xp://*[contains(@class, 'default')]",
     "chrome|iphone|android" : "xp://*[contains(@class, 'special')]"

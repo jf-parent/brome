@@ -1,8 +1,10 @@
 #! -*- coding: utf-8 -*-
 
 from brome.core.model.utils import *
+from brome.core.model.selector import Selector
 
 from model.basetest import BaseTest
+from model.selector import selector_dict
 
 class Test(BaseTest):
 
@@ -29,12 +31,12 @@ class Test(BaseTest):
         assert element.get_attribute('id') == '2'
 
         #FIND BY TAG NAME DOESNT EXIST
-        element = self.pdriver.find("tn:thisdoesntexist", raise_exception = False, wait_until_visible = False)
+        element = self.pdriver.find("tn:thisdoesntexist", raise_exception = False, wait_until_visible = False, wait_until_present = False)
         assert element == None
 
         #FIND BY TAG NAME DOESNT EXIST RAISE EXCEPTION
         try:
-            self.pdriver.find("tn:thisdoesntexist", wait_until_visible = False)
+            self.pdriver.find("tn:thisdoesntexist", wait_until_visible = False, wait_until_present = False)
             assert False
         except NoSuchElementException:
             assert True
@@ -53,12 +55,12 @@ class Test(BaseTest):
         assert element.get_attribute('id') == '4'
 
         #FIND BY NAME DOESNT EXIST
-        element = self.pdriver.find("nm:thisdoesntexist", raise_exception = False, wait_until_visible = False)
+        element = self.pdriver.find("nm:thisdoesntexist", raise_exception = False, wait_until_visible = False, wait_until_present = False)
         assert element == None
 
         #FIND BY NAME DOESNT EXIST RAISE EXCEPTION
         try:
-            self.pdriver.find("nm:thisdoesntexist", wait_until_visible = False)
+            self.pdriver.find("nm:thisdoesntexist", wait_until_visible = False, wait_until_present = False)
             assert False
         except NoSuchElementException:
             assert True
@@ -82,7 +84,7 @@ class Test(BaseTest):
 
         #FIND BY CLASS NAME DOESNT EXIST RAISE EXCEPTION
         try:
-            self.pdriver.find("cn:thisdoesntexist", wait_until_visible = False)
+            self.pdriver.find("cn:thisdoesntexist", wait_until_visible = False, wait_until_present = False)
             assert False
         except NoSuchElementException:
             assert True
@@ -106,7 +108,7 @@ class Test(BaseTest):
 
         #FIND BY ID DOESNT EXIST RAISE EXCEPTION
         try:
-            self.pdriver.find("id:thisdoesntexist", wait_until_visible = False)
+            self.pdriver.find("id:thisdoesntexist", wait_until_visible = False, wait_until_present = False)
             assert False
         except NoSuchElementException:
             assert True
@@ -125,12 +127,12 @@ class Test(BaseTest):
         assert element.get_attribute('id') == '2'
 
         #FIND BY XPATH DOESNT EXIST
-        element = self.pdriver.find("xp://*[@class = 'thisdoesntexist']", raise_exception = False, wait_until_visible = False)
+        element = self.pdriver.find("xp://*[@class = 'thisdoesntexist']", raise_exception = False, wait_until_visible = False, wait_until_present = False)
         assert element == None
 
         #FIND BY XPATH DOESNT EXIST RAISE EXCEPTION
         try:
-            self.pdriver.find("xp://*[@class = 'thisdoesntexist']", wait_until_visible = False)
+            self.pdriver.find("xp://*[@class = 'thisdoesntexist']", wait_until_visible = False, wait_until_present = False)
             assert False
         except NoSuchElementException:
             assert True
@@ -149,12 +151,12 @@ class Test(BaseTest):
         assert element.get_attribute('id') == '2'
 
         #FIND BY CSS DOESNT EXIST
-        element = self.pdriver.find("cs:.thisdoesntexist", raise_exception = False, wait_until_visible = False)
+        element = self.pdriver.find("cs:.thisdoesntexist", raise_exception = False, wait_until_visible = False, wait_until_present = False)
         assert element == None
 
         #FIND BY CSS DOESNT EXIST RAISE EXCEPTION
         try:
-            self.pdriver.find("cs:.thisdoesntexist", wait_until_visible = False)
+            self.pdriver.find("cs:.thisdoesntexist", wait_until_visible = False, wait_until_present = False)
             assert False
         except NoSuchElementException:
             assert True
@@ -173,12 +175,12 @@ class Test(BaseTest):
         assert element.get_attribute('id') == '7'
 
         #FIND BY LINK TEXT DOESNT EXIST
-        element = self.pdriver.find("lt:text-selector", raise_exception = False)
+        element = self.pdriver.find("lt:text-selector", raise_exception = False, wait_until_visible = False, wait_until_present = False)
         assert element == None
 
         #FIND BY LINK TEXT DOESNT EXIST RAISE EXCEPTION
         try:
-            self.pdriver.find("lt:thisdoesntexit", wait_until_visible = False)
+            self.pdriver.find("lt:thisdoesntexit", wait_until_visible = False, wait_until_present = False)
             assert False
         except NoSuchElementException:
             assert True
@@ -197,12 +199,60 @@ class Test(BaseTest):
         assert element.get_attribute('id') == '7'
 
         #FIND BY PARTIAL LINK TEXT DOESNT EXIST
-        element = self.pdriver.find("pl:thisdoesntexist", raise_exception = False, wait_until_visible = False)
+        element = self.pdriver.find("pl:thisdoesntexist", raise_exception = False, wait_until_visible = False, wait_until_present = False)
         assert element == None
 
         #FIND BY PARTIAL LINK TEXT DOESNT EXIST RAISE EXCEPTION
         try:
-            self.pdriver.find("pl:thisdoesntexit", wait_until_visible = False)
+            self.pdriver.find("pl:thisdoesntexit", wait_until_visible = False, wait_until_present = False)
             assert False
         except NoSuchElementException:
+            assert True
+
+        ###SELECTOR VARIABLE
+        #Selector variable that doesnt exist in the selector dict
+        selector = "sv:not_exist"
+        try:
+            Selector(self.pdriver, selector)
+            assert False
+        except:
+            assert True
+
+        #Selector variable that are invalid 
+        #selector_dict['test_2'] = "zz://*[@id = '1']"
+        selector = "sv:test_2"
+        try:
+            Selector(self.pdriver, selector)
+            assert False
+        except:
+            assert True
+
+        #Single selector
+        selector = "sv:test_1"
+        _selector = Selector(self.pdriver, selector)
+
+        assert _selector.get_selector() == selector_dict["test_1"][3:]
+
+        #Double selector
+        selector_1 = "sv:test_3"
+        selector_2 = "sv:test_4"
+        _selector = Selector(self.pdriver, [selector_1, selector_2])
+
+        assert _selector.get_selector() == selector_dict["test_3"][3:] + selector_dict["test_4"][3:]
+
+        #Multiple selector
+        selector_1 = "sv:test_3"
+        selector_2 = "sv:test_4"
+        selector_3 = "sv:test_5"
+        _selector = Selector(self.pdriver, [selector_1, selector_2, selector_3])
+
+        assert _selector.get_selector() == selector_dict["test_3"][3:] + selector_dict["test_4"][3:] + selector_dict["test_5"][3:]
+
+        #Multiple selector with mismatch
+        selector_1 = "sv:test_3"
+        selector_2 = "sv:test_7"
+        try:
+            Selector(self.pdriver, [selector_1, selector_2])
+            assert False
+        except:
             assert True

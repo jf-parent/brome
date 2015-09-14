@@ -1,7 +1,5 @@
 #! -*- coding: utf-8 -*-
 
-from IPython import embed
-
 from brome.core.model.proxy_element import ProxyElement
 
 class ProxyElementList(list):
@@ -28,3 +26,9 @@ class ProxyElementList(list):
             return ProxyElementList(self._elements[index.start: index.stop: index.step], self._selector, self.pdriver)
         else:
             return ProxyElement(self._elements[index], self._selector, self.pdriver)
+
+    def __repr__(self):
+        if len(self) <= 5:
+            return 'WebElement list [\n %s \n]'%',\n '.join([repr(el) for el in self])
+        else:
+            return 'WebElement list containing %d webelement'%len(self)

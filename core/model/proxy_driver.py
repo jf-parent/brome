@@ -380,7 +380,7 @@ class ProxyDriver(object):
             self.debug_log("wait_until_not_visible (%s): element is not visible"%_selector)
             return True
         except TimeoutException:
-            msg = "wait_until_not_visible: element is still visible"%_selector
+            msg = "wait_until_not_visible (%s): element is still visible"%_selector
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
@@ -520,7 +520,7 @@ class ProxyDriver(object):
         if wait_until_visible:
             self.wait_until_visible(selector, raise_exception = False)
 
-        element = self.find(selector, raise_exception = False)
+        element = self.find(selector, raise_exception = False, wait_until_visible = False, wait_until_present = False)
         if element and element.is_displayed(raise_exception = False):
             if highlight:
                 element.highlight(
@@ -558,7 +558,7 @@ class ProxyDriver(object):
         if wait_until_not_visible:
             self.wait_until_not_visible(selector, raise_exception = False)
 
-        element = self.find(selector, raise_exception = False)
+        element = self.find(selector, raise_exception = False, wait_until_visible = False, wait_until_present = False)
         if element and element.is_displayed(raise_exception = False):
             if highlight:
                 element.highlight(

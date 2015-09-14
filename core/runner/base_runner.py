@@ -199,9 +199,13 @@ class BaseRunner(object):
         failed_test_list = []
         for test_result in sa_test_batch.test_results:
             if not test_result.result and not test_result.test in failed_test_list:
-                test = session.query(Test).filter(Test.id == test_result.test_id).one()
-                failed_test_list.append(test_result.test)
-                self.info_log("[%s] %s"%(test.test_id, test.name))
+                query = session.query(Test).filter(Test.id == test_result.test_id)
+                if query.count():
+                    failed_test_list.append(query.one().test)
+                    self.info_log("[%s] %s"%(test.test_id, test.name))
+                else:
+                    failed_test_list.append(test_result.title)
+                    self.info_log("[noid] %s"%(test_result.title))
 
         if not failed_test_list:
             self.info_log('No test failed!')

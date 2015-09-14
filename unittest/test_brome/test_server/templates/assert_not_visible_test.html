@@ -2,12 +2,17 @@
 {% block title %}{{ title }}{% endblock %}
 {% block content %}
 <div id='main'>
-    <div id='3' style="display: none;">already present</div>
+    <div id='3'>already visible</div>
 </div>
 <script type="text/javascript">
 setTimeout(
     function(){ 
-        $('#main').append('<div id="2" style="display: none;">present after 4 sec</div>');
+        $('#main').append('<div id="2">visible after 4 sec</div>');
+    }, 4000
+);
+setTimeout(
+    function(){ 
+        $('#3').remove();
     }, 4000
 );
 </script>

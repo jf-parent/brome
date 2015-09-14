@@ -394,17 +394,14 @@ class BaseTest(object):
         results.append('Total_test: %s; Total_test_successful: %s; Total_test_failed: %s'%(total_test, total_test_successful, total_test_failed))
 
         for failed_test in failed_tests:
-            test = session.query(Test).filter(Test.id == failed_test.test_id).one()
-            if self._runner.brome.test_dict.has_key(test.test_id):
-                test_config = self._runner.brome.test_dict[test.test_id]
-                if type(test_config) == dict:
-                    test_name = test_config.get('name')
-                else:
-                    test_name = test_config
+            query = session.query(Test).filter(Test.id == failed_test.test_id)
+            if query.count():
+                test = query.one()
+                test_id = test.test_id
             else:
-                test_name = test.test_id
+                test_id = 'n/a'
 
-            results.append('[%s]%s'%(test.test_id, test_name))
+            results.append('[%s] %s'%(test_id, failed_test.title))
 
         session.close()
 

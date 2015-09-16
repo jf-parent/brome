@@ -43,7 +43,7 @@ else:
 def kill_by_name(procname):
     for proc in psutil.process_iter():
         if proc.name() == procname:
-            self.log('[pid:%s][name:%s] killed'%(proc.pid, proc.name()))
+            print '[pid:%s][name:%s] killed'%(proc.pid, proc.name())
             proc.kill()
 
 def kill_by_found_string_in_cmdline(procname, string):
@@ -51,4 +51,5 @@ def kill_by_found_string_in_cmdline(procname, string):
         if proc.name() == procname:
             for cmd in proc.cmdline():
                 if cmd.find(string) != -1:
+                    print '[pid:%s][name:%s] killed'%(proc.pid, proc.name())
                     proc.kill()

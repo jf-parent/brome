@@ -5,6 +5,7 @@ from glob import glob
 import shutil
 import psutil
 from datetime import datetime
+import json
 
 from brome.core.model.test_batch import TestBatch
 from brome.core.model.test_instance import TestInstance
@@ -16,6 +17,21 @@ def get_test_batch_list():
     data = db.session.query(TestBatch).order_by(TestBatch.id.desc()).all()
 
     return data
+
+def get_active_test_instance(app, testbatch_id):
+    test_instances = db.session.query(TestInstance)\
+                            .filter(TestInstance.test_batch_id == testbatch_id)\
+                            .filter(TestInstance.ending_timestamp == None)\
+                            .all()
+
+    for test_instance in test_instances:
+        extra_data = json.loads(test_instance.extra_data)
+        if extra_data.has_key('instance_public_dns'):
+            test_instance.public_dns = extra_data['instance_public_dns']
+        else:
+            test_instance.public_dns = False
+
+    return test_instances
 
 def get_total_execution_time(app, testbatch_id):
     test_batch = get_test_batch(testbatch_id)

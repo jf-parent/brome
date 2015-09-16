@@ -681,6 +681,20 @@ default_config["webserver"]["PORT"] = {
     'title': 'webserver port',
 }
 
+default_config["webserver"]["SHOW_VIDEO_CAPTURE"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Show the video capture in the detail of a test batch',
+}
+
+default_config["webserver"]["SHOW_TEST_INSTANCES"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Show the test instance in the detail of a test batch',
+}
+
 default_config["webserver"]["HOST"] = {
     'default': 'localhost',
     'type': 'input',

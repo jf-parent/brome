@@ -23,8 +23,6 @@
     });
 </script>
 <div>
-<!--    <a href="{{ url_for('testbatch.vnc', host = 'ec2-52-20-159-246.compute-1.amazonaws.com') }}">Vnc</a>-->
- 
     {% if data['test_batch'].ending_timestamp is none %}
         <a class="btn btn-danger" href="javascript://" onclick="onTestBatchStop({{ testbatch_id }});" title="Stop this test batch" style="float: right; margin-right: 10px;">
            <i class="fa fa-stop"></i>
@@ -61,9 +59,16 @@
     <h3>Report:</h3>
     <div>
         <ul class="list-unstyled">
-            <li>
-                <!-- <button class="btn btn-link" onclick="location.href='{{ url_for('testbatch.videocapture', testbatch_id = testbatch_id) }}'"><i class="fa fa-television"></i> Video captures</a> -->
-            </li>
+            {% if show_video_capture %}
+                <li>
+                    <a class="unlink" onclick="location.href='{{ url_for('testbatch.videocapture', testbatch_id = testbatch_id) }}'"><i class="fa fa-television"></i> Video captures</a>
+                </li>
+            {% endif %}
+            {% if show_test_instances %}
+                <li>
+                    <a class="unlink" onclick="location.href='{{ url_for('testbatch.test_instances', testbatch_id = testbatch_id) }}'"><i class="fa fa-eye"></i> Test intances</a>
+                </li>
+            {% endif %}
             <li>
                 <a class="unlink" href="{{ url_for('testbatch.screenshot', testbatch_id = testbatch_id) }}"><i class="fa fa-file-image-o"></i> Screenshots (<span id="total_screenshots">{{ data['test_batch'].total_screenshots}}</span>)</a>
             </li>

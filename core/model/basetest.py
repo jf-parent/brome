@@ -11,7 +11,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 #from browsermobproxy import Server
 
-from brome.castro import Castro
+#from brome.castro import Castro
 from brome.core.model.utils import *
 from brome.core.model.stateful import Stateful
 from brome.core.model.proxy_driver import ProxyDriver

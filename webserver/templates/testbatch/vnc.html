@@ -193,7 +193,7 @@
             document.title = unescape(WebUtil.getQueryVar('title', 'noVNC'));
             // By default, use the host and port of server that served this file
             host = WebUtil.getQueryVar('host', '{{host}}');
-            port = WebUtil.getQueryVar('port', '{{post}}');
+            port = WebUtil.getQueryVar('port', {{port}});
 
             // if port == 80 (or 443) then it won't be present and should be
             // set manually

@@ -75,25 +75,26 @@ class BaseTest(object):
         session.close()
 
     def start_video_recording(self):
-        node_ip = self.pdriver.get_ip_of_node()
+        if self._browser_config.get('record_session'):
+            node_ip = self.pdriver.get_ip_of_node()
 
-        self._video_capture_file_path = os.path.join(
-            self._video_recording_dir,
-            string_to_filename('%s.flv'%(self._name.replace(' ', '_')))
-        )
+            self._video_capture_file_path = os.path.join(
+                self._video_recording_dir,
+                string_to_filename('%s.flv'%(self._name.replace(' ', '_')))
+            )
 
-        self._castro = Castro(
-            data_dir = self._video_recording_dir,
-            filename = self._video_capture_file_path,
-            host = node_ip,
-            port = self._browser_config.get('vnc_port', 5900)
-        )
+            self._castro = Castro(
+                data_dir = self._video_recording_dir,
+                filename = self._video_capture_file_path,
+                host = node_ip,
+                port = self._browser_config.get('vnc_port', 5900)
+            )
 
-        try:
-            self._castro.start()
-            self.info_log("Castro started (ip: %s)(output: %s)"%(node_ip, self._video_capture_file_path))
-        except Exception as e:
-            self.info_log("Castro exception: %s"%str(e))
+            try:
+                self._castro.start()
+                self.info_log("Castro started (ip: %s)(output: %s)"%(node_ip, self._video_capture_file_path))
+            except Exception as e:
+                self.info_log("Castro exception: %s"%str(e))
 
     def stop_video_recording(self):
         if hasattr(self, '_castro'):

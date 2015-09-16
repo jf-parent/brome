@@ -95,11 +95,11 @@ class ProxyElement(object):
         try:
             self._element.click()
         except (InvalidElementStateException, WebDriverException) as e:
-            self.debug_log("click exception: %s"%str(e))
+            self.debug_log(u"click exception: %s"%unicode(e))
             sleep(2)
             self._element.click()
         except StaleElementReferenceException as e:
-            self.debug_log("click exception StaleElementReferenceException: %s"%str(e))
+            self.debug_log(u"click exception StaleElementReferenceException: %s"%unicode(e))
             sleep(2)
             self._element = self.pdriver.find(self.selector)
             self._element.click()
@@ -141,12 +141,12 @@ class ProxyElement(object):
         try:
             self._element.send_keys(value)
         except StaleElementReferenceException as e:
-            self.debug_log("send_keys exception StaleElementReferenceException: %s"%str(e))
+            self.debug_log(u"send_keys exception StaleElementReferenceException: %s"%unicode(e))
             sleep(2)
             self._element = self.pdriver.find(self.selector)
             self._element.send_keys(value)
         except (InvalidElementStateException, WebDriverException) as e:
-            self.debug_log("send_keys exception: %s"%str(e))
+            self.debug_log(u"send_keys exception: %s"%unicode(e))
             sleep(2)
             self._element.send_keys(value)
 
@@ -158,11 +158,11 @@ class ProxyElement(object):
         try:
             self._element.clear()
         except (InvalidElementStateException, WebDriverException) as e:
-            self.debug_log("send_keys exception: %s"%str(e))
+            self.debug_log(u"send_keys exception: %s"%unicode(e))
             sleep(2)
             self._element.clear()
         except StaleElementReferenceException as e:
-            self.debug_log("send_keys exception StaleElementReferenceException: %s"%str(e))
+            self.debug_log(u"send_keys exception StaleElementReferenceException: %s"%unicode(e))
             sleep(2)
             self._element = self.pdriver.find(self.selector)
             self._element.clear()
@@ -214,7 +214,7 @@ class ProxyElement(object):
                 raise
             else:
                 tb = traceback.format_exc()
-                self.error_log('scroll_into_view WebDriverException: %s'%str(tb))
+                self.error_log('scroll_into_view WebDriverException: %s'%unicode(tb))
                 return False
 
         return True
@@ -252,7 +252,7 @@ class ProxyElement(object):
                 raise
             else:
                 tb = traceback.format_exc()
-                self.error_log('select_all WebDriverException: %s'%str(tb))
+                self.error_log('select_all WebDriverException: %s'%unicode(tb))
                 return False
 
         return True

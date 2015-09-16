@@ -11,6 +11,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 #from browsermobproxy import Server
 
+from brome.castro import Castro
 from brome.core.model.utils import *
 from brome.core.model.stateful import Stateful
 from brome.core.model.proxy_driver import ProxyDriver
@@ -44,6 +45,9 @@ class BaseTest(object):
 
         self.pdriver.configure_resolution()
 
+        #VIDEO RECORDING
+        self.start_video_recording()
+
         #TEST KWARGS
         self._test_config = test_config_to_dict(self.get_config_value("runner:test_config"))
 
@@ -69,6 +73,40 @@ class BaseTest(object):
         self.test_instance_id = sa_test_instance.id
 
         session.close()
+
+    def start_video_recording(self):
+        node_ip = self.pdriver.get_ip_of_node()
+
+        self._video_capture_file_path = os.path.join(
+            self._video_recording_dir,
+            string_to_filename('%s.flv'%(self._name.replace(' ', '_')))
+        )
+
+        self._castro = Castro(
+            data_dir = self._video_recording_dir,
+            filename = self._video_capture_file_path,
+            host = node_ip,
+            port = self._browser_config.get('vnc_port', 5900)
+        )
+
+        try:
+            self._castro.start()
+            self.info_log("Castro started (ip: %s)(output: %s)"%(node_ip, self._video_capture_file_path))
+        except Exception as e:
+            self.info_log("Castro exception: %s"%str(e))
+
+    def stop_video_recording(self):
+        if hasattr(self, '_castro'):
+            self.info_log("Finalizing the video capture...")
+
+            #Let the time to the driver to quit so we have the full picture
+            sleep(5)
+
+            self._castro.stop()
+            """
+            file_name = "%s/%s"%(self.video_capture_dir, self.config.get('name').replace(' ', '_'))
+            Popen(["/usr/bin/ffmpeg", "-i", "%s.flv"%file_name, "-vcodec", "libvpx", "-acodec", "libvorbis", "%s.webm"%file_name], stdout=devnull, stderr=devnull)
+            """
 
     def init_driver(self, retry = 10):
         #LOCAL
@@ -304,6 +342,8 @@ class BaseTest(object):
 
         self.quit_driver()
 
+        self.stop_video_recording()
+
         if self.get_config_value("runner:play_sound_on_test_finished"):
             say(self.get_config_value("runner:sound_on_test_finished"))
 
@@ -408,6 +448,15 @@ class BaseTest(object):
             self.pdriver.get_id(join_char = '_')
         )
         create_dir_if_doesnt_exist(self._screenshot_dir)
+
+        #VIDEO RECORDING DIRECTORY
+        if self._browser_config.get('record_session'):
+            self._video_recording_dir = os.path.join(
+                self._runner_dir,
+                'video_recording',
+                self.pdriver.get_id(join_char = '_')
+            )
+            create_dir_if_doesnt_exist(self._video_recording_dir)
 
     def get_test_result_summary(self):
         results = []

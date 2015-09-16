@@ -21,18 +21,18 @@ class ProxyElement(object):
         self.pdriver.error_log(u"[%s] %s"%(repr(self), msg))
 
     def __repr__(self):
-        msg = ["WebElement (selector: '%s')"%self.selector]
+        msg = [u"WebElement (selector: '%s')"%self.selector]
 
         if self._element.get_attribute('id'):
-            msg.append("(id: '%s')"%self._element.get_attribute('id'))
+            msg.append(u"(id: '%s')"%self._element.get_attribute('id'))
         
         if self._element.get_attribute('name'):
-            msg.append("(name: '%s')"%self._element.get_attribute('name'))
+            msg.append(u"(name: '%s')"%self._element.get_attribute('name'))
 
         if self._element.get_attribute('class'):
-            msg.append("(class: '%s')"%self._element.get_attribute('class'))
+            msg.append(u"(class: '%s')"%self._element.get_attribute('class'))
 
-        return ' '.join(msg)
+        return u' '.join(msg)
 
     def is_displayed(self, **kwargs):
         self.debug_log("Is displayed")

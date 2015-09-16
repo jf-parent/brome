@@ -2,15 +2,6 @@
 {% block content %}
 {% if data['result_list']|count %}
 <script type="text/javascript">
-    function showScreenshot(screenshotPath, title) {
-        $("#screenshotImg").attr("src", screenshotPath);
-        $("#screenshotPreview").attr("title", title);
-        $("#screenshotPreview").dialog({
-                                        minHeight: 800,
-                                        minWidth: 1000,
-        });
-    };
-
     $(function() {
 
         $('#testresult').puidatatable({
@@ -34,9 +25,9 @@
                         'result': '<div class="text-center"><span class="label label-{% if result.result %}success{% else %}danger{% endif %}"> {% if result.result %} <i class="fa fa-check"></i> {% else %} <i class="fa fa-exclamation"></i> {% endif %}</span></div>',
                         'screenshot': '<div id="{{ result.id }}">' +
                                     {% if result.screenshot_path != '' %}
-                                            '<button class="btn btn-link" onclick="showScreenshot(\'{{ url_for('testbatch.test_batch_report_file', filename = result.screenshot_path) }}\', \'{{ result.title }}\');" >' +
+                                            '<a class="unlink" href="{{ url_for('testbatch.test_batch_report_file', filename = result.screenshot_path) }}" target="_blank" >' +
                                                 'View screenshot' +
-                                            '</button>' +
+                                            '</a>' +
                                     {% else %}
                                         '<p class="text-center"> N/A </p>' +
                                     {% endif %}
@@ -50,9 +41,6 @@
 {% endif %}
 <div>
     <h1>Test Result for Test Batch id: {{ testbatch_id }}</h1>
-</div>
-<div id="screenshotPreview" title="">
-    <img id="screenshotImg" src="" /> 
 </div>
 {% if data['result_list']|count %}
     <div id="testresult"></div>

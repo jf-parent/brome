@@ -4,6 +4,11 @@
 {% if data['screenshot_list']|count %}
     <script type="text/javascript">
         $(function() {
+            OpenInNewTab = function (url) {
+              var win = window.open(url, '_blank');
+              win.focus();
+            };
+
             $('#screenshots').puigalleria({
                 autoPlay: false,
                 panelWidth: 1200,
@@ -19,8 +24,8 @@
     <div id="screenshots">
         <ul>
             {% for screenshot in data['screenshot_list'] %}
-                <li>
-                    <img src="{{ url_for('testbatch.test_batch_report_file', filename = screenshot['path']) }}" alt="{{ screenshot['browser_id'] }}" title="{{ screenshot['title'] }}"/>
+                <li style="overflow: scroll;">
+                    <img onclick="OpenInNewTab('{{ url_for('testbatch.test_batch_report_file', filename = screenshot['path']) }}');" src="{{ url_for('testbatch.test_batch_report_file', filename = screenshot['path']) }}" alt="{{ screenshot['browser_id'] }}" title="{{ screenshot['title'] }}" style="cursor: pointer;"/>
                 </li>
             {% endfor %}
         </ul>

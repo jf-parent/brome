@@ -35,6 +35,51 @@
     {% assets "js_all" %}
         <script type="text/javascript" src="{{ ASSET_URL }}"></script>
     {% endassets %}
+
+     <script type="text/javascript">
+        $(function() {
+            onTestBatchDelete = function (testbatch_id) {
+                BootstrapDialog.show({
+                    title: 'Delete Test Batch',
+                    message: 'Are you sure you want to delete this test batch?',
+                    buttons: [{
+                        label: 'No',
+                        action: function(me) {
+                            me.close();
+                        }
+                    }, {
+                        label: 'Yes',
+                        cssClass: 'btn btn-danger',
+                        action: function(me) {
+                            me.close();
+                            Sijax.request('delete_test_batch', [testbatch_id]);
+                        }
+                    }]
+                });
+            }
+
+            onTestBatchStop = function (testbatch_id) {
+                BootstrapDialog.show({
+                    title: 'Stop Test Batch',
+                    message: 'Are you sure you want to stop this test batch?',
+                    buttons: [{
+                        label: 'No',
+                        action: function(me) {
+                            me.close();
+                        }
+                    }, {
+                        label: 'Yes',
+                        cssClass: 'btn btn-danger',
+                        action: function(me) {
+                            me.close();
+                            Sijax.request('stop_test_batch', [testbatch_id]);
+                        }
+                    }]
+                });
+            }
+        });
+     </script>
+
     {% block js %}{% endblock %}
     <!-- end scripts -->
   {% block css %}{% endblock %}
@@ -67,6 +112,25 @@
 
     {% block content %}{% endblock %}
   </div>
+
+  <!--modal dialog -->
+    <div class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title">Modal title</h4>
+                </div>
+                <div class="modal-body">
+                    <p>One fine body…</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
 
 </div><!-- end container -->
 

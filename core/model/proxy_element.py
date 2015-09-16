@@ -15,12 +15,10 @@ class ProxyElement(object):
         return getattr(self._element, funcname)
 
     def error_log(self, msg):
-        #self.pdriver.error_log(u"[%s] %s"%(repr(self), msg))
-        self.pdriver.error_log(msg)
+        self.pdriver.error_log(u"[%s] %s"%(self.__repr__(), msg))
 
     def debug_log(self, msg):
-        #self.pdriver.debug_log(u"[%s] %s"%(repr(self), msg))
-        self.pdriver.debug_log(msg)
+        self.pdriver.debug_log(u"[%s] %s"%(self.__repr__(), msg))
 
     def __repr__(self):
         msg = [u"WebElement (selector: '%s')"%self.selector]
@@ -37,7 +35,7 @@ class ProxyElement(object):
         return u' '.join(msg)
 
     def is_displayed(self, **kwargs):
-        self.debug_log("Is displayed")
+        self.debug_log(u"Is displayed")
 
         raise_exception = kwargs.get(
                                     'raise_exception',
@@ -49,13 +47,13 @@ class ProxyElement(object):
 
         try:
             is_displayed = self._element.is_displayed()
-            self.debug_log("is displayed")
+            self.debug_log(u"is displayed")
             return is_displayed
         except StaleElementReferenceException:
             if retry:
                 #NOTE this is an imperfect solution since we can have found the element with find_last
                 #TODO find a better way to handle this edge case
-                self.debug_log("StaleElementReferenceException; retrying...")
+                self.debug_log(u"StaleElementReferenceException; retrying...")
                 self._element = self.pdriver.find(self.selector, raise_exception = False)
                 if self._element:
                     return self.is_displayed(retry = False)
@@ -68,7 +66,7 @@ class ProxyElement(object):
                     return False
 
     def click(self, **kwargs):
-        self.debug_log("Clicking on element")
+        self.debug_log(u"Clicking on element")
         
         highlight = kwargs.get( 
                             'highlight',
@@ -109,7 +107,7 @@ class ProxyElement(object):
         return True
 
     def send_keys(self, value, **kwargs):
-        self.debug_log("Sending keys")
+        self.debug_log(u"Sending keys")
 
         highlight = kwargs.get( 
                             'highlight',
@@ -155,7 +153,7 @@ class ProxyElement(object):
         return True
 
     def clear(self):
-        self.debug_log("Clearing element")
+        self.debug_log(u"Clearing element")
 
         try:
             self._element.clear()
@@ -172,7 +170,7 @@ class ProxyElement(object):
         return True
 
     def highlight(self, **kwargs):
-        self.debug_log("Highlighting element")
+        self.debug_log(u"Highlighting element")
         """
             kwargs:
                 style: css
@@ -200,7 +198,7 @@ class ProxyElement(object):
         return True
 
     def scroll_into_view(self, **kwargs):
-        self.debug_log("Scrolling into view element")
+        self.debug_log(u"Scrolling into view element")
 
         raise_exception = kwargs.get(
                                     'raise_exception',
@@ -216,13 +214,13 @@ class ProxyElement(object):
                 raise
             else:
                 tb = traceback.format_exc()
-                self.error_log('scroll_into_view WebDriverException: %s'%unicode(tb))
+                self.error_log(u'scroll_into_view WebDriverException: %s'%unicode(tb))
                 return False
 
         return True
 
     def select_all(self, **kwargs):
-        self.debug_log("Selecting all in element")
+        self.debug_log(u"Selecting all in element")
 
         raise_exception = kwargs.get(
                                     'raise_exception',
@@ -254,7 +252,7 @@ class ProxyElement(object):
                 raise
             else:
                 tb = traceback.format_exc()
-                self.error_log('select_all WebDriverException: %s'%unicode(tb))
+                self.error_log(u'select_all WebDriverException: %s'%unicode(tb))
                 return False
 
         return True

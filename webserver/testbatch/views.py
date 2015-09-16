@@ -16,11 +16,13 @@ blueprint = Blueprint("testbatch", __name__, url_prefix='/tb',
 
 def delete_test_batch(obj_response, testbatch_id):
     data_controller.delete_test_batch(blueprint.app, testbatch_id)
-    obj_response.alert('The test batch (%s) has been deleted'%testbatch_id)
+    flash("The test batch (%s) have been deleted!"%testbatch_id, 'success')
+    obj_response.script("window.location = '%s';"%url_for("testbatch.list"))
 
 def stop_test_batch(obj_response, testbatch_id):
     data_controller.stop_test_batch(blueprint.app, testbatch_id)
-    obj_response.alert('The test batch (%s) will be stop as soon as possible...'%testbatch_id)
+    flash("The test batch (%s) will be stop as soon as possible..."%testbatch_id, 'success')
+    obj_response.script("window.location = '%s';"%url_for("testbatch.list"))
 
 @blueprint.route("/vnc/<string:host>")
 @login_required
@@ -80,11 +82,12 @@ def detail(testbatch_id):
                         $('#runnerlog').append('<h6>' + log + '</h6>');
                     });
             """%("|".join(test_batch_log[runner_log_length:])))
+        else:
+            obj_response.script("clearInterval(%s);"%interval_id)
 
         if test_batch.ending_timestamp:
             total_execution_time = data_controller.get_total_execution_time(blueprint.app, testbatch_id)
 
-            obj_response.script("clearInterval(%s);"%interval_id)
             obj_response.script("$('#testprogressdiv').remove();")
             obj_response.script("$('#testexecutiontimespan > strong').html('%s');"%total_execution_time)
             obj_response.script("$('#testexecutiontimediv').show();")

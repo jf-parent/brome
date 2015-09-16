@@ -294,22 +294,22 @@ class BaseTest(object):
         self._logger.setLevel(getattr(logging, self.get_config_value('logger_test:level')))
 
     def get_logger_dict(self):
-        return {'batchid': self._test_batch_id, 'testname': "%s"%self._name}
+        return {'batchid': self._test_batch_id, 'testname': u"%s"%self._name}
 
     def debug_log(self, msg):
-        self._logger.debug("[debug]%s"%msg, extra=self.get_logger_dict())
+        self._logger.debug(u"[debug]%s"%msg, extra=self.get_logger_dict())
 
     def info_log(self, msg):
-        self._logger.info("%s"%msg, extra=self.get_logger_dict())
+        self._logger.info(u"%s"%msg, extra=self.get_logger_dict())
 
     def warning_log(self, msg):
-        self._logger.warning("[warning]%s"%msg, extra=self.get_logger_dict())
+        self._logger.warning(u"[warning]%s"%msg, extra=self.get_logger_dict())
 
     def error_log(self, msg):
-        self._logger.error("[error]%s"%msg, extra=self.get_logger_dict())
+        self._logger.error(u"[error]%s"%msg, extra=self.get_logger_dict())
 
     def critical_log(self, msg):
-        self._logger.critical("[critical]%s"%msg, extra=self.get_logger_dict())
+        self._logger.critical(u"[critical]%s"%msg, extra=self.get_logger_dict())
 
     def execute(self):
         try:

@@ -7,7 +7,7 @@ from IPython import embed
 from brome import Brome
 
 from model.selector import selector_dict
-from browser_config.main_config import browsers_config
+from config.main_config import browsers_config
 from model.test_dict import test_dict
 
 if __name__ == '__main__':

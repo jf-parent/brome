@@ -67,6 +67,7 @@ class ConfigForm(object):
                     data[section_key][option_key] = {
                         'value': option_item,
                         'type': 'input',
+                        'visible': True,
                         'title': option_key
                     }
 
@@ -76,6 +77,7 @@ class ConfigForm(object):
                         data[section_key][option_key] = {
                             'value': option_item,
                             'type': 'input',
+                            'visible': True,
                             'title': option_key
                         }
                     else:
@@ -95,4 +97,18 @@ class ConfigForm(object):
                 except IndexError:
                     field['value'] = False
 
-        return save_brome_config(self.app.brome.config_path, self.fields)
+        config = {}
+        for k,v in self.fields.iteritems():
+            for ik, iv in v.iteritems():
+                if not config.has_key(k):
+                    config[k] = {}
+
+                if not config[k].has_key(ik):
+                    config[k][ik] = {}
+
+                if iv['type'] == 'number':
+                    config[k][ik] = int(iv['value'])
+                else:
+                    config[k][ik] = iv['value']
+
+        return save_brome_config(self.app.brome.config_path, config) 

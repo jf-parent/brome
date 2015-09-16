@@ -4,7 +4,9 @@
 {% if data['testbatch_list']|count %}
     <script type="text/javascript">
         $(function() {
+            
             $(document).puitooltip();
+
             $('#testbatchlist').puidatagrid({
                 paginator: {
                     rows: 9
@@ -37,13 +39,13 @@
                     panel += '<div>';
 
                     if (data.is_running & !data.killed) {
-                        panel += '<a class="btn btn-danger" href="javascript://" onclick="Sijax.request(\'stop_test_batch\', [' + data.id + ']); window.location = \'{{ url_for("testbatch.list") }}\';" title="Stop this test batch" style="margin-right: 10px;">';
+                        panel += '<a class="btn btn-danger" href="javascript://" onclick="onTestBatchStop(' + data.id + ');" title="Stop this test batch" style="margin-right: 10px;">';
                         panel += '<i class="fa fa-stop"></i>';
                         panel += '</a>';
                     } else if (data.killed & data.is_running) {
                         panel += "<p>killed</p>"
                     } else {
-                        panel += '<a class="btn btn-danger" thref="javascript://" onclick="Sijax.request(\'delete_test_batch\', [' + data.id +']); window.location = \'{{ url_for("testbatch.list") }}\';" title="Delete this test batch" style="margin-right: 10px;">';
+                        panel += '<a class="btn btn-danger" thref="javascript://" onclick="onTestBatchDelete(' + data.id + ');" title="Delete this test batch" style="margin-right: 10px;">';
                         panel += '<i class="fa fa-remove"></i>';
                         panel += '</a>';
                     }

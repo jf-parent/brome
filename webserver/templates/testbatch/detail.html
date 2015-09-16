@@ -26,11 +26,11 @@
 <!--    <a href="{{ url_for('testbatch.vnc', host = 'ec2-52-20-159-246.compute-1.amazonaws.com') }}">Vnc</a>-->
  
     {% if data['test_batch'].ending_timestamp is none %}
-        <a class="btn btn-danger" href="javascript://" onclick="Sijax.request('stop_test_batch', [{{ testbatch_id }}]);" title="Stop this test batch" style="float: right; margin-right: 10px;">
+        <a class="btn btn-danger" href="javascript://" onclick="onTestBatchStop({{ testbatch_id }});" title="Stop this test batch" style="float: right; margin-right: 10px;">
            <i class="fa fa-stop"></i>
         </a>
     {% else %}
-        <a class="btn btn-danger" href="javascript://" onclick="Sijax.request('delete_test_batch', [{{ testbatch_id }}]); window.location = '{{ url_for("testbatch.list") }}';" title="Delete this test batch" style="float: right; margin-right: 10px;">
+        <a class="btn btn-danger" href="javascript://" onclick="onTestBatchDelete({{ testbatch_id }});" title="Delete this test batch" style="float: right; margin-right: 10px;">
             <i class="fa fa-remove"></i>
         </a>
     {% endif %}

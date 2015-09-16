@@ -9,6 +9,7 @@ css = Bundle(
     "libs/primeui/css/datagrid/datagrid.css", #http://forum.primefaces.org/viewtopic.php?f=16&t=42486
     "libs/bootstrap/dist/css/bootstrap.css",
     "css/style.css",
+    "libs/bootstrap_dialog/bootstrap-dialog.min.css",
     filters="cssmin",
     output="public/css/all.css"
 )
@@ -20,6 +21,7 @@ js = Bundle(
     "libs/primeui/js/datagrid/datagrid.js", #http://forum.primefaces.org/viewtopic.php?f=16&t=42486
     "libs/bootstrap/dist/js/bootstrap.js",
     "js/plugins.js",
+    "libs/bootstrap_dialog/bootstrap-dialog.min.js",
     filters='jsmin',
     output="public/js/all.js"
 )

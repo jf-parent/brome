@@ -69,7 +69,8 @@ def detail(testbatch_id):
                     });
             """%("|".join(test_batch_log[runner_log_length:])))
         else:
-            obj_response.script("clearInterval(%s);"%interval_id)
+            if test_batch.ending_timestamp:
+                obj_response.script("clearInterval(%s);"%interval_id)
 
         if test_batch.ending_timestamp:
             total_execution_time = data_controller.get_total_execution_time(blueprint.app, testbatch_id)

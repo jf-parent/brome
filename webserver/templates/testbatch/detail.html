@@ -61,12 +61,12 @@
         <ul class="list-unstyled">
             {% if show_video_capture %}
                 <li>
-                    <a class="unlink" onclick="location.href='{{ url_for('testbatch.videocapture', testbatch_id = testbatch_id) }}'"><i class="fa fa-television"></i> Video captures</a>
+                    <a class="unlink" href="{{ url_for('testbatch.videocapture', testbatch_id = testbatch_id) }}"><i class="fa fa-television"></i> Video captures</a>
                 </li>
             {% endif %}
             {% if show_test_instances %}
                 <li>
-                    <a class="unlink" onclick="location.href='{{ url_for('testbatch.test_instances', testbatch_id = testbatch_id) }}'"><i class="fa fa-eye"></i> Test intances</a>
+                    <a class="unlink" href="{{ url_for('testbatch.test_instances', testbatch_id = testbatch_id) }}"><i class="fa fa-eye"></i> Test intances</a>
                 </li>
             {% endif %}
             <li>

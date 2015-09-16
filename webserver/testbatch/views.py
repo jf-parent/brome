@@ -30,7 +30,7 @@ def stop_test_batch(obj_response, testbatch_id):
 @blueprint.route("/vnc/<string:host>")
 @login_required
 def vnc(host):
-    return render_template("testbatch/vnc.html", title = 'VNC')
+    return render_template("testbatch/vnc.html", title = 'VNC', host = host, port = 5900)
 
 @blueprint.route("/file/<path:filename>")
 @login_required

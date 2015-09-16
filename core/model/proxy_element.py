@@ -15,10 +15,10 @@ class ProxyElement(object):
         return getattr(self._element, funcname)
 
     def error_log(self, msg):
-        self.pdriver.error_log("[%s] %s"%(repr(self), msg))
+        self.pdriver.error_log(u"[%s] %s"%(repr(self), msg))
 
     def debug_log(self, msg):
-        self.pdriver.error_log("[%s] %s"%(repr(self), msg))
+        self.pdriver.error_log(u"[%s] %s"%(repr(self), msg))
 
     def __repr__(self):
         msg = ["WebElement (selector: '%s')"%self.selector]

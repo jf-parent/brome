@@ -169,6 +169,7 @@ class EC2Instance(BaseInstance):
 
             self.private_ip = instance.private_ip_address
             self.public_dns = instance.public_dns_name
+            self.private_dns = instance.private_dns_name
             self.public_ip = instance.ip_address
 
             return True

@@ -59,6 +59,7 @@ class BaseTest(object):
             extra_data['instance_private_ip'] = self._runner.instances_ip[private_ip].private_ip
             extra_data['instance_public_ip'] = self._runner.instances_ip[private_ip].public_ip
             extra_data['instance_public_dns'] = self._runner.instances_ip[private_ip].public_dns
+            extra_data['instance_private_dns'] = self._runner.instances_ip[private_ip].private_dns
 
         sa_test_instance = TestInstance(
             starting_timestamp = datetime.now(),

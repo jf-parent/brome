@@ -23,14 +23,18 @@ class ProxyElement(object):
     def __repr__(self):
         msg = [u"WebElement (selector: '%s')"%self.selector]
 
-        if self._element.get_attribute('id'):
-            msg.append(u"(id: '%s')"%self._element.get_attribute('id'))
-        
-        if self._element.get_attribute('name'):
-            msg.append(u"(name: '%s')"%self._element.get_attribute('name'))
+        try:
+            if self._element.get_attribute('id'):
+                msg.append(u"(id: '%s')"%self._element.get_attribute('id'))
+            
+            if self._element.get_attribute('name'):
+                msg.append(u"(name: '%s')"%self._element.get_attribute('name'))
 
-        if self._element.get_attribute('class'):
-            msg.append(u"(class: '%s')"%self._element.get_attribute('class'))
+            if self._element.get_attribute('class'):
+                msg.append(u"(class: '%s')"%self._element.get_attribute('class'))
+
+        except Exception as e:
+            self.pdriver.debug_log("exception in __repr__: %s"%unicode(e))
 
         return u' '.join(msg)
 

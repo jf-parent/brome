@@ -205,7 +205,6 @@
                     port = 80;
                 }
             }
-            port = 6880;
 
             // If a token variable is passed in, set the parameter in a cookie.
             // This is used by nova-novncproxy.
@@ -214,7 +213,7 @@
                 WebUtil.createCookie('token', token, 1)
             }
 
-            password = WebUtil.getQueryVar('password', '1asdf!!');
+            password = WebUtil.getQueryVar('password', '{{password}}');
             path = WebUtil.getQueryVar('path', 'websockify');
 
             if ((!host) || (!port)) {

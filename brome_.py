@@ -9,6 +9,8 @@ import shutil
 import re
 from glob import glob
 
+import yaml
+
 from brome.core.model.meta import Session
 from brome.core.model.grep import grep_files
 from brome.core.runner.local_runner import LocalRunner
@@ -22,9 +24,12 @@ class Brome(object):
         self.config_path = kwargs.get('config_path')
         self.selector_dict = kwargs.get('selector_dict', {})
         self.test_dict = kwargs.get('test_dict', {})
-        self.browsers_config = kwargs.get('browsers_config')
+        self.browsers_config_path = kwargs.get('browsers_config_path')
         self.config = load_brome_config(self.config_path)
         self.config['project']['absolute_path'] = kwargs.get('absolute_path')
+
+        with open(self.browsers_config_path, 'r') as fd:
+            self.browsers_config = yaml.load(fd)
 
         if not self.browsers_config:
             print 'You must provide a browsers config dict to the brome instance'
@@ -40,8 +45,6 @@ class Brome(object):
 
         if args[1] == 'run':
             self.run(args[2:])
-        elif args[1] == 'generate':
-            self.generate(args[2:])
         elif args[1] == 'admin':
             self.admin(args[2:])
         elif args[1] == 'find':

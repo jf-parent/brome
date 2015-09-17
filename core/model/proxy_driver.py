@@ -1,6 +1,6 @@
 #! -*- coding: utf-8 -*-
 
-from inspect import currentframe
+from inspect import currentframe, getframeinfo
 import re
 
 from brome.core.model.utils import *
@@ -394,7 +394,7 @@ class ProxyDriver(object):
 
         set_trace()
 
-    def embed(self, title = '', stack_depth = 2):
+    def embed(self, title = ''):
         if self.embed_disabled:
             self.warning_log("Embed are disabled when runned from the grid runner because of the multithreading")
             return False
@@ -407,10 +407,14 @@ class ProxyDriver(object):
         ipshell = InteractiveShellEmbed(banner1 = title)
 
         frame = currentframe()
-        for i in range(stack_depth - 1):
+        stack_depth = 1
+        for i in range(5):
             frame = frame.f_back
+            stack_depth += 1
+            if not frame.f_code.co_filename in __file__:
+                break
 
-        msg = 'Stopped at %s and line %s; stack_depth: %s'%(frame.f_code.co_filename, frame.f_lineno, stack_depth)
+        msg = 'Stopped at %s and line %s;'%(frame.f_code.co_filename, frame.f_lineno)
 
         ipshell(msg, stack_depth = stack_depth)
 
@@ -721,7 +725,7 @@ class ProxyDriver(object):
 
             #EMBED
             if self.get_config_value("runner:embed_on_assertion_success") and embed:
-                self.embed(title = embed_title, stack_depth = 4)
+                self.embed(title = embed_title)
         else:
             #SCREENSHOT
             if self.get_config_value("proxy_driver:take_screenshot_on_assertion_failure"):
@@ -746,7 +750,7 @@ class ProxyDriver(object):
 
             #EMBED
             if self.get_config_value("runner:embed_on_assertion_failure") and embed:
-                self.embed(title = embed_title, stack_depth = 4)
+                self.embed(title = embed_title)
 
         sa_test_result = TestResult(
             result = result,

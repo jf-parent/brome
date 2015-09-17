@@ -40,6 +40,11 @@ if sys.platform == 'win32':
 else:
     devnull = open('/dev/null', 'w')
 
+def kill_by_pid(pid):
+    p = psutil.Process(pid)
+    p.terminate()
+    print '[pid:%s]killed'%pid
+
 def kill_by_name(procname):
     for proc in psutil.process_iter():
         if proc.name() == procname:

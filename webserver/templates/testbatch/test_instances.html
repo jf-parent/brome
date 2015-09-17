@@ -8,12 +8,12 @@
 {% if data['test_instance_list']|count %}
     {% for test_instance in data['test_instance_list'] %}
         <button name="stopWebsocket" class="btn btn-default" onclick="Sijax.request('stop_websocket');">Stop websocket</button>
+        <a href="{{ url_for('testbatch.vnc') }}">Vnc</a>
         <div class="panel panel-default">
             <div class="panel-body">
                 <span>{{ test_instance.name }}</span>
                 {% if test_instance.public_dns %}
-                    <a href="{{ url_for('testbatch.vnc', host = test_instance.public_dns) }}">Vnc</a>
-                    <button {% if websocket_running %}disabled=true {% endif %}name="startWebsocket" class="btn btn-default" onclick="Sijax.request('start_websocket', [host = '{{test_instance.public_dns}}']);">Start websocket</button>
+                    <button {% if websocket_pid %}disabled=true {% endif %}name="startWebsocket" class="btn btn-default" onclick="Sijax.request('start_websocket', [host = '{{test_instance.public_dns}}']);">Start websocket</button>
                 {% else %}
                     <h3> This instance have not vnc session available </h3>
                 {% endif %}

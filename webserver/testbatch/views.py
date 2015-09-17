@@ -15,7 +15,7 @@ from brome.webserver import data_controller
 blueprint = Blueprint("testbatch", __name__, url_prefix='/tb',
                       static_folder="../static")
 
-websocket_running = False
+websocket_pid = None
 
 def delete_test_batch(obj_response, testbatch_id):
     data_controller.delete_test_batch(blueprint.app, testbatch_id)
@@ -30,7 +30,8 @@ def stop_test_batch(obj_response, testbatch_id):
 @blueprint.route("/vnc/<string:host>")
 @login_required
 def vnc(host):
-    return render_template("testbatch/vnc.html", title = 'VNC', host = host, port = 5900)
+    #TODO make this configurable
+    return render_template("testbatch/vnc.html", title = 'VNC', host = host, port = 5900, password = '1asdf!!')
 
 @blueprint.route("/file/<path:filename>")
 @login_required
@@ -123,12 +124,12 @@ def screenshot(testbatch_id):
 @flask_sijax.route(blueprint, "/test_instances/<int:testbatch_id>")
 @login_required
 def test_instances(testbatch_id):
-    global websocket_running
+    global websocket_pid
     data = {}
     data['test_instance_list'] = data_controller.get_active_test_instance(blueprint.app, testbatch_id)
 
     def start_websocket(obj_response, host):
-        global websocket_running
+        global websocket_pid
         webserver_root = os.sep.join(os.path.abspath(os.path.dirname(__file__)).split(os.sep)[:-1])
         websockify_exe = os.path.join(
             webserver_root,
@@ -145,7 +146,8 @@ def test_instances(testbatch_id):
             '%s:%s'%(src_addr, src_port),
             '%s:%s'%(dest_addr, dest_port)
         ]
-        process = subprocess.Popen(command)
+        if not websocket_pid:
+            process = subprocess.Popen(command)
 
         obj_response.script("""
             $('[name = "startWebsocket"]').each(function( index ) {
@@ -153,11 +155,12 @@ def test_instances(testbatch_id):
               });
         """)
 
-        websocket_running = True
+        websocket_pid = process.pid
 
     def stop_websocket(obj_response):
-        global websocket_running
-        kill_by_found_string_in_cmdline('Python', 'websockify')
+        global websocket_pid
+
+        kill_by_pid(websocket_pid)
 
         obj_response.script("""
             $('[name = "startWebsocket"]').each(function( index ) {
@@ -165,14 +168,14 @@ def test_instances(testbatch_id):
               });
         """)
 
-        websocket_running = False
+        websocket_pid = None
 
     if g.sijax.is_sijax_request:
         g.sijax.register_callback('start_websocket', start_websocket)
         g.sijax.register_callback('stop_websocket', stop_websocket)
         return g.sijax.process_request()
 
-    return render_template("testbatch/test_instances.html", testbatch_id = testbatch_id, data = data, websocket_running = websocket_running)
+    return render_template("testbatch/test_instances.html", testbatch_id = testbatch_id, data = data, websocket_pid = websocket_pid)
 
 @blueprint.route("/videocapture/<int:testbatch_id>")
 @login_required

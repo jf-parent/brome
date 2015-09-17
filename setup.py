@@ -11,9 +11,13 @@ except ImportError:
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
-requirements = [
-    # TODO: put package requirements here
-]
+requirements = []
+
+with open('requirements.txt', 'r') as fd:
+    for line in fd:
+        requirements.append(line)
+
+print requirements
 
 setup(
     name='brome',

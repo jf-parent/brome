@@ -33,6 +33,6 @@ Quick-start
 
     $ cookiecutter https://github.com/worker-9/cookiecutter-brome
     $ chmod +x bro
-    $ ./bro install
+    $ pip install brome
     $ vim config/brome.yml
     $ ./bro admin --create-database

@@ -2,14 +2,18 @@
 *.py[cod]
 # C extensions
 *.so
-
+#VIM
+*.swp
 # Packages
 *.egg
 *.egg-info
-dist
+.dist
 build
 eggs
 bin
+
+#OSX
+*.DS_Store
 
 # Sphinx
 docs/_build

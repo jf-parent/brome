@@ -19,8 +19,11 @@ Features
 Quick-start
 -----------
 
-    cookiecutter https://github.com/brome-hq/brome
-    chmod +x bro
-    ./bro install
-    vim config/brome.yml
-    ./bro admin --create-database
+.. role:: bash(code)
+   :language: bash
+
+    :bash:`cookiecutter https://github.com/brome-hq/brome`.
+    :bash:`chmod +x bro`.
+    :bash:`./bro install`.
+    :bash:`vim config/brome.yml`.
+    :bash:`./bro admin --create-database'`.

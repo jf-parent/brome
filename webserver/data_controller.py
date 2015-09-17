@@ -26,10 +26,10 @@ def get_active_test_instance(app, testbatch_id):
 
     for test_instance in test_instances:
         extra_data = json.loads(test_instance.extra_data)
-        if extra_data.has_key('instance_private_dns'):
-            test_instance.private_dns = extra_data['instance_private_dns']
+        if extra_data.has_key('instance_private_ip'):
+            test_instance.private_ip = extra_data['instance_private_ip']
         else:
-            test_instance.private_dns = False
+            test_instance.private_ip = False
 
     return test_instances
 

@@ -1,5 +1,11 @@
-# Python bytescode
+# Python
+*.pkl
 *.py[cod]
+#sqlite
+*.db
+#yaml
+*.yml
+*.yaml
 # C extensions
 *.so
 #VIM

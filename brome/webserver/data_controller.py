@@ -178,7 +178,7 @@ def get_test_batch_screenshot(app, testbatch_id, only_total = False):
             for screenshot in screenshot_list:
                 data.append({
                     'title': screenshot.split('.')[0].replace('_', ' '),
-                    'broswer_id': browser_dir.replace('_', ' '),
+                    'browser_id': browser_dir.replace('_', ' '),
                     'path': os.path.join(relative_dir, browser_dir, screenshot)
                 })
 

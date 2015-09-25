@@ -3,6 +3,8 @@
 from inspect import currentframe, getframeinfo
 import re
 
+from selenium.webdriver.common.action_chains import ActionChains
+
 from brome.core.model.utils import *
 from brome.core.model.meta.base import Session
 from brome.core.model.selector import Selector
@@ -393,6 +395,32 @@ class ProxyDriver(object):
             say(self.get_config_value("runner:sound_on_pdb"))
 
         set_trace()
+
+    def drag_and_drop(self, source_selector, destination_selector):
+        self.info_log("Drag and drop: source (%s); destination (%s)"%(source_selector, destination_selector))
+
+        source_el = self.find(source_selector)
+        destination_el = self.find(destination_selector)
+
+        if self.get_config_value("proxy_driver:use_javascript_dnd"):
+            try:
+                dnd_script = """
+                    function simulate(f,c,d,e){var b,a=null;for(b in eventMatchers)if(eventMatchers[b].test(c)){a=b;break}if(!a)return!1;document.createEvent?(b=document.createEvent(a),a=="HTMLEvents"?b.initEvent(c,!0,!0):b.initMouseEvent(c,!0,!0,document.defaultView,0,d,e,d,e,!1,!1,!1,!1,0,null),f.dispatchEvent(b)):(a=document.createEventObject(),a.detail=0,a.screenX=d,a.screenY=e,a.clientX=d,a.clientY=e,a.ctrlKey=!1,a.altKey=!1,a.shiftKey=!1,a.metaKey=!1,a.button=1,f.fireEvent("on"+c,a));return!0} var eventMatchers={HTMLEvents:/^(?:load|unload|abort|error|select|change|submit|reset|focus|blur|resize|scroll)$/,MouseEvents:/^(?:click|dblclick|mouse(?:down|up|over|move|out))$/};
+
+                    var source = arguments[0],
+                        destination = arguments[1];
+
+                    simulate(source, "mousedown", 0, 0);
+                    simulate(source, "mousemove", destination.offsetLeft, destination.offsetTop); 
+                    simulate(source, "mouseup", destination.offsetLeft, destination.offsetTop);
+                """
+                self._driver.execute_script(dnd_script, source_el._element, destination_el._element)
+
+            except Exception as e:
+                self.error_log(u'drag_and_drop exception: %s'%str(e))
+                raise
+        else:
+            ActionChains(self._driver).drag_and_drop(source_el, destination_el).perform()
 
     def embed(self, title = ''):
         if self.embed_disabled:

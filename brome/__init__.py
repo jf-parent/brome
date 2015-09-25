@@ -2,6 +2,7 @@
 
 __version__ = "0.5"
 
+import webbrowser
 import shutil
 import pickle
 import hashlib
@@ -10,6 +11,7 @@ import argparse
 import shutil
 import re
 from glob import glob
+from threading import Timer
 
 import yaml
 
@@ -275,10 +277,17 @@ class Brome(object):
         elif parsed_args.delete_database:
             delete_database(self.get_config_value('database:sqlalchemy.url'))
         elif parsed_args.update_test:
-            _update_test()
+            self.update_test()
+
+    def open_browser(self):
+        if self.get_config_value("webserver:open_browser"):
+            webbrowser.open("http://%s:%s/tb/list"%(self.get_config_value("webserver:HOST"), self.get_config_value("webserver:PORT")))
 
     def webserver(self, args):
         app = create_app(self)
+
+        Timer(2, self.open_browser).start()
+
         app.run(host = self.get_config_value("webserver:HOST"), port = self.get_config_value("webserver:PORT"))
 
     def list_(self, args):

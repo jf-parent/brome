@@ -260,6 +260,13 @@ default_config["logger_test"]["format"] = {
     'title': 'Logger format'
 }
 
+default_config["proxy_driver"]["use_javascript_dnd"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Use javascript to perform drag and drop'
+}
+
 default_config["proxy_driver"]["wait_until_visible_before_find"] = {
     'default': False,
     'type': 'checkbox',
@@ -582,13 +589,6 @@ default_config["database"]["sqlalchemy.url"] = {
     'title': 'Sqlalchemy url'
 }
 
-default_config["webserver"]["SQLALCHEMY_DATABASE_URI"] = {
-    'default': '',
-    'type': 'input',
-    'visible': False,
-    'title': 'Sqlalchemy url',
-}
-
 default_config["webserver"]["level"] = {
     'default': 'INFO',
     'type': 'dropdown',
@@ -700,4 +700,11 @@ default_config["webserver"]["HOST"] = {
     'type': 'input',
     'visible': True,
     'title': 'webserver ip',
+}
+
+default_config["webserver"]["open_browser"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Open the webserver index in a new tab on start',
 }

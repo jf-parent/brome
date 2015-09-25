@@ -5,4 +5,4 @@ class App(object):
         self.pdriver = pdriver
 
     def go_to(self, page):
-        self.pdriver.get("%s/%s"%(self.pdriver.get_config_value("project:base_url"), page))
+        self.pdriver.get("%s/%s"%(self.pdriver.get_config_value("project:url"), page))

@@ -1,3 +1,6 @@
+
+import os
+
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy import engine_from_config, MetaData, create_engine
@@ -29,20 +32,32 @@ Base.metadata.naming_convention={
     }
 
 def delete_database(sqlalchemy_url):
-    db_name = sqlalchemy_url.split('/')[-1]
-    engine = create_engine('/'.join(sqlalchemy_url.split('/')[:-1]))
-    conn = engine.connect()
-    conn.execute("DROP DATABASE IF EXISTS %s"%db_name)
-    conn.close()
-    print 'Database (%s) deleted!'%db_name
+    if sqlalchemy_url.startswith('sqlite'):
+        db_path = sqlalchemy_url.split('/')[-1]
+        try:
+            os.remove(db_path)
+            print 'Database (%s) deleted!'%db_path
+        except OSError:
+            pass
+    else:
+        db_name = sqlalchemy_url.split('/')[-1]
+        engine = create_engine('/'.join(sqlalchemy_url.split('/')[:-1]))
+        conn = engine.connect()
+        conn.execute("DROP DATABASE IF EXISTS %s"%db_name)
+        conn.close()
+        print 'Database (%s) deleted!'%db_name
 
 def create_database(sqlalchemy_url):
-    db_name = sqlalchemy_url.split('/')[-1]
-    engine = create_engine('/'.join(sqlalchemy_url.split('/')[:-1]))
-    conn = engine.connect()
-    conn.execute("CREATE DATABASE %s"%db_name)
-    conn.close()
-    print 'Database (%s) created!'%db_name
+    if sqlalchemy_url.startswith('sqlite'):
+        engine = create_engine(sqlalchemy_url)
+        print 'Database (%s) created!'%sqlalchemy_url.split('/')[-1]
+    else:
+        db_name = sqlalchemy_url.split('/')[-1]
+        engine = create_engine('/'.join(sqlalchemy_url.split('/')[:-1]))
+        conn = engine.connect()
+        conn.execute("CREATE DATABASE %s"%db_name)
+        conn.close()
+        print 'Database (%s) created!'%db_name
 
 def setup_database(config):
     """Setup the application given a config dictionary."""

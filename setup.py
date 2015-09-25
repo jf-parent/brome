@@ -17,8 +17,6 @@ with open('requirements.txt', 'r') as fd:
     for line in fd:
         requirements.append(line)
 
-print requirements
-
 setup(
     name='brome',
     version='0.0.5',

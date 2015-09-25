@@ -201,7 +201,8 @@ class BaseRunner(object):
             if not test_result.result and not test_result.test in failed_test_list:
                 query = session.query(Test).filter(Test.id == test_result.test_id)
                 if query.count():
-                    failed_test_list.append(query.one().test)
+                    test = query.one()
+                    failed_test_list.append(test.test_id)
                     self.info_log("[%s] %s"%(test.test_id, test.name))
                 else:
                     failed_test_list.append(test_result.title)

@@ -54,7 +54,13 @@ class Selector(object):
         return selector[3:]
 
     def get_type(self, selector):
-        return SELECTOR_DICT[selector[:3]]
+        try:
+            return SELECTOR_DICT[selector[:3]]
+        except KeyError:
+            raise Exception("""
+                All selector need to start with either:
+                    'nm:' (name), 'xp:' (xpath), 'cn:' (classname), 'id:' (id), 'cs:' (css), 'tn:' (tag name), 'lt:' (link text), 'pl:' (partial link text)
+            """)
 
     #RESOLVE
     def resolve_selector(self):

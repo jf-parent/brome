@@ -137,6 +137,23 @@ class BaseTest(object):
                 driver = getattr(webdriver, self._browser_config.get('browserName'))()
             except AttributeError:
                 raise Exception("The browserName('%s') is invalid"%self._browser_config.get('browserName'))
+        #SAUCELABS
+        elif self._browser_config.location in ['saucelabs']:
+            config = self._browser_config.config
+
+            desired_cap = {}
+            desired_cap['browserName'] = config.get('browserName')
+            desired_cap['platform'] = config.get('platform')
+            desired_cap['version'] = config.get('version')
+            desired_cap['javascriptEnabled'] = True
+
+            driver = webdriver.Remote(
+                command_executor='http://%s:%s@ondemand.saucelabs.com:80/wd/hub'%(
+                    self.get_config_value("saucelabs:username"),
+                    self.get_config_value("saucelabs:key")
+                ),
+                desired_capabilities=desired_cap
+            )
 
         #REMOTE
         elif self._browser_config.location in ['virtualbox', 'ec2']:

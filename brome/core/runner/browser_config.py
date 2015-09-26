@@ -15,8 +15,10 @@ class BrowserConfig(object):
             self.location = 'ec2'
         elif self.config.has_key("vbox_name"):
             self.location = 'virtualbox'
-        elif self.config.get('appium', False):
+        elif self.config.has_key('appium'):
             self.location = 'appium'
+        elif self.config.has_key('saucelabs'):
+            self.location = 'saucelabs'
         else:
             self.location = 'localhost'
 

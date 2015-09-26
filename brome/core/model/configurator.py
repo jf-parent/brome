@@ -107,6 +107,7 @@ default_config = {}
 
 ###SECTIONS
 default_config["project"] = {}
+default_config["saucelabs"] = {}
 default_config["proxy_driver"] = {}
 default_config["browser"] = {}
 default_config["highlight"] = {}
@@ -119,6 +120,20 @@ default_config["grid_runner"] = {}
 default_config["webserver"] = {}
 
 #OPTIONS
+default_config["saucelabs"]["username"] = {
+    'default': '',
+    'type': 'input',
+    'visible': True,
+    'title': 'Saucelabs username'
+}
+
+default_config["saucelabs"]["key"] = {
+    'default': '',
+    'type': 'input',
+    'visible': True,
+    'title': 'Saucelabs key'
+}
+
 default_config["grid_runner"]["max_running_time"] = {
     'default': 7200,
     'type': 'number',

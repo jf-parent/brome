@@ -17,6 +17,7 @@
 build
 eggs
 bin
+test_results
 
 #OSX
 *.DS_Store

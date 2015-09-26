@@ -14,6 +14,7 @@ from brome.core.runner.base_runner import BaseRunner
 from brome.core.runner.ec2_instance import EC2Instance
 from brome.core.runner.virtualbox_instance import VirtualboxInstance
 from brome.core.runner.localhost_instance import LocalhostInstance
+from brome.core.runner.saucelabs_instance import SauceLabsInstance
 from brome.core.runner.browser_config import BrowserConfig
 from brome.core.model.test_batch import TestBatch
 
@@ -74,6 +75,13 @@ class GridRunner(BaseRunner):
             #VIRTUALBOX
             elif browser_config.location == 'virtualbox':
                 vbox = virtualbox.VirtualBox()
+
+            elif browser_config.location == 'saucelabs':
+
+                if not self.instances.get(browser_id):
+                    self.instances[browser_id] = []
+
+                self.instances[browser_id].append(SauceLabsInstance())
 
             elif browser_config.location == 'localhost':
 

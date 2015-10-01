@@ -11,13 +11,13 @@ class BrowserConfig(object):
         self.config = self.browsers_config[self.browser_id]
 
         #LOCATION
-        if self.config.has_key("amiid"):
+        if self.config.get("amiid"):
             self.location = 'ec2'
-        elif self.config.has_key("vbox_name"):
+        elif self.config.get("vbox_name"):
             self.location = 'virtualbox'
-        elif self.config.has_key('appium'):
+        elif self.config.get('appium'):
             self.location = 'appium'
-        elif self.config.has_key('saucelabs'):
+        elif self.config.get('saucelabs'):
             self.location = 'saucelabs'
         else:
             self.location = 'localhost'

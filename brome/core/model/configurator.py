@@ -109,6 +109,7 @@ default_config = {}
 default_config["project"] = {}
 default_config["saucelabs"] = {}
 default_config["proxy_driver"] = {}
+default_config["proxy_element"] = {}
 default_config["browser"] = {}
 default_config["highlight"] = {}
 default_config["runner"] = {}
@@ -120,6 +121,13 @@ default_config["grid_runner"] = {}
 default_config["webserver"] = {}
 
 #OPTIONS
+default_config["proxy_element"]["use_touch_instead_of_click"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Use touch instead of click'
+}
+
 default_config["saucelabs"]["username"] = {
     'default': '',
     'type': 'input',

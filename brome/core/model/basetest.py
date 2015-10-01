@@ -137,8 +137,25 @@ class BaseTest(object):
                 driver = getattr(webdriver, self._browser_config.get('browserName'))()
             except AttributeError:
                 raise Exception("The browserName('%s') is invalid"%self._browser_config.get('browserName'))
+
+        #APPIUM
+        elif self._browser_config.location == 'appium':
+            config = self._browser_config.config
+
+            desired_cap = {}
+            desired_cap['browserName'] = config.get('browserName')
+            desired_cap['deviceName'] = config.get('deviceName')
+            desired_cap['platformName'] = config.get('platformName')
+            desired_cap['platformVersion'] = config.get('platformVersion')
+            desired_cap['nativeWebTap'] = config.get('nativeWebTap')
+            desired_cap['udid'] = config.get('udid')
+
+            driver = webdriver.Remote(
+                command_executor='http://127.0.0.1:4723/wd/hub',
+                desired_capabilities = desired_cap
+            )
         #SAUCELABS
-        elif self._browser_config.location in ['saucelabs']:
+        elif self._browser_config.location == 'saucelabs':
             config = self._browser_config.config
 
             desired_cap = {}

@@ -2,6 +2,8 @@
 
 import traceback
 
+from selenium.webdriver.common.touch_actions import TouchActions
+
 from brome.core.model.utils import *
 
 class ProxyElement(object):
@@ -96,17 +98,24 @@ class ProxyElement(object):
                         )
                 )
 
+        def _click():
+            if self.pdriver.get_config_value("proxy_element:use_touch_instead_of_click"):
+                touch_action = TouchActions(self.pdriver._driver)
+                touch_action.tap(self._element).perform()
+            else:
+                self._element.click()
+
         try:
-            self._element.click()
+            _click()
         except (InvalidElementStateException, WebDriverException) as e:
             self.debug_log(u"click exception: %s"%unicode(e))
             sleep(2)
-            self._element.click()
+            _click()
         except StaleElementReferenceException as e:
             self.debug_log(u"click exception StaleElementReferenceException: %s"%unicode(e))
             sleep(2)
             self._element = self.pdriver.find(self.selector)
-            self._element.click()
+            _click()
 
         return True
 

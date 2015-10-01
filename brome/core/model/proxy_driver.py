@@ -557,7 +557,7 @@ class ProxyDriver(object):
             if highlight:
                 element.highlight(
                     style = self.get_config_value(
-                                'highlight:on_assertion_success'
+                                'highlight:style_on_assertion_success'
                             )
                 )
             if testid is not None:

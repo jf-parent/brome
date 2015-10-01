@@ -15,23 +15,25 @@ Features
 --------
 
 * Simple API
-* Runner for Amazon EC2
-* Saucelabs runner
 * Highly configurable
+* Runner for Amazon EC2, Saucelabs, Virtualbox, Appium
+* Javascript implementation of select, drag and drop, scroll into view
 * IPython embed on assertion for debugging
 * Video recording of the session
 * Persistent test report
 * Webserver
 * Pdb integration
-* Support Appium
 * Visual validation (Beta)
+* Test state persistence system
+* Browsermob proxy integration
+* Support mobile easier (e.g.: click use Touch)
 
 Quick-start
 -----------
 
     ::
 
-    $ cookiecutter https://github.com/worker-9/cookiecutter-brome
+    $ cookiecutter https://github.com/brome-hq/cookiecutter-brome
     $ chmod +x bro
     $ pip install brome
     $ vim config/brome.yml

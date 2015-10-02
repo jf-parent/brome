@@ -2,7 +2,9 @@
 
 import virtualbox
 import paramiko
+import netifaces as ni
 
+from brome.core.model.utils import *
 from .base_instance import BaseInstance
 
 class VirtualboxInstance(BaseInstance):
@@ -39,7 +41,7 @@ class VirtualboxInstance(BaseInstance):
             self.info_log(u"execute_command_on_node exception: %s"%unicode(e))
 
     def startup(self):
-        if not self.browser_config.get('register', False):
+        if not self.browser_config.get('launch', False):
             return
 
         self.info_log("Starting up")
@@ -103,6 +105,8 @@ class VirtualboxInstance(BaseInstance):
                     self.info_log("Setting the guest property in Windows")
 
                     user_session.machine.set_guest_property("hub_ip", "%s:%s"%(hub_ip, '4444'), '')
+
+            return True
 
         except Exception as e:
             self.info_log('Exception: %s'%e)

@@ -13,7 +13,7 @@ class BrowserConfig(object):
         #LOCATION
         if self.config.get("amiid"):
             self.location = 'ec2'
-        elif self.config.get("vbox_name"):
+        elif self.config.get("vbname"):
             self.location = 'virtualbox'
         elif self.config.get('appium'):
             self.location = 'appium'

@@ -12,3 +12,4 @@ c:
   test_files_path: '/Users/pyrat/Documents/PROG/PYTHON/test-migration/resources/test-files/'
 p:
   browserName: 'PhantomJS'
+  available_in_webserver: true

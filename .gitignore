@@ -18,9 +18,8 @@ build
 eggs
 bin
 test_results
+*.log
 
-#phantomjs
-ghostdriver.log
 #OSX
 *.DS_Store
 

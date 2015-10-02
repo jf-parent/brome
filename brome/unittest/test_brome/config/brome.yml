@@ -48,7 +48,7 @@ logger_test:
   filelogger: false
   format: !!python/unicode "[%(batchid)s]\e[34m(%(testname)s)\e[0m:\e[32m%(message)s\e\
     [0m"
-  level: !!python/unicode 'DEBUG'
+  level: !!python/unicode 'INFO'
   streamlogger: true
 project:
   gather_javascript_error: !!python/unicode 'True'
@@ -92,8 +92,8 @@ webserver:
   ASSETS_DEBUG: true
   CACHE_TYPE: !!python/unicode 'simple'
   CLOSED_REGISTRATION: false
-  DEBUG: true
-  DEBUG_TB_ENABLED: true
+  DEBUG: false
+  DEBUG_TB_ENABLED: false
   DEBUG_TB_INTERCEPT_REDIRECTS: false
   HOST: !!python/unicode 'localhost'
   PORT: 5000
@@ -101,6 +101,6 @@ webserver:
   SECRET_KEY: !!python/unicode 'rkaekrjklejrljaekrjekjrejlkfjklewjfjwekjfkweljf'
   SHOW_TEST_INSTANCES: true
   SHOW_VIDEO_CAPTURE: true
-  filelogger: true
+  filelogger: false
   level: !!python/unicode 'INFO'
-  streamlogger: true
+  streamlogger: false

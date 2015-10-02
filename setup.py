@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-
+from setuptools import setup, find_packages
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -25,17 +20,7 @@ setup(
     author="Brome-HQ",
     author_email='brome.hq@gmail.com',
     url='https://github.com/brome-hq/brome',
-    packages=[
-        'brome',
-        'brome.core',
-        'brome.core.model',
-        'brome.core.model.meta',
-        'brome.core.runner',
-        'brome.webserver',
-    ],
-    package_dir={
-        'brome':'brome'
-    },
+    packages=find_packages(),
     include_package_data=True,
     install_requires=requirements,
     license="ISCL",

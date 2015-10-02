@@ -2,7 +2,8 @@ include AUTHORS.rst
 include LICENSE
 include README.rst
 
-recursive-include brome.webserver *
+recursive-include brome/webserver/templates *
+recursive-include brome/webserver/static *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 

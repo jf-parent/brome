@@ -6,4 +6,4 @@ before_script:
   - python setup.py install
   - python brome/unittest/test_brome/test_server/server.py &
   - sleep 3
-script: python brome/unittest/test_brome/bro run -l p
+script: sudo python brome/unittest/test_brome/bro run -l p

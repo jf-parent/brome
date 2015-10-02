@@ -461,23 +461,25 @@ class ProxyDriver(object):
                     take_screenshot = False
 
             if take_screenshot:
+                if self.test_instance._runner_dir:
+                    screenshot_path = os.path.join(
+                            self.test_instance._screenshot_dir,
+                            '%s.png'%string_to_filename(screenshot_name)
+                        )
+                    self._driver.save_screenshot(
+                        screenshot_path
+                    )
+                    self.debug_log(u"Screenshot taken (%s)"%screenshot_path)
+        else:
+            if self.test_instance._runner_dir:
                 screenshot_path = os.path.join(
                         self.test_instance._screenshot_dir,
-                        '%s.png'%string_to_filename(screenshot_name)
+                        '%s.png'%get_timestamp()
                     )
                 self._driver.save_screenshot(
                     screenshot_path
                 )
                 self.debug_log(u"Screenshot taken (%s)"%screenshot_path)
-        else:
-            screenshot_path = os.path.join(
-                    self.test_instance._screenshot_dir,
-                    '%s.png'%get_timestamp()
-                )
-            self._driver.save_screenshot(
-                screenshot_path
-            )
-            self.debug_log(u"Screenshot taken (%s)"%screenshot_path)
 
     #ASSERT
     def assert_present(self, selector, testid = None, **kwargs):
@@ -732,20 +734,21 @@ class ProxyDriver(object):
         if result:
             #SCREENSHOT
             if self.get_config_value("proxy_driver:take_screenshot_on_assertion_success"):
-                screenshot_name = 'succeed_%s_%s_%s.png'%(
-                    string_to_filename(testid),
-                    get_timestamp(),
-                    self.get_id(join_char = '_')
-                )
-                screenshot_path = os.path.join(
-                    self.test_instance._assertion_screenshot_dir,
-                    screenshot_name
-                )
-                screenshot_relative_path = os.path.join(
-                    self.test_instance._assertion_screenshot_relative_dir,
-                    screenshot_name
-                )
-                self.take_screenshot(screenshot_path = screenshot_path)
+                if self.test_instance._runner_dir:
+                    screenshot_name = 'succeed_%s_%s_%s.png'%(
+                        string_to_filename(testid),
+                        get_timestamp(),
+                        self.get_id(join_char = '_')
+                    )
+                    screenshot_path = os.path.join(
+                        self.test_instance._assertion_screenshot_dir,
+                        screenshot_name
+                    )
+                    screenshot_relative_path = os.path.join(
+                        self.test_instance._assertion_screenshot_relative_dir,
+                        screenshot_name
+                    )
+                    self.take_screenshot(screenshot_path = screenshot_path)
 
             #SOUND NOTIFICATION
             if self.get_config_value("runner:play_sound_on_assertion_success"):
@@ -757,20 +760,21 @@ class ProxyDriver(object):
         else:
             #SCREENSHOT
             if self.get_config_value("proxy_driver:take_screenshot_on_assertion_failure"):
-                screenshot_name = 'failed_%s_%s_%s.png'%(
-                    string_to_filename(testid),
-                    get_timestamp(),
-                    self.get_id(join_char = '_')
-                )
-                screenshot_path = os.path.join(
-                    self.test_instance._assertion_screenshot_dir,
-                    screenshot_name
-                )
-                screenshot_relative_path = os.path.join(
-                    self.test_instance._assertion_screenshot_relative_dir,
-                    screenshot_name
-                )
-                self.take_screenshot(screenshot_path = screenshot_path)
+                if self.test_instance._runner_dir:
+                    screenshot_name = 'failed_%s_%s_%s.png'%(
+                        string_to_filename(testid),
+                        get_timestamp(),
+                        self.get_id(join_char = '_')
+                    )
+                    screenshot_path = os.path.join(
+                        self.test_instance._assertion_screenshot_dir,
+                        screenshot_name
+                    )
+                    screenshot_relative_path = os.path.join(
+                        self.test_instance._assertion_screenshot_relative_dir,
+                        screenshot_name
+                    )
+                    self.take_screenshot(screenshot_path = screenshot_path)
 
             #SOUND NOTIFICATION
             if self.get_config_value("runner:play_sound_on_assertion_failure"):

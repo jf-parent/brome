@@ -40,19 +40,19 @@ highlight:
     solid red;'
   use_highlight: true
 logger_runner:
-  filelogger: true
+  filelogger: false
   format: !!python/unicode "[%(batchid)s]\e[32m%(message)s\e[0m"
   level: !!python/unicode 'INFO'
   streamlogger: true
 logger_test:
-  filelogger: true
+  filelogger: false
   format: !!python/unicode "[%(batchid)s]\e[34m(%(testname)s)\e[0m:\e[32m%(message)s\e\
     [0m"
   level: !!python/unicode 'DEBUG'
   streamlogger: true
 project:
   gather_javascript_error: !!python/unicode 'True'
-  test_batch_result_path: !!python/unicode '/Users/pyrat/Documents/PROG/PYTHON/brome/brome/unittest/test_brome/test_results/'
+  test_batch_result_path: False
   update_app_title: !!python/unicode 'True'
   url: !!python/unicode 'http://localhost:7777'
 proxy_driver:

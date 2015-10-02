@@ -33,7 +33,10 @@ class BaseTest(object):
         self._test_batch_id = kwargs.get('test_batch_id')
 
         #TEST BATCH DIRECTORY
-        self._runner_dir = self._runner.runner_dir
+        if self._runner.runner_dir:
+            self._runner_dir = self._runner.runner_dir
+        else:
+            self._runner_dir = False
 
         #LOGGING
         self.configure_logger()
@@ -298,13 +301,16 @@ class BaseTest(object):
     def configure_logger(self):
         logger_name = self._name
 
-        self.test_log_dir = os.path.join(
-            self._runner_dir,
-            "logs"
-        )
+        if self._runner_dir:
+            self.test_log_dir = os.path.join(
+                self._runner_dir,
+                "logs"
+            )
+
         self._logger = logging.getLogger(logger_name)
 
-        create_dir_if_doesnt_exist(self.test_log_dir)
+        if self._runner_dir:
+            create_dir_if_doesnt_exist(self.test_log_dir)
 
         format_ = self.get_config_value("logger_test:format")
 
@@ -315,16 +321,17 @@ class BaseTest(object):
             sh.setFormatter(stream_formatter)
             self._logger.addHandler(sh)
 
-        #File logger
-        if self.get_config_value('logger_test:filelogger'):
-            test_name = string_to_filename(self._name)
-            fh = logging.FileHandler(os.path.join(
-                self.test_log_dir,
-                "%s_%s.log"%(test_name, self._browser_config.get_id())
-            ))
-            file_formatter = logging.Formatter(format_)
-            fh.setFormatter(file_formatter)
-            self._logger.addHandler(fh)
+        if self._runner_dir:
+            #File logger
+            if self.get_config_value('logger_test:filelogger'):
+                test_name = string_to_filename(self._name)
+                fh = logging.FileHandler(os.path.join(
+                    self.test_log_dir,
+                    "%s_%s.log"%(test_name, self._browser_config.get_id())
+                ))
+                file_formatter = logging.Formatter(format_)
+                fh.setFormatter(file_formatter)
+                self._logger.addHandler(fh)
 
         self._logger.setLevel(getattr(logging, self.get_config_value('logger_test:level')))
 
@@ -426,15 +433,16 @@ class BaseTest(object):
 
         file_name = "%s - %s"%(self.pdriver.get_id(join_char = '_'), self._name)
 
-        #CRASH LOG
-        with open(os.path.join(self._crash_report_dir, string_to_filename('%s.log'%file_name)), 'w') as f:
-            f.write(str(tb))
+        if self._runner_dir:
+            #CRASH LOG
+            with open(os.path.join(self._crash_report_dir, string_to_filename('%s.log'%file_name)), 'w') as f:
+                f.write(str(tb))
 
-        #CRASH SCREENSHOT
-        self.pdriver.take_screenshot(screenshot_path = os.path.join(
-            self._crash_report_dir,
-            string_to_filename('%s.png'%file_name)
-        ))
+            #CRASH SCREENSHOT
+            self.pdriver.take_screenshot(screenshot_path = os.path.join(
+                self._crash_report_dir,
+                string_to_filename('%s.png'%file_name)
+            ))
 
     def get_config_value(self, config_name):
         if not hasattr(self, 'browser_brome_config'):
@@ -454,6 +462,9 @@ class BaseTest(object):
         return value
 
     def configure_test_result_dir(self):
+
+        if not self._runner_dir:
+            return
 
         #CRASH DIRECTORY
         self._crash_report_dir = os.path.join(

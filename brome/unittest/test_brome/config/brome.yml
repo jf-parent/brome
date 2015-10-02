@@ -1,0 +1,107 @@
+saucelabs:
+  username: 'worker-9'
+  key: '74344251-c069-49e3-b195-8fb330902e1a'
+browser:
+  maximize_window: false
+  window_height: 725
+  window_width: 1650
+  window_x_position: 0
+  window_y_position: 0
+database:
+  #sqlalchemy.url: !!python/unicode 'mysql://root:1asdf!!@localhost/brome_unittest'
+  sqlalchemy.url: !!python/unicode 'sqlite:////Users/pyrat/Documents/PROG/PYTHON/brome/brome/unittest/test_brome/unittest.db'
+ec2:
+  wait_after_instance_launched: 30
+  wait_until_system_and_instance_check_performed: true
+grid_runner:
+  kill_selenium_server: true
+  max_running_time: 7200
+  selenium_hub_config: !!python/unicode '/Users/pyrat/Documents/PROG/PYTHON/test-migration/resources/hub-config.json'
+  selenium_server_command: !!python/unicode 'java -jar {selenium_server_jar_path}
+    -role hub -hubConfig {selenium_hub_config} -DPOOL_MAX 512 &'
+  selenium_server_ip: !!python/unicode 'localhost'
+  selenium_server_jar_path: !!python/unicode '/Users/pyrat/Documents/PROG/PYTHON/test-migration/resources/selenium-server-standalone.jar'
+  selenium_server_port: 4444
+  start_selenium_server: false
+highlight:
+  highlight_on_assertion_failure: true
+  highlight_on_assertion_success: true
+  highlight_when_element_is_clicked: true
+  highlight_when_element_is_visible: true
+  highlight_when_element_receive_keys: true
+  style_on_assertion_failure: !!python/unicode 'background: red; border: 2px solid
+    black;'
+  style_on_assertion_success: !!python/unicode 'background: green; border: 2px solid
+    black;'
+  style_when_element_is_clicked: !!python/unicode 'background: yellow; border: 2px
+    solid red;'
+  style_when_element_is_visible: !!python/unicode 'background: purple; border: 2px
+    solid black;'
+  style_when_element_receive_keys: !!python/unicode 'background: yellow; border: 2px
+    solid red;'
+  use_highlight: true
+logger_runner:
+  filelogger: true
+  format: !!python/unicode "[%(batchid)s]\e[32m%(message)s\e[0m"
+  level: !!python/unicode 'INFO'
+  streamlogger: true
+logger_test:
+  filelogger: true
+  format: !!python/unicode "[%(batchid)s]\e[34m(%(testname)s)\e[0m:\e[32m%(message)s\e\
+    [0m"
+  level: !!python/unicode 'DEBUG'
+  streamlogger: true
+project:
+  gather_javascript_error: !!python/unicode 'True'
+  test_batch_result_path: !!python/unicode '/Users/pyrat/Documents/PROG/PYTHON/brome/brome/unittest/test_brome/test_results/'
+  update_app_title: !!python/unicode 'True'
+  url: !!python/unicode 'http://localhost:7777'
+proxy_driver:
+  use_javascript_dnd: true
+  default_timeout: 5
+  intercept_javascript_error: true
+  raise_exception: true
+  take_screenshot_on_assertion_failure: true
+  take_screenshot_on_assertion_success: false
+  validate_css_selector: true
+  validate_xpath_selector: true
+  wait_until_not_present_before_assert_not_present: true
+  wait_until_not_visible_before_assert_not_visible: true
+  wait_until_present_before_assert_present: true
+  wait_until_present_before_find: true
+  wait_until_visible_before_assert_visible: true
+  wait_until_visible_before_find: true
+runner:
+  cache_screenshot: true
+  embed_on_assertion_failure: true
+  embed_on_assertion_success: false
+  embed_on_test_crash: true
+  play_sound_on_assertion_failure: true
+  play_sound_on_assertion_success: false
+  play_sound_on_ipython_embed: true
+  play_sound_on_pdb: true
+  play_sound_on_test_crash: true
+  play_sound_on_test_finished: true
+  sound_on_assertion_failure: !!python/unicode '{testid} failed'
+  sound_on_assertion_success: !!python/unicode '{testid} succeeded'
+  sound_on_ipython_embed: !!python/unicode 'Attention required'
+  sound_on_pdb: !!python/unicode 'Attention required'
+  sound_on_test_crash: !!python/unicode 'Crash'
+  sound_on_test_finished: !!python/unicode 'Test finished'
+webserver:
+  open_browser: false
+  ASSETS_DEBUG: true
+  CACHE_TYPE: !!python/unicode 'simple'
+  CLOSED_REGISTRATION: false
+  DEBUG: true
+  DEBUG_TB_ENABLED: true
+  DEBUG_TB_INTERCEPT_REDIRECTS: false
+  HOST: !!python/unicode 'localhost'
+  PORT: 5000
+  REGISTRATION_TOKEN: !!python/unicode 'ratata'
+  SECRET_KEY: !!python/unicode 'rkaekrjklejrljaekrjekjrejlkfjklewjfjwekjfkweljf'
+  SHOW_TEST_INSTANCES: true
+  SHOW_VIDEO_CAPTURE: true
+  filelogger: true
+  level: !!python/unicode 'INFO'
+  streamlogger: true

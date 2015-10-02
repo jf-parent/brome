@@ -1,0 +1,14 @@
+f:
+  browserName: 'Firefox'
+  available_in_webserver: true
+  test_files_path: '/Users/pyrat/Documents/PROG/PYTHON/test-migration/resources/test-files/'
+c_saucelabs:
+  saucelabs: True
+  platform: "Mac OS X 10.9"
+  browserName: "chrome"
+  version: "31"
+c:
+  browserName: 'Chrome'
+  test_files_path: '/Users/pyrat/Documents/PROG/PYTHON/test-migration/resources/test-files/'
+p:
+  browserName: 'PhantomJS'

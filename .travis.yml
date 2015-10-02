@@ -3,6 +3,7 @@ python:
   - "2.7"
 install: "pip install -r requirements.txt"
 before_script:
+  - python setup.py install
   - python brome/unittest/test_brome/test_server/server.py &
   - sleep 3
 script: python brome/unittest/test_brome/bro run -l p

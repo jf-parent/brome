@@ -8,8 +8,7 @@ browser:
   window_x_position: 0
   window_y_position: 0
 database:
-  #sqlalchemy.url: !!python/unicode 'mysql://root:1asdf!!@localhost/brome_unittest'
-  sqlalchemy.url: !!python/unicode 'sqlite:////Users/pyrat/Documents/PROG/PYTHON/brome/brome/unittest/test_brome/unittest.db'
+  sqlalchemy.url: !!python/unicode 'sqlite:///unittest.db'
 ec2:
   wait_after_instance_launched: 30
   wait_until_system_and_instance_check_performed: true
@@ -73,15 +72,15 @@ proxy_driver:
   wait_until_visible_before_find: true
 runner:
   cache_screenshot: true
-  embed_on_assertion_failure: true
+  embed_on_assertion_failure: false
   embed_on_assertion_success: false
-  embed_on_test_crash: true
-  play_sound_on_assertion_failure: true
+  embed_on_test_crash: false
+  play_sound_on_assertion_failure: false
   play_sound_on_assertion_success: false
-  play_sound_on_ipython_embed: true
-  play_sound_on_pdb: true
-  play_sound_on_test_crash: true
-  play_sound_on_test_finished: true
+  play_sound_on_ipython_embed: false
+  play_sound_on_pdb: false
+  play_sound_on_test_crash: false
+  play_sound_on_test_finished: false
   sound_on_assertion_failure: !!python/unicode '{testid} failed'
   sound_on_assertion_success: !!python/unicode '{testid} succeeded'
   sound_on_ipython_embed: !!python/unicode 'Attention required'

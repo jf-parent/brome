@@ -1,5 +1,6 @@
 wheel==0.23.0
 selenium
+decorator
 pudb==2014.1
 PyYAML==3.11
 ipython==3.0.0

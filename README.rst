@@ -8,6 +8,9 @@ brome
 .. image:: https://img.shields.io/pypi/v/brome.svg
         :target: https://pypi.python.org/pypi/brome
 
+.. image:: https://readthedocs.org/projects/brome/badge/?version=latest
+    :target: http://brome.readthedocs.org/en/latest/?badge=latest
+    :alt: Documentation Status
 
 Framework for Selenium
 

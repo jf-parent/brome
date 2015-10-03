@@ -39,6 +39,10 @@ class ProxyDriver(object):
         
         return True
 
+    def inject_js_script(self, script_uri):
+        """
+        """
+
     def init_javascript_error_interception(self):
         self.debug_log("Initializing javascript error interception")
 
@@ -817,6 +821,10 @@ class ProxyDriver(object):
         self.test_instance.critical_log(msg)
 
     def configure_resolution(self):
+        #This is not supported on android
+        if self.get_platform().lower() == 'android':
+            return
+
         #Maximaze window
         if self.get_config_value('browser:maximize_window'):
             self._driver.maximize_window()

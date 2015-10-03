@@ -13,7 +13,7 @@
 # Packages
 *.egg
 *.egg-info
-.dist
+dist
 build
 eggs
 bin
@@ -24,4 +24,4 @@ test_results
 *.DS_Store
 
 # Sphinx
-docs/_build
+docs/source/_build/

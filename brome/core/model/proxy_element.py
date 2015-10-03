@@ -110,6 +110,7 @@ class ProxyElement(object):
         except (InvalidElementStateException, WebDriverException) as e:
             self.debug_log(u"click exception: %s"%unicode(e))
             sleep(2)
+            self.scroll_into_view()
             _click()
         except StaleElementReferenceException as e:
             self.debug_log(u"click exception StaleElementReferenceException: %s"%unicode(e))

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 from setuptools import setup, find_packages
 
 with open('README.rst') as readme_file:
@@ -14,7 +15,7 @@ with open('requirements.txt', 'r') as fd:
 
 setup(
     name='brome',
-    version='0.0.5',
+    version='0.0.7',
     description="Framework For Selenium",
     long_description=readme,
     author="Brome-HQ",

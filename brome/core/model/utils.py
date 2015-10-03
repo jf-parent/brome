@@ -1,20 +1,23 @@
 #! -*- coding: utf-8 -*-
 
 from urlparse import urlparse
-import psutil
 import string
 import os
-from pudb import set_trace
 import traceback
 from datetime import datetime
 import sys
 from subprocess import call
-from selenium.common.exceptions import *
 from time import sleep
+
+from selenium.common.exceptions import *
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from IPython import embed
+from pudb import set_trace
+import psutil
+
+from .exceptions import *
 
 def get_timestamp():
     return datetime.now().strftime('%Y-%m-%d-%H-%M-%S')

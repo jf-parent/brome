@@ -22,15 +22,24 @@ from brome.core.model.test import Test
 from brome.core.model.configurator import get_config_value, parse_brome_config_from_browser_config, default_config, test_config_to_dict
 
 class BaseTest(object):
+    """Base test class used to init the driver, load and save state, start and stop video recording
 
-    def __init__(self, **kwargs):
+    Attributes:
+        runner (object): the runner that created the BaseTest instance
+        name (str): the name of the test
+        index (int): the index of the test
+        browser_config (object): the browser config; used to init the driver
+        test_batch_id (int): the test batch id
+    """
+
+    def __init__(self, runner, name, index, browser_config, test_batch_id):
+        self._runner = runner
+        self._name = name
+        self._index = index
+        self._browser_config = browser_config
+        self._test_batch_id = test_batch_id
+
         self._crash_error = False
-
-        self._runner = kwargs.get('runner')
-        self._name = kwargs.get('name')
-        self._index = kwargs.get('index')
-        self._browser_config = kwargs.get('browser_config')
-        self._test_batch_id = kwargs.get('test_batch_id')
 
         #TEST BATCH DIRECTORY
         if self._runner.runner_dir:
@@ -42,10 +51,12 @@ class BaseTest(object):
         self.configure_logger()
 
         #DRIVER
-        self.init_driver()
+        self.pdriver = self.init_driver()
 
+        #TEST RESULT DIRECTORY
         self.configure_test_result_dir()
 
+        #DRIVER RESOLUTION
         self.pdriver.configure_resolution()
 
         #VIDEO RECORDING
@@ -114,6 +125,22 @@ class BaseTest(object):
             """
 
     def init_driver(self, retry = 10):
+        """Init driver will instanciate a webdriver according to the browser config
+
+        First a webdriver is instanciate according to the provided browser config
+        then the webdriver is wrapped in the brome proxy_driver
+
+        Args:
+            retry (int): the number of time the init driver will retry to init the driver if it fail
+                            default: 10
+
+        Returns:
+            proxy_driver instance
+            
+        Raises:
+            Exception InitDriverException
+
+        """
         #LOCAL
         if self._browser_config.location == 'localhost':
             """
@@ -215,15 +242,19 @@ class BaseTest(object):
                     else:
                         raise Exception("Cannot get the driver")
 
-        self.pdriver = ProxyDriver(
+        #Wrap the driver in the brome proxy driver and return it
+        return ProxyDriver(
             driver = driver,
             test_instance = self,
             runner = self._runner
         )
 
-    def delete_state(self):
-        state_pickle = self.get_state_pickle_path()
-
+    def delete_state(self, state_pickle):
+        """This will delete the pickle that hold the saved test state
+            
+        Args:
+            state_pickle (path): the path of the pickle that will be delete
+        """
         if os.path.isfile(state_pickle):
             os.remove(state_pickle)
             self.info_log("State deleted: %s"%state_pickle)
@@ -358,7 +389,7 @@ class BaseTest(object):
             self.before_run()
 
             if self._test_config.get("delete_state"):
-                self.delete_state()
+                self.delete_state(self.get_state_pickle_path())
 
             if not self.load_state():
                 if hasattr(self, 'create_state'):

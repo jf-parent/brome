@@ -9,9 +9,10 @@ Welcome to Brome's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    installation
+   configuration
 
 
 Indices and tables

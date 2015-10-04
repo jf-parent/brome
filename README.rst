@@ -9,7 +9,7 @@ brome
         :target: https://pypi.python.org/pypi/brome
 
 .. image:: https://readthedocs.org/projects/brome/badge/?version=latest
-    :target: http://brome.readthedocs.org/en/main
+    :target: http://brome.readthedocs.org/en/latest
     :alt: Documentation Status
 
 Framework for Selenium

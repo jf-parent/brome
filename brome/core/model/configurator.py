@@ -648,13 +648,6 @@ default_config["webserver"]["ASSETS_DEBUG"] = {
     'title': 'Assets debug',
 }
 
-default_config["webserver"]["DEBUG"] = {
-    'default': True,
-    'type': 'checkbox',
-    'visible': True,
-    'title': 'Assets debug',
-}
-
 default_config["webserver"]["DEBUG_TB_INTERCEPT_REDIRECTS"] = {
     'default': False,
     'type': 'checkbox',

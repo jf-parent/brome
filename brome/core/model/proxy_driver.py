@@ -39,9 +39,21 @@ class ProxyDriver(object):
         
         return True
 
-    def inject_js_script(self, script_uri):
+    def inject_js_script(self, script_url):
+        """inject a javascript script inside the current page
+
+        Arguments:
+            script_url: str (path)
+
+        Returns: None
         """
-        """
+        self._driver.execute_script("""
+            var script = document.createElement("script");
+
+            script.src = "%s"
+
+            document.head.appendChild(script);
+        """%scrip_url)
 
     def init_javascript_error_interception(self):
         self.debug_log("Initializing javascript error interception")

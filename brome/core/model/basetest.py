@@ -139,6 +139,7 @@ class BaseTest(object):
             
         Raises:
             Exception InitDriverException
+            Exception InvalidBrowserName
 
         """
         #LOCAL
@@ -166,7 +167,7 @@ class BaseTest(object):
             try:
                 driver = getattr(webdriver, self._browser_config.get('browserName'))()
             except AttributeError:
-                raise Exception("The browserName('%s') is invalid"%self._browser_config.get('browserName'))
+                raise InvalidBrowserName("The browserName('%s') is invalid"%self._browser_config.get('browserName'))
 
         #APPIUM
         elif self._browser_config.location == 'appium':
@@ -184,6 +185,7 @@ class BaseTest(object):
                 command_executor='http://127.0.0.1:4723/wd/hub',
                 desired_capabilities = desired_cap
             )
+
         #SAUCELABS
         elif self._browser_config.location == 'saucelabs':
             config = self._browser_config.config
@@ -240,7 +242,7 @@ class BaseTest(object):
 
                         return self.init_driver(retry = (retry - 1))
                     else:
-                        raise Exception("Cannot get the driver")
+                        raise InitDriverException("Cannot get the driver")
 
         #Wrap the driver in the brome proxy driver and return it
         return ProxyDriver(
@@ -260,44 +262,88 @@ class BaseTest(object):
             self.info_log("State deleted: %s"%state_pickle)
 
     def get_state_pickle_path(self):
+        """Return the state's pickle path
+
+        The project:url config need to be set in order to extract the server name. Each server will have it own state
+        The test name is used to name the state.
+        The project:absolute_path config is needed
+
+        E.g.: the test named "test 1" that run with the project:url ("http://www.example.com") with have a state named:
+        tests/states/test_1_example.com.pkl
+
+        Returns: str (path)
+        """
+
         #Extract the server name
         server = urlparse(self.pdriver.get_config_value("project:url")).netloc
 
-        state_dir = os.path.join(
+        states_dir = os.path.join(
             self.get_config_value("project:absolute_path"),
             "tests",
             "states"
         )
-        create_dir_if_doesnt_exist(state_dir)
+        create_dir_if_doesnt_exist(states_dir)
 
         #TODO should be configurable
-        state_pickle = os.path.join(
-            state_dir,
+        state_pickle_path = os.path.join(
+            states_dir,
             string_to_filename('%s_%s.pkl'%(self._name.replace(' ', '_'), server))
         )
 
-        return  state_pickle
+        return  state_pickle_path
 
     def save_state(self):
+        """Save the state in a pickle
+
+        First remove all the instance variables that are private (_*).
+        Then remove the pdriver instance variable.
+        Finally cleanup the state using the Stateful.cleanup_state function.
+        The cleanup is recursive.
+
+        The test state will be saved to the path returned by the get_state_pickle_path.
+        
+        Returns: None
+        """
         self.info_log("Saving state...")
 
         state = {}
+
+        #Remove all the instance variables that are private
         state = {key:value for (key, value) in self.__dict__.iteritems() if key[0] != '_'}
+
+        #Remove the pdriver
         del state['pdriver']
 
+        #Cleanup the state
         effective_state = Stateful.cleanup_state(state)
 
-        state_pickle = self.get_state_pickle_path()
-        
-        with open(state_pickle,'wb') as s:
-            pickle.dump(effective_state, s)
+        #Save the state
+        state_pickle_path = self.get_state_pickle_path()
+        with open(state_pickle_path, 'wb') as fd:
+            pickle.dump(effective_state, fd)
 
-        self.info_log("State saved: %s"%state_pickle)
+        self.info_log("State saved: %s"%state_pickle_path)
 
     def load_state(self):
+        """Load the state pickle into the instance object if a state is found
+
+        The state will be loaded in the basetest instance if a state exist.
+        The pdriver will be set on each instance that inherited from Stateful
+        These instance can be in a dict or a list. It is not recursive tho.
+
+        If the instance has an after_load method, this method will be called
+        E.g.:
+        class Base(object):
+            def after_load(self):
+                self.app = self.pdriver.app
+
+        Returns: bool True if a state was found; False if no state was found;
+        """
         self.info_log("Loading state...")
 
+        #Set the pdriver for an object that inherited from Stateful
         def set_pdriver(value):
+            #TODO support class that inherited Stateful
             if Stateful in value.__class__.__bases__:
                 value.pdriver = self.pdriver
                 if hasattr(value, 'after_load'):
@@ -309,40 +355,61 @@ class BaseTest(object):
                 for k, v in value.iteritems():
                     set_pdriver(v)
 
-        #Extract the server name
-        state_pickle = self.get_state_pickle_path()
-
-        if os.path.isfile(state_pickle):
-            with open(state_pickle, 'rb') as s:
-                state = pickle.load(s)
+        #Load the state pickle
+        state_pickle_path = self.get_state_pickle_path()
+        if os.path.isfile(state_pickle_path):
+            with open(state_pickle_path, 'rb') as fd:
+                state = pickle.load(fd)
         else:
             self.info_log("No state found.")
 
             return False
 
+        #Set the pdriver
         for key, value in state.iteritems():
             set_pdriver(value)
 
+        #Update the instance variable dictionary
         self.__dict__.update(state)
 
-        self.info_log("State loaded")
+        self.info_log("State loaded.")
 
         return True
 
     def configure_logger(self):
+        """Configure the logger for the test
+
+        Configure the logger from the logger_test config:
+            logger_test:level
+            logger_test:streamlogger
+            logger_test:filelogger
+            logger_test:format
+
+        See documentation: http://brome.readthedocs.org/en/release/configuration.html#logger-test
+
+        If the config project:test_batch_result_path is set to False then the filelogger will not be configured.
+
+        Returns: None
+        """
+
+        #Logger name
         logger_name = self._name
 
+        #Log directory
         if self._runner_dir:
             self.test_log_dir = os.path.join(
                 self._runner_dir,
                 "logs"
             )
 
+        #Logger
         self._logger = logging.getLogger(logger_name)
 
+        #Create the log directory
         if self._runner_dir:
             create_dir_if_doesnt_exist(self.test_log_dir)
 
+        #Format
         format_ = self.get_config_value("logger_test:format")
 
         #Stream logger 
@@ -352,8 +419,8 @@ class BaseTest(object):
             sh.setFormatter(stream_formatter)
             self._logger.addHandler(sh)
 
+        #File logger
         if self._runner_dir:
-            #File logger
             if self.get_config_value('logger_test:filelogger'):
                 test_name = string_to_filename(self._name)
                 fh = logging.FileHandler(os.path.join(
@@ -364,6 +431,7 @@ class BaseTest(object):
                 fh.setFormatter(file_formatter)
                 self._logger.addHandler(fh)
 
+        #Set level
         self._logger.setLevel(getattr(logging, self.get_config_value('logger_test:level')))
 
     def get_logger_dict(self):

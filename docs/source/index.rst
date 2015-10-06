@@ -18,6 +18,16 @@ Welcome to Brome's documentation!
 
 Brome is a Framework for Selenium
 
+Documentation
+-------------
+
+.. toctree::
+   :maxdepth: 1
+
+   installation
+   configuration
+   location
+
 Features
 --------
 
@@ -34,32 +44,4 @@ Features
 * Test state persistence system
 * Browsermob proxy integration
 * Support mobile easier (e.g.: click use Touch)
-
-Quick-start
------------
-
-    ::
-
-    $ cookiecutter https://github.com/brome-hq/cookiecutter-brome
-    $ chmod +x bro
-    $ pip install brome
-    $ vim config/brome.yml
-    $ ./bro admin --create-database
-
-Documentation
--------------
-
-.. toctree::
-   :maxdepth: 1
-
-   installation
-   configuration
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 

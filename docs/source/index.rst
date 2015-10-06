@@ -26,6 +26,7 @@ Documentation
 
    installation
    configuration
+   location
 
 Features
 --------

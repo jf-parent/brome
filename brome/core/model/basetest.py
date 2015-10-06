@@ -11,7 +11,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 #from browsermobproxy import Server
 
-from brome.castro import Castro
+from castro import Castro
 from brome.core.model.utils import *
 from brome.core.model.stateful import Stateful
 from brome.core.model.proxy_driver import ProxyDriver
@@ -98,8 +98,8 @@ class BaseTest(object):
                 string_to_filename('%s.flv'%(self._name.replace(' ', '_')))
             )
 
+            os.environ["CASTRO_DATA_DIR"] = self._video_recording_dir
             self._castro = Castro(
-                data_dir = self._video_recording_dir,
                 filename = self._video_capture_file_path,
                 host = node_ip,
                 port = self._browser_config.get('vnc_port', 5900)

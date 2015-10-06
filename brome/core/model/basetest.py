@@ -266,7 +266,6 @@ class BaseTest(object):
 
         The project:url config need to be set in order to extract the server name. Each server will have it own state
         The test name is used to name the state.
-        The project:absolute_path config is needed
 
         E.g.: the test named "test 1" that run with the project:url ("http://www.example.com") with have a state named:
         tests/states/test_1_example.com.pkl

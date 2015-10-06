@@ -53,7 +53,7 @@ class ProxyDriver(object):
             script.src = "%s"
 
             document.head.appendChild(script);
-        """%scrip_url)
+        """%script_url)
 
     def init_javascript_error_interception(self):
         self.debug_log("Initializing javascript error interception")

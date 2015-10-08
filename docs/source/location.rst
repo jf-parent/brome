@@ -27,6 +27,11 @@ The find method accept three kwargs::
         raise_exception = True
     )
 
+The defaults for the kwargs wait_until_present, wait_until_visible and raise_exception can be set respectively with:
+* proxy_driver:wait_until_present_before_find
+* proxy_driver:wait_until_visible_before_find
+* proxy_driver:raise_exception
+
 The `find` and `find_last` method return a `proxy_element`.
 
 The `find_all` method return a `proxy_element_list`.

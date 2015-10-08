@@ -27,6 +27,7 @@ Documentation
    installation
    configuration
    location
+   waiting
 
 Features
 --------

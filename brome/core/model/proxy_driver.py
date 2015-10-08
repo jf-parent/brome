@@ -14,24 +14,57 @@ from brome.core.model.proxy_element import ProxyElement
 from brome.core.model.proxy_element_list import ProxyElementList
 
 class ProxyDriver(object):
+    """This class act as a proxy between the driver calls and the selenium driver
 
-    def __init__(self, **kwargs):
-        self._driver = kwargs.get('driver')
-        self.test_instance = kwargs.get('test_instance')
-        self.runner = kwargs.get('runner')
+    It add functionalities or add value to existing selenium functionalities
+
+    If the proxy driver doesn't have a particular method it automatically redirect it to the selenium native driver
+
+    If you need to bypass the proxy driver you can by accessing the _driver directly:
+        e.g.::
+
+            pdriver._driver.find_element_by_xpath("//div")
+
+    Attributes:
+        driver (object): the native selenium driver
+        test_instance (object): the test instance binded to this driver
+        runner (object): the runner instance binded to this driver
+    """
+
+    def __init__(self, driver, test_instance, runner):
+        self._driver = driver
+        self.test_instance = test_instance
+        self.runner = runner
 
         self.browser_config = self.test_instance._browser_config
         self.brome = self.runner.brome
         self.selector_dict = self.brome.selector_dict
 
+        #Use when we run with the remote runner
+        #We don't want to embed in this case
         self.embed_disabled = False
 
         self.no_javascript_error_string = 'No javascript error'
     
     def __getattr__(self, funcname):
+        """Redirect to the native selenium driver when necessary
+        """
+
         return getattr(self._driver, funcname)
 
     def get(self, url):
+        """Navigate to a specific url
+
+        This specific implementation inject a javascript script to intercept the javascript error
+        
+        Configurable with the "proxy_driver:intercept_javascript_error" config
+
+        Args:
+            url (str): the url to navigate to
+
+        Returns:
+            bool
+        """
         self._driver.get(url)
 
         if self.get_config_value("proxy_driver:intercept_javascript_error"):
@@ -47,6 +80,7 @@ class ProxyDriver(object):
 
         Returns: None
         """
+
         self._driver.execute_script("""
             var script = document.createElement("script");
 
@@ -56,6 +90,8 @@ class ProxyDriver(object):
         """%script_url)
 
     def init_javascript_error_interception(self):
+        """Inject javascript code that will gather the javascript raised
+        """
         self.debug_log("Initializing javascript error interception")
 
         self._driver.execute_script("""
@@ -67,22 +103,25 @@ class ProxyDriver(object):
             };
         """)
 
-    def print_javascript_error(self, **kwargs):
+    def print_javascript_error(self):
+        """Print to the info log the gathered javascript error
+
+        If no error is found then nothing is printed
+        """
+
         errors = self.get_javascript_error(return_type = 'list')
         if errors:
             self.info_log("Javascript error:")
             for error in errors:
                 self.info_log(error)
 
-    def get_javascript_error(self, **kwargs):
-        """
-            kwargs:
-                return_type: 'string' | 'list'; default: 'string'
-        """
-        
-        return_type = kwargs.get('return_type', 'string')
+    def get_javascript_error(self, return_type = 'string'):
+        """Return the gathered javascript error
 
-        js_errors = []
+        Args:
+            return_type: 'string' | 'list'; default: 'string'
+        """
+
         if self.get_config_value("proxy_driver:intercept_javascript_error"):
             js_errors = self._driver.execute_script('return window.jsErrors; window.jsErrors = [];')
 
@@ -96,15 +135,24 @@ class ProxyDriver(object):
                     return []
             else:
                 if len(js_errors):
-                    return '\n'.join(js_errors)
+                    return os.linesep.join(js_errors)
                 else:
                     return self.no_javascript_error_string
         else:
-            self.warning_log("get_javascript_error was call but proxy_driver:intercept_javascript_error is set to False")
+            self.warning_log("get_javascript_error was called but proxy_driver:intercept_javascript_error is set to False.")
             return []
 
     #IS
-    def is_present(self, selector, **kwargs):
+    def is_present(self, selector):
+        """Check if an element is present in the dom or not
+
+        This method won't check if the element is displayed or not
+        This method won't wait until the element is visible or present
+        This method won't raise any exception if the element is not present
+
+        Returns:
+            bool: True if the element is present; False otherwise
+        """
         self.debug_log(u"Is present (%s)"%selector)
         
         element = self.find(
@@ -120,7 +168,21 @@ class ProxyDriver(object):
             self.debug_log("is present: False")
             return False
 
-    def is_visible(self, selector, **kwargs):
+    def is_visible(self, selector):
+        """Check if an element is visible in the dom or not
+
+        This method will check if the element is displayed or not
+
+        This method might (according to the config highlight:element_is_visible)
+        highlight the element if it is visible
+
+        This method won't wait until the element is visible or present
+        This method won't raise any exception if the element is not visible
+
+        Returns:
+            bool: True if the element is visible; False otherwise
+        """
+
         self.debug_log(u"Is visible (%s)"%selector)
 
         element = self.find(
@@ -149,10 +211,29 @@ class ProxyDriver(object):
 
     #FIND
     def find(self, selector, **kwargs):
+        """Find an element with a selector
+
+        Args:
+            selector (str): the selector used to find the element
+
+        Kwargs:
+            wait_until_present (bool)
+            wait_until_visible (bool)
+            raise_exception (bool)
+
+        Returns:
+            None if no element was found
+            proxy_element is an element was found
+
+        Raises:
+            this function might raise an exception depending on the raise_exception kwargs
+            or
+            the config proxy_driver:raise_exception
+        """
+
         self.debug_log(u"Finding element with selector: %s"%selector)
 
         elements = self.find_all(selector, **kwargs)
-
         if len(elements):
             self.debug_log(u"find (%s): Element found"%(selector))
             return elements[0]
@@ -161,10 +242,29 @@ class ProxyDriver(object):
             return None
 
     def find_last(self, selector, **kwargs):
+        """Return the last element found with a selector
+
+        Args:
+            selector (str): the selector used to find the element
+
+        Kwargs:
+            wait_until_present (bool)
+            wait_until_visible (bool)
+            raise_exception (bool)
+
+        Returns:
+            None if no element was found
+            proxy_element is an element was found
+
+        Raises:
+            this function might raise an exception depending on the raise_exception kwargs
+            or
+            the config proxy_driver:raise_exception
+        """
+
         self.debug_log(u"Finding last element with selector: %s"%selector)
 
         elements = self.find_all(selector, **kwargs)
-
         if len(elements):
             self.debug_log(u"find_last (%s): element found"%selector)
             return elements[-1]
@@ -173,6 +273,26 @@ class ProxyDriver(object):
             return None
 
     def find_all(self, selector, **kwargs):
+        """Return all the elements found with a selector
+
+        Args:
+            selector (str): the selector used to find the element
+
+        Kwargs:
+            wait_until_present (bool) default configurable via proxy_driver:wait_until_present_before_find
+            wait_until_visible (bool) default configurable via proxy_driver:wait_until_visible_before_find
+            raise_exception (bool) default configurable via proxy_driver:raise_exception
+
+        Returns:
+            empty list if no element was found
+            proxy_element_list when element are found
+
+        Raises:
+            this function might raise an exception depending on the raise_exception kwargs
+            or
+            the config proxy_driver:raise_exception
+        """
+
         self.debug_log(u"Finding elements with selector: %s"%selector)
 
         raise_exception = kwargs.get(

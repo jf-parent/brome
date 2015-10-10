@@ -28,6 +28,7 @@ Documentation
    configuration
    location
    waiting
+   interaction
 
 Features
 --------

@@ -52,96 +52,6 @@ class ProxyDriver(object):
 
         return getattr(self._driver, funcname)
 
-    def get(self, url):
-        """Navigate to a specific url
-
-        This specific implementation inject a javascript script to intercept the javascript error
-        
-        Configurable with the "proxy_driver:intercept_javascript_error" config
-
-        Args:
-            url (str): the url to navigate to
-
-        Returns:
-            bool
-        """
-        self._driver.get(url)
-
-        if self.get_config_value("proxy_driver:intercept_javascript_error"):
-            self.init_javascript_error_interception()
-        
-        return True
-
-    def inject_js_script(self, script_url):
-        """inject a javascript script inside the current page
-
-        Arguments:
-            script_url: str (path)
-
-        Returns: None
-        """
-
-        self._driver.execute_script("""
-            var script = document.createElement("script");
-
-            script.src = "%s"
-
-            document.head.appendChild(script);
-        """%script_url)
-
-    def init_javascript_error_interception(self):
-        """Inject javascript code that will gather the javascript raised
-        """
-        self.debug_log("Initializing javascript error interception")
-
-        self._driver.execute_script("""
-            window.jsErrors = [];
-            window.onerror = function (errorMessage, url, lineNumber) {
-                var message = 'Error: ' + errorMessage;
-                window.jsErrors.push(message);
-                return false;
-            };
-        """)
-
-    def print_javascript_error(self):
-        """Print to the info log the gathered javascript error
-
-        If no error is found then nothing is printed
-        """
-
-        errors = self.get_javascript_error(return_type = 'list')
-        if errors:
-            self.info_log("Javascript error:")
-            for error in errors:
-                self.info_log(error)
-
-    def get_javascript_error(self, return_type = 'string'):
-        """Return the gathered javascript error
-
-        Args:
-            return_type: 'string' | 'list'; default: 'string'
-        """
-
-        if self.get_config_value("proxy_driver:intercept_javascript_error"):
-            js_errors = self._driver.execute_script('return window.jsErrors; window.jsErrors = [];')
-
-            if not js_errors:
-                js_errors = []
-
-            if return_type == 'list':
-                if len(js_errors):
-                    return js_errors
-                else:
-                    return []
-            else:
-                if len(js_errors):
-                    return os.linesep.join(js_errors)
-                else:
-                    return self.no_javascript_error_string
-        else:
-            self.warning_log("get_javascript_error was called but proxy_driver:intercept_javascript_error is set to False.")
-            return []
-
     #IS
     def is_present(self, selector):
         """Check if an element is present in the dom or not
@@ -612,9 +522,167 @@ class ProxyDriver(object):
                 return False
 
     #FUNCTION
+    def configure_resolution(self):
+        #This is not supported on android
+        if self.get_platform().lower() == 'android':
+            return
+
+        #Maximaze window
+        if self.get_config_value('browser:maximize_window'):
+            self._driver.maximize_window()
+        else:
+            #Window position
+            self._driver.set_window_position(
+                self.get_config_value('browser:window_x_position'),
+                self.get_config_value('browser:window_y_position')
+            )
+
+            #Window size
+            self._driver.set_window_size(
+                self.get_config_value('browser:window_width'),
+                self.get_config_value('browser:window_height')
+            )
+
+    def get_config_value(self, value):
+        return self.test_instance.get_config_value(value)
+
+    def get_ip_of_node(self, **kwargs):
+        if self.browser_config.location in ['localhost', 'appium']:
+            return '127.0.0.1'
+        elif self.browser_config.location == 'virtualbox':
+            #TODO
+            raise NotImplemented()
+
+        #EC2
+        elif self.browser_config.location == 'ec2':
+            exception_str = ''
+            try:
+                self._driver.execute_script("error")
+            except WebDriverException as e:
+                exception_str = str(e)
+
+            try:
+                return re.search("ip: '([^']*)", exception_str).group(1)
+            except AttributeError:
+                msg = "The ip address of the node could not be determined"
+                self.error_log(msg)
+                raise Exception(msg)
+
+    def get_id(self, join_char = '-'):
+        return join_char.join([
+                    self.get_browser_name(),
+                    self.get_browser_version(),
+                    self.get_platform()
+                ])
+
+    def get_browser_name(self):
+        return self._driver.capabilities['browserName']
+
+    def get_browser_version(self):
+        return self._driver.capabilities['version'].replace('.', '_')
+
+    def get_platform(self):
+        return self._driver.capabilities['platform'].replace('.', '_')
+
+    def get(self, url):
+        """Navigate to a specific url
+
+        This specific implementation inject a javascript script to intercept the javascript error
+        
+        Configurable with the "proxy_driver:intercept_javascript_error" config
+
+        Args:
+            url (str): the url to navigate to
+
+        Returns:
+            bool
+        """
+        self._driver.get(url)
+
+        if self.get_config_value("proxy_driver:intercept_javascript_error"):
+            self.init_javascript_error_interception()
+        
+        return True
+
+    def inject_js_script(self, script_url):
+        """inject a javascript script inside the current page
+
+        Arguments:
+            script_url: str (path)
+
+        Returns: None
+        """
+
+        self._driver.execute_script("""
+            var script = document.createElement("script");
+
+            script.src = "%s"
+
+            document.head.appendChild(script);
+        """%script_url)
+
+    def init_javascript_error_interception(self):
+        """Inject javascript code that will gather the javascript raised
+        """
+        self.debug_log("Initializing javascript error interception")
+
+        self._driver.execute_script("""
+            window.jsErrors = [];
+            window.onerror = function (errorMessage, url, lineNumber) {
+                var message = 'Error: ' + errorMessage;
+                window.jsErrors.push(message);
+                return false;
+            };
+        """)
+
+    def print_javascript_error(self):
+        """Print to the info log the gathered javascript error
+
+        If no error is found then nothing is printed
+        """
+
+        errors = self.get_javascript_error(return_type = 'list')
+        if errors:
+            self.info_log("Javascript error:")
+            for error in errors:
+                self.info_log(error)
+
+    def get_javascript_error(self, return_type = 'string'):
+        """Return the gathered javascript error
+
+        Args:
+            return_type: 'string' | 'list'; default: 'string'
+        """
+
+        if self.get_config_value("proxy_driver:intercept_javascript_error"):
+            js_errors = self._driver.execute_script('return window.jsErrors; window.jsErrors = [];')
+
+            if not js_errors:
+                js_errors = []
+
+            if return_type == 'list':
+                if len(js_errors):
+                    return js_errors
+                else:
+                    return []
+            else:
+                if len(js_errors):
+                    return os.linesep.join(js_errors)
+                else:
+                    return self.no_javascript_error_string
+        else:
+            self.warning_log("get_javascript_error was called but proxy_driver:intercept_javascript_error is set to False.")
+            return []
+
     def pdb(self):
         """Start the python debugger
+
+        Calling pdb won't do anything in a multithread context
         """
+        if self.embed_disabled:
+            self.warning_log("Pdb is disabled when runned from the grid runner because of the multithreading")
+            return False
+            
         if self.get_config_value("runner:play_sound_on_pdb"):
             say(self.get_config_value("runner:sound_on_pdb"))
 
@@ -672,7 +740,7 @@ class ProxyDriver(object):
         The stack_depth will be found automatically
         """
         if self.embed_disabled:
-            self.warning_log("Embed are disabled when runned from the grid runner because of the multithreading")
+            self.warning_log("Embed is disabled when runned from the grid runner because of the multithreading")
             return False
             
         from IPython.terminal.embed import InteractiveShellEmbed
@@ -1075,65 +1143,3 @@ class ProxyDriver(object):
 
     def critical_log(self, msg):
         self.test_instance.critical_log(msg)
-
-    def configure_resolution(self):
-        #This is not supported on android
-        if self.get_platform().lower() == 'android':
-            return
-
-        #Maximaze window
-        if self.get_config_value('browser:maximize_window'):
-            self._driver.maximize_window()
-        else:
-            #Window position
-            self._driver.set_window_position(
-                self.get_config_value('browser:window_x_position'),
-                self.get_config_value('browser:window_y_position')
-            )
-
-            #Window size
-            self._driver.set_window_size(
-                self.get_config_value('browser:window_width'),
-                self.get_config_value('browser:window_height')
-            )
-
-    def get_config_value(self, value):
-        return self.test_instance.get_config_value(value)
-
-    def get_ip_of_node(self, **kwargs):
-        if self.browser_config.location in ['localhost', 'appium']:
-            return '127.0.0.1'
-        elif self.browser_config.location == 'virtualbox':
-            #TODO
-            raise NotImplemented()
-
-        #EC2
-        elif self.browser_config.location == 'ec2':
-            exception_str = ''
-            try:
-                self._driver.execute_script("error")
-            except WebDriverException as e:
-                exception_str = str(e)
-
-            try:
-                return re.search("ip: '([^']*)", exception_str).group(1)
-            except AttributeError:
-                msg = "The ip address of the node could not be determined"
-                self.error_log(msg)
-                raise Exception(msg)
-
-    def get_id(self, join_char = '-'):
-        return join_char.join([
-                    self.get_browser_name(),
-                    self.get_browser_version(),
-                    self.get_platform()
-                ])
-
-    def get_browser_name(self):
-        return self._driver.capabilities['browserName']
-
-    def get_browser_version(self):
-        return self._driver.capabilities['version'].replace('.', '_')
-
-    def get_platform(self):
-        return self._driver.capabilities['platform'].replace('.', '_')

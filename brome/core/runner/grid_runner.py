@@ -171,9 +171,9 @@ class GridRunner(BaseRunner):
                     else:
                         current_active_thread = 0
                         for thread in threading.enumerate():
-                            if type(thread) != threading._MainThread and \
-                                thread.test._browser_config.browser_id == browser_id:
-                                current_active_thread += 1
+                            if hasattr(thread, 'test'):
+                                if thread.test._browser_config.browser_id == browser_id:
+                                    current_active_thread += 1
 
                         active_thread_by_browser_id[browser_id] = current_active_thread
 

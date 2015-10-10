@@ -11,6 +11,7 @@ try:
     from castro import Castro
 except ImportError:
     print "Castro not installed => pip install castro"
+    Castro = None
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options

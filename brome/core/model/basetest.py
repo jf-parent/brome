@@ -7,11 +7,16 @@ import os
 import pickle
 from urlparse import urlparse
 
+try:
+    from castro import Castro
+except ImportError:
+    print "Castro not installed => pip install castro"
+    castro = None
+
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 #from browsermobproxy import Server
 
-from castro import Castro
 from brome.core.model.utils import *
 from brome.core.model.stateful import Stateful
 from brome.core.model.proxy_driver import ProxyDriver
@@ -90,6 +95,10 @@ class BaseTest(object):
         session.close()
 
     def start_video_recording(self):
+        if not castro:
+            self.warning_log("Castro is not installed so session recording won't work")
+            return False
+
         if self._browser_config.get('record_session'):
             node_ip = self.pdriver.get_ip_of_node()
 

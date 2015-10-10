@@ -113,17 +113,63 @@ Proxy element
 Click
 #####
 
+Click on the element::
+
+    pdriver.find("sv:login_button").click()
+    pdriver.find("sv:login_button").click(highlight = False)
+    pdriver.find("sv:login_button").click(wait_until_clickable = False)
+
+**Note**: if the first `click` raise an exception then another `click` will be attempt; if the second `click` also fail then a exception will be raised.
+If you don't want this kind of behaviour then you can use the `click` selenium method instead::
+
+    pdriver.find("sv:login_button")._element.click() #plain selenium method
+
 Send keys
 #########
+
+Send keys to the element::
+
+    pdriver.find("sv:username_input"").send_keys('username')
+    pdriver.find("sv:username_input"").send_keys('new_username', clear = True)
+    pdriver.find("sv:username_input"").send_keys('new_username', highlight = False)
+    pdriver.find("sv:username_input"").send_keys('new_username', wait_until_clickable = False)
+
+**Note**: if the first `send_keys` raise an exception then another click will be attempt; if the second `send_keys` also fail then a exception will be raised.
+If you don't want this kind of behaviour then you can use the `send_keys` selenium method instead::
+
+    pdriver.find("sv:login_button")._element.send_keys('username') #plain selenium method
 
 Clear
 #####
 
+Clear the element::
+
+    pdriver.find("sv:username_input").clear()
+
+**Note**: if the first `clear` raise an exception then another `clear` will be attempt; if the second `clear` also fail then a exception will be raised.
+If you don't want this kind of behaviour then you can use the `clear` selenium method instead::
+
+    pdriver.find("sv:login_button")._element.clear() #plain selenium method
+
 Highlight
 #########
+
+Highlight an element::
+
+    style = 'background: red; border: 2px solid black;'
+    pdriver.find("sv:login_button").highlight(style = style, highlight_time = .3)
 
 Scroll into view
 ################
 
+Scroll into view where the element is located::
+
+    pdriver.find("sv:last_element").scroll_into_view()
+
 Select all
 ##########
+
+Select all text found in the element::
+
+    pdriver.find("sv:title_input").select_all()
+

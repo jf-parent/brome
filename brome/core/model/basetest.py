@@ -11,7 +11,6 @@ try:
     from castro import Castro
 except ImportError:
     print "Castro not installed => pip install castro"
-    castro = None
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -95,7 +94,7 @@ class BaseTest(object):
         session.close()
 
     def start_video_recording(self):
-        if not castro:
+        if not Castro:
             self.warning_log("Castro is not installed so session recording won't work")
             return False
 

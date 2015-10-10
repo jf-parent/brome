@@ -361,6 +361,23 @@ class ProxyDriver(object):
 
     #WAIT
     def wait_until_clickable(self, selector, **kwargs):
+        """Wait until an element is clickable
+
+        Args:
+            selector (str): the selector used to find the element
+
+        Kwargs:
+            timeout (int) second before a timeout exception is raise
+            raise_exception (bool) raise an exception or return a bool
+
+        Returns:
+            bool True if element is clickable before the timeout, False otherwise (raise_exception = False)
+
+        Raises:
+            this function might raise an exception depending on the raise_exception kwargs
+            or
+            the config proxy_driver:raise_exception
+        """
         self.info_log("Waiting until clickable (%s)"%selector)
         
         timeout = kwargs.get(
@@ -382,7 +399,7 @@ class ProxyDriver(object):
         _selector = Selector(self, selector)
 
         try:
-            WebDriverWait(self._driver, timeout).until(EC.element_to_be_clickable((getattr(By, _selector.fin_by), _selector.get_selector())))
+            WebDriverWait(self._driver, timeout).until(EC.element_to_be_clickable((getattr(By, _selector.find_by), _selector.get_selector())))
             self.debug_log(u"wait_until_clickable (%s): element is clickable"%_selector)
             return True
         except TimeoutException:
@@ -395,6 +412,23 @@ class ProxyDriver(object):
                 return False
 
     def wait_until_present(self, selector, **kwargs):
+        """Wait until an element is present
+
+        Args:
+            selector (str): the selector used to find the element
+
+        Kwargs:
+            timeout (int) second before a timeout exception is raise
+            raise_exception (bool) raise an exception or return a bool
+
+        Returns:
+            proxy_element: if element is present before the timeout, False otherwise (raise_exception = False)
+
+        Raises:
+            this function might raise an exception depending on the raise_exception kwargs
+            or
+            the config proxy_driver:raise_exception
+        """
         self.info_log("Waiting until present (%s)"%selector)
         
         timeout = kwargs.get(
@@ -428,6 +462,23 @@ class ProxyDriver(object):
                 return False
 
     def wait_until_not_present(self, selector, **kwargs):
+        """Wait until an element is not present
+
+        Args:
+            selector (str): the selector used to find the element
+
+        Kwargs:
+            timeout (int) second before a timeout exception is raise
+            raise_exception (bool) raise an exception or return a bool
+
+        Returns:
+            bool: True if the element is not present before the timeout, False otherwise (raise_exception = False)
+
+        Raises:
+            this function might raise an exception depending on the raise_exception kwargs
+            or
+            the config proxy_driver:raise_exception
+        """
         self.info_log("Waiting until not present (%s)"%selector)
         
         timeout = kwargs.get(
@@ -461,6 +512,23 @@ class ProxyDriver(object):
                 return False
 
     def wait_until_visible(self, selector, **kwargs):
+        """Wait until an element is visible
+
+        Args:
+            selector (str): the selector used to find the element
+
+        Kwargs:
+            timeout (int) second before a timeout exception is raise
+            raise_exception (bool) raise an exception or return a bool
+
+        Returns:
+            proxy_elment: if the element is visible before the timeout, False otherwise (raise_exception = False)
+
+        Raises:
+            this function might raise an exception depending on the raise_exception kwargs
+            or
+            the config proxy_driver:raise_exception
+        """
         self.info_log("Waiting until visible (%s)"%selector)
         
         timeout = kwargs.get(
@@ -494,6 +562,23 @@ class ProxyDriver(object):
                 return False
 
     def wait_until_not_visible(self, selector, **kwargs):
+        """Wait until an element is not visible
+
+        Args:
+            selector (str): the selector used to find the element
+
+        Kwargs:
+            timeout (int) second before a timeout exception is raise
+            raise_exception (bool) raise an exception or return a bool
+
+        Returns:
+            bool: True if the element is not visible before the timeout, False otherwise (raise_exception = False)
+
+        Raises:
+            this function might raise an exception depending on the raise_exception kwargs
+            or
+            the config proxy_driver:raise_exception
+        """
         self.info_log("Waiting until not visible (%s)"%selector)
 
         timeout = kwargs.get(
@@ -526,19 +611,36 @@ class ProxyDriver(object):
             else:
                 return False
 
+    #FUNCTION
     def pdb(self):
+        """Start the python debugger
+        """
         if self.get_config_value("runner:play_sound_on_pdb"):
             say(self.get_config_value("runner:sound_on_pdb"))
 
         set_trace()
 
-    def drag_and_drop(self, source_selector, destination_selector):
+    def drag_and_drop(self, source_selector, destination_selector, **kwargs):
+        """Drag and drop
+
+        Args:
+            source_selector: (str)
+            destination_selector: (str)
+
+        Kwargs:
+            use_javascript_dnd: bool; default: config proxy_driver:use_javascript_dnd
+        """
         self.info_log("Drag and drop: source (%s); destination (%s)"%(source_selector, destination_selector))
+
+        use_javascript_dnd = kwargs.get(
+            "use_javascript_dnd",
+            "proxy_driver:use_javascript_dnd"
+        )
 
         source_el = self.find(source_selector)
         destination_el = self.find(destination_selector)
 
-        if self.get_config_value("proxy_driver:use_javascript_dnd"):
+        if use_javascript_dnd:
             try:
                 dnd_script = """
                     function simulate(f,c,d,e){var b,a=null;for(b in eventMatchers)if(eventMatchers[b].test(c)){a=b;break}if(!a)return!1;document.createEvent?(b=document.createEvent(a),a=="HTMLEvents"?b.initEvent(c,!0,!0):b.initMouseEvent(c,!0,!0,document.defaultView,0,d,e,d,e,!1,!1,!1,!1,0,null),f.dispatchEvent(b)):(a=document.createEventObject(),a.detail=0,a.screenX=d,a.screenY=e,a.clientX=d,a.clientY=e,a.ctrlKey=!1,a.altKey=!1,a.shiftKey=!1,a.metaKey=!1,a.button=1,f.fireEvent("on"+c,a));return!0} var eventMatchers={HTMLEvents:/^(?:load|unload|abort|error|select|change|submit|reset|focus|blur|resize|scroll)$/,MouseEvents:/^(?:click|dblclick|mouse(?:down|up|over|move|out))$/};
@@ -556,9 +658,19 @@ class ProxyDriver(object):
                 self.error_log(u'drag_and_drop exception: %s'%str(e))
                 raise
         else:
-            ActionChains(self._driver).drag_and_drop(source_el, destination_el).perform()
+            try:
+                ActionChains(self._driver).drag_and_drop(source_el, destination_el).perform()
+            except Exception as e:
+                self.error_log(u'drag_and_drop exception: %s'%str(e))
+                raise
 
     def embed(self, title = ''):
+        """Start an IPython embed
+
+        Calling embed won't do anything in a multithread context
+
+        The stack_depth will be found automatically
+        """
         if self.embed_disabled:
             self.warning_log("Embed are disabled when runned from the grid runner because of the multithreading")
             return False
@@ -583,6 +695,18 @@ class ProxyDriver(object):
         ipshell(msg, stack_depth = stack_depth)
 
     def take_screenshot(self, screenshot_name = None, screenshot_path = None):
+        """Take a screenshot
+            
+        Use the screenshot_name args when you want to take a screenshot for reference
+
+        If the `runner:cache_screenshot` config is set to True then screenshot sharing all the same name will be saved only once
+
+        The screenshot_path args is exclusively used by the proxy_driver:create_test_result function
+
+        Args:
+            screenshot_name (str) the name of the screenshot
+            screenshot_path (str) the path of the screenshot
+        """
         self.info_log("Taking a screenshot...")
 
         if screenshot_path:

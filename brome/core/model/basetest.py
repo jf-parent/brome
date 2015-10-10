@@ -11,7 +11,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 #from browsermobproxy import Server
 
-#from brome.castro import Castro
+from castro import Castro
 from brome.core.model.utils import *
 from brome.core.model.stateful import Stateful
 from brome.core.model.proxy_driver import ProxyDriver
@@ -98,8 +98,8 @@ class BaseTest(object):
                 string_to_filename('%s.flv'%(self._name.replace(' ', '_')))
             )
 
+            os.environ["CASTRO_DATA_DIR"] = self._video_recording_dir
             self._castro = Castro(
-                data_dir = self._video_recording_dir,
                 filename = self._video_capture_file_path,
                 host = node_ip,
                 port = self._browser_config.get('vnc_port', 5900)
@@ -266,7 +266,6 @@ class BaseTest(object):
 
         The project:url config need to be set in order to extract the server name. Each server will have it own state
         The test name is used to name the state.
-        The project:absolute_path config is needed
 
         E.g.: the test named "test 1" that run with the project:url ("http://www.example.com") with have a state named:
         tests/states/test_1_example.com.pkl

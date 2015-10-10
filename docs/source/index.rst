@@ -27,6 +27,8 @@ Documentation
    installation
    configuration
    location
+   waiting
+   interaction
 
 Features
 --------

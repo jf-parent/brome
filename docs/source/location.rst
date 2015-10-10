@@ -27,80 +27,85 @@ The find method accept three kwargs::
         raise_exception = True
     )
 
+The defaults for the kwargs wait_until_present, wait_until_visible and raise_exception can be set respectively with:
+* proxy_driver:wait_until_present_before_find
+* proxy_driver:wait_until_visible_before_find
+* proxy_driver:raise_exception
+
 The `find` and `find_last` method return a `proxy_element`.
 
 The `find_all` method return a `proxy_element_list`.
 
 By id
------
+#####
 
 ::
 
     pdriver.find("id:button-1")
 
 By css selector
----------------
+###############
 
 ::
 
     pdriver.find("cs:div > span")
 
 By name
--------
+#######
 
 ::
 
     pdriver.find("nm:button-1")
 
 By class name
--------------
+#############
 
 ::
 
     pdriver.find("cn:button")
 
 By tag name
------------
+###########
 
 ::
 
     pdriver.find_all("tn:div")
 
 By link text
-------------
+############
 
 ::
 
     pdriver.find("lt:register now!")
 
 By partial link text
---------------------
+####################
 
 ::
 
     pdriver.find("pl:register")
 
-By selector
------------
+By selector variable
+####################
 
 ::
 
     pdriver.find("sv:button_1")
 
-List of selector support
-------------------------
+List of selectors
+-----------------
 
 If you want to create a selector from multiple selector you can pass a list of selector to the `find_*` method::
 
     pdriver.find(["sv:selector_v1", "sv:selector_v2", "xp://*[contains(@class, 'button')]"])
 
-Validation
-----------
+Selectors validation
+--------------------
 
 The xpath and css selector will be validated if the config `proxy_driver:validate_xpath_selector` and `proxy_driver:validate_css_selector` are set to true.
 
-Selector dictionary
--------------------
+Selector variable dictionary
+----------------------------
 
 A selector dictionary can be provided to brome::
 

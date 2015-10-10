@@ -183,8 +183,9 @@ def test_instances(testbatch_id):
 @login_required
 def videocapture(testbatch_id):
     data = {}
+    data['video_capture_list'] = []
 
-    return render_template("testbatch/videocapture.html", testbatch_id = testbatch_id, data = data)
+    return render_template("testbatch/video_capture.html", testbatch_id = testbatch_id, data = data)
 
 @blueprint.route("/testresult/<int:testbatch_id>")
 @login_required

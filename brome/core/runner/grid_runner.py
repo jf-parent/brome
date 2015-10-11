@@ -96,6 +96,13 @@ class GridRunner(BaseRunner):
 
                 self.instances[browser_id].append(SauceLabsInstance())
 
+            elif browser_config.location == 'browserstack':
+
+                if not self.instances.get(browser_id):
+                    self.instances[browser_id] = []
+
+                self.instances[browser_id].append(BrowserstackInstance())
+
             elif browser_config.location == 'localhost':
 
                 max_number_of_instance = browser_config.get('max_number_of_instance', 1)

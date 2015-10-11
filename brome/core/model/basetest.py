@@ -213,6 +213,24 @@ class BaseTest(object):
                 desired_capabilities=desired_cap
             )
 
+        #BROWSERSTACK
+        elif self._browser_config.location == 'browserstack':
+            config = self._browser_config.config
+
+            desired_cap = {}
+            desired_cap['browserName'] = config.get('browserName')
+            desired_cap['platform'] = config.get('platform')
+            desired_cap['version'] = config.get('version')
+            desired_cap['javascriptEnabled'] = True
+
+            driver = webdriver.Remote(
+                command_executor='http://%s:%s@hub.browserstack.com:80/wd/hub'%(
+                    self.get_config_value("browserstack:username"),
+                    self.get_config_value("browserstack:key")
+                ),
+                desired_capabilities=desired_cap
+            )
+
         #REMOTE
         elif self._browser_config.location in ['virtualbox', 'ec2']:
             config = self._browser_config.config

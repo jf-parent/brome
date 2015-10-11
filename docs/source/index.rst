@@ -29,6 +29,7 @@ Documentation
    location
    waiting
    interaction
+   assertion
 
 Features
 --------

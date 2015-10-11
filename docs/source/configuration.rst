@@ -21,6 +21,9 @@ sample configuration file
     saucelabs:
       username: ''
       key: ''
+    browserstack:
+      username: ''
+      key: ''
     browser:
       maximize_window: false
       window_height: 725
@@ -122,6 +125,13 @@ project
 * **test_batch_result_path**: The test path where the test batch result file will be create. If you don't want to save any file when a test batch run, just set this options to False. `str [path] | bool (false only)` `(default: '')`
 
 * **url**: The url of the server on which the test run (must include the protocol) e.g.:https://the-internet.herokuapp.com/ `str [url]` `(default: '')`
+
+browserstack
+------------
+
+* **username**: Browserstack username `str` `(default: '')`
+
+* **key**: Browserstack key `str` `(default: '')`
 
 saucelabs
 ---------

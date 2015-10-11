@@ -811,6 +811,18 @@ class ProxyDriver(object):
 
     #ASSERT
     def assert_present(self, selector, testid = None, **kwargs):
+        """Assert that the element is present in the dom
+
+        Args:
+            selector (str): the selector used to find the element
+            test_id (str): the test_id or a str
+
+        Kwargs:
+            wait_until_present (bool)
+
+        Returns:
+            bool: True is the assertion succeed; False otherwise.
+        """
         self.info_log("Assert present selector(%s) testid(%s)"%(selector, testid))
 
         wait_until_present = kwargs.get('wait_until_present',
@@ -837,6 +849,18 @@ class ProxyDriver(object):
             return False
 
     def assert_not_present(self, selector, testid = None, **kwargs):
+        """Assert that the element is not present in the dom
+
+        Args:
+            selector (str): the selector used to find the element
+            test_id (str): the test_id or a str
+
+        Kwargs:
+            wait_until_not_present (bool)
+
+        Returns:
+            bool: True is the assertion succeed; False otherwise.
+        """
         self.info_log("Assert not present selector(%s) testid(%s)"%(selector, testid))
 
         wait_until_not_present = kwargs.get('wait_until_not_present',
@@ -863,6 +887,19 @@ class ProxyDriver(object):
             return False
 
     def assert_visible(self, selector, testid = None, **kwargs):
+        """Assert that the element is visible in the dom
+
+        Args:
+            selector (str): the selector used to find the element
+            test_id (str): the test_id or a str
+
+        Kwargs:
+            wait_until_visible (bool)
+            highlight (bool)
+
+        Returns:
+            bool: True is the assertion succeed; False otherwise.
+        """
         self.info_log("Assert visible selector(%s) testid(%s)"%(selector, testid))
 
         highlight = kwargs.get('highlight',
@@ -901,6 +938,19 @@ class ProxyDriver(object):
             return False
 
     def assert_not_visible(self, selector, testid = None, **kwargs):
+        """Assert that the element is not visible in the dom
+
+        Args:
+            selector (str): the selector used to find the element
+            test_id (str): the test_id or a str
+
+        Kwargs:
+            wait_until_not_visible (bool)
+            highlight (bool)
+
+        Returns:
+            bool: True is the assertion succeed; False otherwise.
+        """
         self.info_log("Assert not visible selector(%s) testid(%s)"%(selector, testid))
 
         highlight = kwargs.get('highlight',
@@ -939,6 +989,20 @@ class ProxyDriver(object):
             return True
 
     def assert_text_equal(self, selector, value, testid = None, **kwargs):
+        """Assert that the element's text is equal to the provided value
+
+        Args:
+            selector (str): the selector used to find the element
+            value (str): the value that will be compare with the element.text value
+            test_id (str): the test_id or a str
+
+        Kwargs:
+            wait_until_visible (bool)
+            highlight (bool)
+
+        Returns:
+            bool: True is the assertion succeed; False otherwise.
+        """
         self.info_log("Assert text equal selector(%s) testid(%s)"%(selector, testid))
 
         highlight = kwargs.get('highlight',
@@ -986,6 +1050,20 @@ class ProxyDriver(object):
             return False
 
     def assert_text_not_equal(self, selector, value, testid = None, **kwargs):
+        """Assert that the element's text is not equal to the provided value
+
+        Args:
+            selector (str): the selector used to find the element
+            value (str): the value that will be compare with the element.text value
+            test_id (str): the test_id or a str
+
+        Kwargs:
+            wait_until_visible (bool)
+            highlight (bool)
+
+        Returns:
+            bool: True is the assertion succeed; False otherwise.
+        """
         self.info_log("Assert text not equal selector(%s) testid(%s)"%(selector, testid))
 
         highlight = kwargs.get('highlight',
@@ -1032,7 +1110,17 @@ class ProxyDriver(object):
 
             return False
 
-    def create_test_result(self, testid, result, **kwargs):
+    def create_test_result(self, testid, result):
+        """Create a test result entry in the persistence layer
+
+        Args:
+            testid (str)
+            result (bool)
+
+        Returns:
+            None
+        """
+
         embed = True
         videocapture_path = ''
         screenshot_relative_path = ''

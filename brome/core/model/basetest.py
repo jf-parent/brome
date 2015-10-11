@@ -218,9 +218,10 @@ class BaseTest(object):
             config = self._browser_config.config
 
             desired_cap = {}
-            desired_cap['browserName'] = config.get('browserName')
-            desired_cap['platform'] = config.get('platform')
-            desired_cap['version'] = config.get('version')
+            desired_cap['browser'] = config.get('browser')
+            desired_cap['browser_version'] = config.get('browser_version')
+            desired_cap['os'] = config.get('os')
+            desired_cap['os_version'] = config.get('os_version')
             desired_cap['javascriptEnabled'] = True
 
             driver = webdriver.Remote(

@@ -260,12 +260,15 @@ class BaseTest(object):
             runner = self._runner
         )
 
-    def delete_state(self, state_pickle):
+    def delete_state(self, state_pickle = None):
         """This will delete the pickle that hold the saved test state
             
         Args:
             state_pickle (path): the path of the pickle that will be delete
         """
+        if not state_pickle:
+            state_pickle = self.get_state_pickle_path()
+
         if os.path.isfile(state_pickle):
             os.remove(state_pickle)
             self.info_log("State deleted: %s"%state_pickle)

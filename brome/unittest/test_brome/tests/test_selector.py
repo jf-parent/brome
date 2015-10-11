@@ -256,3 +256,16 @@ class Test(BaseTest):
             assert False
         except:
             assert True
+
+        #Selector browser specific
+        self.app.pdriver._driver.capabilities['browserName'] = 'firefox'
+
+        _selector = Selector(self.pdriver, 'sv:example_multiple_selector')
+
+        assert _selector.get_selector() == selector_dict['example_multiple_selector']['default'][3:]
+
+        self.app.pdriver._driver.capabilities['browserName'] = 'chrome'
+
+        _selector = Selector(self.pdriver, 'sv:example_multiple_selector')
+
+        assert _selector.get_selector() == selector_dict['example_multiple_selector']['chrome|iphone|android'][3:]

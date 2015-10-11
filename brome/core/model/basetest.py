@@ -104,7 +104,7 @@ class BaseTest(object):
 
             self._video_capture_file_path = os.path.join(
                 self._video_recording_dir,
-                string_to_filename('%s.flv'%(self._name.replace(' ', '_')))
+                string_to_filename('%s.mpeg'%(self._name.replace(' ', '_')))
             )
 
             os.environ["CASTRO_DATA_DIR"] = self._video_recording_dir

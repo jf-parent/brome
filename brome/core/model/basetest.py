@@ -207,6 +207,7 @@ class BaseTest(object):
 
         #REMOTE
         elif self._browser_config.location in ['virtualbox', 'ec2']:
+            desired_cap = self._browser_config.config
             if desired_cap['browserName'].lower() == "chrome":
                 chrome_options = Options()
                 chrome_options.add_argument("--test-type")
@@ -221,7 +222,7 @@ class BaseTest(object):
 
                 driver = webdriver.Remote(
                         command_executor = command_executor,
-                        desired_capabilities = self._browser_config.config
+                        desired_capabilities = desired_cap
                 )
 
                 self.info_log('Got a session')

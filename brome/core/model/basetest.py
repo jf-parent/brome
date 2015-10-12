@@ -180,67 +180,33 @@ class BaseTest(object):
 
         #APPIUM
         elif self._browser_config.location == 'appium':
-            config = self._browser_config.config
-
-            desired_cap = {}
-            desired_cap['browserName'] = config.get('browserName')
-            desired_cap['deviceName'] = config.get('deviceName')
-            desired_cap['platformName'] = config.get('platformName')
-            desired_cap['platformVersion'] = config.get('platformVersion')
-            desired_cap['nativeWebTap'] = config.get('nativeWebTap')
-            desired_cap['udid'] = config.get('udid')
-
             driver = webdriver.Remote(
                 command_executor='http://127.0.0.1:4723/wd/hub',
-                desired_capabilities = desired_cap
+                desired_capabilities = self._browser_config.config
             )
 
         #SAUCELABS
         elif self._browser_config.location == 'saucelabs':
-            config = self._browser_config.config
-
-            desired_cap = {}
-            desired_cap['browserName'] = config.get('browserName')
-            desired_cap['platform'] = config.get('platform')
-            desired_cap['version'] = config.get('version')
-            desired_cap['javascriptEnabled'] = True
-
             driver = webdriver.Remote(
                 command_executor='http://%s:%s@ondemand.saucelabs.com:80/wd/hub'%(
                     self.get_config_value("saucelabs:username"),
                     self.get_config_value("saucelabs:key")
                 ),
-                desired_capabilities=desired_cap
+                desired_capabilities = self._browser_config.config
             )
 
         #BROWSERSTACK
         elif self._browser_config.location == 'browserstack':
-            config = self._browser_config.config
-
-            desired_cap = {}
-            desired_cap['browser'] = config.get('browser')
-            desired_cap['browser_version'] = config.get('browser_version')
-            desired_cap['os'] = config.get('os')
-            desired_cap['os_version'] = config.get('os_version')
-            desired_cap['javascriptEnabled'] = True
-
             driver = webdriver.Remote(
                 command_executor='http://%s:%s@hub.browserstack.com:80/wd/hub'%(
                     self.get_config_value("browserstack:username"),
                     self.get_config_value("browserstack:key")
                 ),
-                desired_capabilities=desired_cap
+                desired_capabilities = self._browser_config.config
             )
 
         #REMOTE
         elif self._browser_config.location in ['virtualbox', 'ec2']:
-            config = self._browser_config.config
-
-            desired_cap = {}
-            desired_cap['browserName'] = config.get('browserName')
-            desired_cap['platform'] = config.get('platform')
-            desired_cap['javascriptEnabled'] = True
-
             if desired_cap['browserName'].lower() == "chrome":
                 chrome_options = Options()
                 chrome_options.add_argument("--test-type")
@@ -255,7 +221,7 @@ class BaseTest(object):
 
                 driver = webdriver.Remote(
                         command_executor = command_executor,
-                        desired_capabilities = desired_cap
+                        desired_capabilities = self._browser_config.config
                 )
 
                 self.info_log('Got a session')

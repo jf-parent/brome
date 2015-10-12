@@ -31,7 +31,6 @@ Features
 * Pdb integration
 * Visual validation (Beta)
 * Test state persistence system
-* Browsermob proxy integration
 * Support mobile easier (e.g.: click use Touch)
 
 Quick-start
@@ -43,4 +42,3 @@ Quick-start
     $ chmod +x bro
     $ pip install brome
     $ vim config/brome.yml
-    $ ./bro admin --create-database

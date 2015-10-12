@@ -96,6 +96,7 @@ class VirtualboxInstance(BaseInstance):
 
                     ssh.connect(vm_ip, username=self.browser_config.get('username'), password=self.browser_config.get('password'))
 
+                    #TODO should be configurable from the browser config
                     command = ["DISPLAY=:0", "nohup", "java", "-jar", "/home/worker/selenium-server.jar", "-role", "node", "-hub", "http://%s:4444/grid/register"%hub_ip, "-browser", "browserName=%s,maxInstances=%s,platform=LINUX"%(self.browser_config.get('browserName'), 1), ">", "node.log", "2>&1", "&"]
 
                     stdin, stdout, stderr = ssh.exec_command(' '.join(command))

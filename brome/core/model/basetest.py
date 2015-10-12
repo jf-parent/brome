@@ -104,7 +104,7 @@ class BaseTest(object):
 
             self._video_capture_file_path = os.path.join(
                 self._video_recording_dir,
-                string_to_filename('%s.flv'%(self._name.replace(' ', '_')))
+                string_to_filename('%s.mpeg'%(self._name.replace(' ', '_')))
             )
 
             os.environ["CASTRO_DATA_DIR"] = self._video_recording_dir
@@ -180,56 +180,29 @@ class BaseTest(object):
 
         #APPIUM
         elif self._browser_config.location == 'appium':
-            config = self._browser_config.config
-
-            desired_cap = {}
-            desired_cap['browserName'] = config.get('browserName')
-            desired_cap['deviceName'] = config.get('deviceName')
-            desired_cap['platformName'] = config.get('platformName')
-            desired_cap['platformVersion'] = config.get('platformVersion')
-            desired_cap['nativeWebTap'] = config.get('nativeWebTap')
-            desired_cap['udid'] = config.get('udid')
-
             driver = webdriver.Remote(
                 command_executor='http://127.0.0.1:4723/wd/hub',
-                desired_capabilities = desired_cap
+                desired_capabilities = self._browser_config.config
             )
 
         #SAUCELABS
         elif self._browser_config.location == 'saucelabs':
-            config = self._browser_config.config
-
-            desired_cap = {}
-            desired_cap['browserName'] = config.get('browserName')
-            desired_cap['platform'] = config.get('platform')
-            desired_cap['version'] = config.get('version')
-            desired_cap['javascriptEnabled'] = True
-
             driver = webdriver.Remote(
                 command_executor='http://%s:%s@ondemand.saucelabs.com:80/wd/hub'%(
                     self.get_config_value("saucelabs:username"),
                     self.get_config_value("saucelabs:key")
                 ),
-                desired_capabilities=desired_cap
+                desired_capabilities = self._browser_config.config
             )
 
         #BROWSERSTACK
         elif self._browser_config.location == 'browserstack':
-            config = self._browser_config.config
-
-            desired_cap = {}
-            desired_cap['browser'] = config.get('browser')
-            desired_cap['browser_version'] = config.get('browser_version')
-            desired_cap['os'] = config.get('os')
-            desired_cap['os_version'] = config.get('os_version')
-            desired_cap['javascriptEnabled'] = True
-
             driver = webdriver.Remote(
                 command_executor='http://%s:%s@hub.browserstack.com:80/wd/hub'%(
                     self.get_config_value("browserstack:username"),
                     self.get_config_value("browserstack:key")
                 ),
-                desired_capabilities=desired_cap
+                desired_capabilities = self._browser_config.config
             )
 
         #REMOTE

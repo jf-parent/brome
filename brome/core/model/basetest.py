@@ -207,7 +207,13 @@ class BaseTest(object):
 
         #REMOTE
         elif self._browser_config.location in ['virtualbox', 'ec2']:
-            desired_cap = self._browser_config.config
+            config = self._browser_config.config
+
+            desired_cap = {}
+            desired_cap['browserName'] = config.get('browserName')
+            desired_cap['platform'] = config.get('platform')
+            desired_cap['javascriptEnabled'] = True
+
             if desired_cap['browserName'].lower() == "chrome":
                 chrome_options = Options()
                 chrome_options.add_argument("--test-type")

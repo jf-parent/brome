@@ -14,7 +14,6 @@ brome
 
 Framework for Selenium
 
-* Free software: ISC license
 * Documentation: https://brome.readthedocs.org.
 
 Features

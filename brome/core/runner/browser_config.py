@@ -19,6 +19,8 @@ class BrowserConfig(object):
             self.location = 'appium'
         elif self.config.get('saucelabs'):
             self.location = 'saucelabs'
+        elif self.config.get('browserstack'):
+            self.location = 'browserstack'
         else:
             self.location = 'localhost'
 

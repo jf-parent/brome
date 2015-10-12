@@ -1,6 +1,6 @@
 #! -*- coding: utf-8 -*-
 
-__version__ = "0.5"
+__version__ = "0.0.8"
 
 import webbrowser
 import shutil
@@ -14,6 +14,9 @@ from glob import glob
 from threading import Timer
 
 import yaml
+from tornado.wsgi import WSGIContainer
+from tornado.httpserver import HTTPServer
+from tornado.ioloop import IOLoop
 
 from core.model.utils import *
 from core.model.meta import Session
@@ -284,11 +287,29 @@ class Brome(object):
             webbrowser.open("http://%s:%s/tb/list"%(self.get_config_value("webserver:HOST"), self.get_config_value("webserver:PORT")))
 
     def webserver(self, args):
+        parser = argparse.ArgumentParser(description='Brome webserver')
+
+        #TORNADO
+        parser.add_argument(
+                            '--tornado',
+                            '-t',
+                            dest = 'tornado', 
+                            action = 'store_true',
+                            help = 'The brome webserver will run on Tornado. (http://www.tornadoweb.org/en/stable/index.html#)'
+        )
+
+        parsed_args = parser.parse_args(args)
+
         app = create_app(self)
 
         Timer(2, self.open_browser).start()
 
-        app.run(host = self.get_config_value("webserver:HOST"), port = self.get_config_value("webserver:PORT"))
+        if parsed_args.tornado:
+            http_server = HTTPServer(WSGIContainer(app))
+            http_server.listen(self.get_config_value("webserver:PORT"))
+            IOLoop.instance().start()
+        else:
+            app.run(host = self.get_config_value("webserver:HOST"), port = self.get_config_value("webserver:PORT"))
 
     def list_(self, args):
         query = os.path.join(

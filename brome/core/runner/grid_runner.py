@@ -96,6 +96,13 @@ class GridRunner(BaseRunner):
 
                 self.instances[browser_id].append(SauceLabsInstance())
 
+            elif browser_config.location == 'browserstack':
+
+                if not self.instances.get(browser_id):
+                    self.instances[browser_id] = []
+
+                self.instances[browser_id].append(BrowserstackInstance())
+
             elif browser_config.location == 'localhost':
 
                 max_number_of_instance = browser_config.get('max_number_of_instance', 1)
@@ -171,9 +178,9 @@ class GridRunner(BaseRunner):
                     else:
                         current_active_thread = 0
                         for thread in threading.enumerate():
-                            if type(thread) != threading._MainThread and \
-                                thread.test._browser_config.browser_id == browser_id:
-                                current_active_thread += 1
+                            if hasattr(thread, 'test'):
+                                if thread.test._browser_config.browser_id == browser_id:
+                                    current_active_thread += 1
 
                         active_thread_by_browser_id[browser_id] = current_active_thread
 

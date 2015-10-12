@@ -108,6 +108,7 @@ default_config = {}
 ###SECTIONS
 default_config["project"] = {}
 default_config["saucelabs"] = {}
+default_config["browserstack"] = {}
 default_config["proxy_driver"] = {}
 default_config["proxy_element"] = {}
 default_config["browser"] = {}
@@ -126,6 +127,20 @@ default_config["proxy_element"]["use_touch_instead_of_click"] = {
     'type': 'checkbox',
     'visible': True,
     'title': 'Use touch instead of click'
+}
+
+default_config["browserstack"]["username"] = {
+    'default': '',
+    'type': 'input',
+    'visible': True,
+    'title': 'Browserstack username'
+}
+
+default_config["browserstack"]["key"] = {
+    'default': '',
+    'type': 'input',
+    'visible': True,
+    'title': 'Browserstack key'
 }
 
 default_config["saucelabs"]["username"] = {
@@ -642,13 +657,6 @@ default_config["webserver"]["CACHE_TYPE"] = {
 }
 
 default_config["webserver"]["ASSETS_DEBUG"] = {
-    'default': True,
-    'type': 'checkbox',
-    'visible': True,
-    'title': 'Assets debug',
-}
-
-default_config["webserver"]["DEBUG"] = {
     'default': True,
     'type': 'checkbox',
     'visible': True,

@@ -1,4 +1,5 @@
-wheel==0.23.0
+wheel
+tornado
 netifaces
 selenium
 decorator

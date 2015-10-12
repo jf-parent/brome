@@ -30,6 +30,8 @@ Documentation
    waiting
    interaction
    assertion
+   browsers
+   resources
 
 Features
 --------

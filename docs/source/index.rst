@@ -31,6 +31,7 @@ Documentation
    interaction
    assertion
    browsers
+   state
    resources
 
 Features

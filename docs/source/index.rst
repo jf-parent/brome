@@ -38,16 +38,13 @@ Features
 --------
 
 * Simple API
+* Focused on test stability and uniformity
 * Highly configurable
-* Runner for Amazon EC2, Saucelabs, Virtualbox, Appium
+* Runner for Amazon EC2, Saucelabs, Browserstack, Virtualbox and Appium
 * Javascript implementation of select, drag and drop, scroll into view
 * IPython embed on assertion for debugging
 * Video recording of the session
 * Persistent test report
 * Webserver
-* Pdb integration
-* Visual validation (Beta)
 * Test state persistence system
-* Browsermob proxy integration
 * Support mobile easier (e.g.: click use Touch)
-

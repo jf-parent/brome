@@ -3,17 +3,22 @@
 import re
 from StringIO import StringIO
 
-from IPython import embed
-
 from lxml import etree
 from lxml.cssselect import CSSSelector
 from cssselect.parser import SelectorSyntaxError
 
 class Selector(object):
+    """Selector class to manage the selector brome system
+
+    Args:
+        pdriver (object)
+        selector (str)
+    """
     def __init__(self, pdriver, selector):
         self._pdriver = pdriver
         self._selector = selector
 
+        #List of selector support
         if not type(selector) is list:
             self._selector_list= [self._selector]
         else:
@@ -48,12 +53,22 @@ class Selector(object):
 
     #GET
     def get_selector(self):
+        """Get the final selector
+
+        This selector can be feed to selenium
+        """
         return self._effective_selector
 
     def _get_selector(self, selector):
+        """Get the selector without his brome specific prefix
+        """
         return selector[3:]
 
     def get_type(self, selector):
+        """Get the type of the selector
+
+        see SELECTOR_DICT for supported type
+        """
         try:
             return SELECTOR_DICT[selector[:3]]
         except KeyError:
@@ -64,6 +79,8 @@ class Selector(object):
 
     #RESOLVE
     def resolve_selector(self):
+        """Resolve the selector variable in place
+        """
         effective_selector_list = []
 
         for current_selector in self._selector_list:
@@ -113,6 +130,10 @@ class Selector(object):
         return effective_selector_list
 
     def resolve_selector_type(self):
+        """Resolve the selector type
+
+        This make sure that all the selectors provided are of the same type (in case of a list of selector)
+        """
         resolved_selector_type_list = []
         for current_selector in self._effective_selector_list:
             resolved_selector_type_list.append(self.get_type(current_selector))
@@ -126,6 +147,8 @@ class Selector(object):
             return set_.pop()
 
     def resolve_function(self):
+        """Resolve the selenium function that will be use to find the element
+        """
         selector_type = self._effective_selector_type
 
         #NAME

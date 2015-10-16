@@ -60,15 +60,17 @@ class LocalhostInstance(BaseInstance):
 
         path_to_mitmproxy = self.runner.brome.get_config_value("mitmproxy:path")
 
-        filter_ = "~m post"
+        filter_ = self.runner.brome.get_config_value("mitmproxy:filter")
         command = [
             path_to_mitmproxy,
             "-p",
             "%s"%self.proxy_port,
             "-w",
-            self.proxy_output_path,
-            filter_
+            self.proxy_output_path
         ]
+
+        if filter_:
+            command.append(filter_)
 
         process = self.execute_command(command)
 

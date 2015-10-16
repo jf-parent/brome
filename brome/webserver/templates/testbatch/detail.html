@@ -59,6 +59,11 @@
     <h3>Report:</h3>
     <div>
         <ul class="list-unstyled">
+            {% if show_network_capture %}
+                <li>
+                    <a class="unlink" href="{{ url_for('testbatch.network_capture', testbatch_id = testbatch_id) }}"><i class="fa fa-cubes"></i> Network Capture</a>
+                </li>
+            {% endif %}
             {% if show_video_capture %}
                 <li>
                     <a class="unlink" href="{{ url_for('testbatch.videocapture', testbatch_id = testbatch_id) }}"><i class="fa fa-television"></i> Video captures</a>

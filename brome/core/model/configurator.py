@@ -712,6 +712,13 @@ default_config["webserver"]["PORT"] = {
     'title': 'webserver port',
 }
 
+default_config["webserver"]["SHOW_NETWORK_CAPTURE"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Show the network capture in the detail of a test batch',
+}
+
 default_config["webserver"]["SHOW_VIDEO_CAPTURE"] = {
     'default': False,
     'type': 'checkbox',

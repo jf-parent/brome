@@ -104,6 +104,8 @@ Selectors validation
 
 The xpath and css selector will be validated if the config `proxy_driver:validate_xpath_selector` and `proxy_driver:validate_css_selector` are set to true.
 
+.. _selector_variable:
+
 Selector variable dictionary
 ----------------------------
 

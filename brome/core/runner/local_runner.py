@@ -4,6 +4,7 @@ import traceback
 
 from brome.core.model.utils import *
 from brome.core.model.meta.base import Session
+from brome.core.runner.localhost_instance import LocalhostInstance
 from brome.core.runner.base_runner import BaseRunner
 from brome.core.runner.browser_config import BrowserConfig
 from brome.core.model.test_batch import TestBatch
@@ -39,15 +40,27 @@ class LocalRunner(BaseRunner):
 
         for test in self.tests:
             
+            localhost_instance = LocalhostInstance(
+                runner = self,
+                browser_config = self.browser_config,
+                test_name = test.Test.name
+            )
+
+            localhost_instance.startup()
+
             test_ = test.Test(
                 runner = self,
                 browser_config = self.browser_config,
                 name = test.Test.name,
                 test_batch_id = self.test_batch_id,
+                localhost_instance = localhost_instance,
                 index = 1
             )
+
             test_.execute()
             self.executed_tests.append(test_)
+
+            localhost_instance.tear_down()
 
     def terminate(self):
 

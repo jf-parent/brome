@@ -13,6 +13,7 @@ except ImportError:
     print "Castro not installed => pip install castro"
     Castro = None
 
+from selenium.webdriver.common.proxy import *
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 #from browsermobproxy import Server
@@ -37,12 +38,13 @@ class BaseTest(object):
         test_batch_id (int): the test batch id
     """
 
-    def __init__(self, runner, name, index, browser_config, test_batch_id):
+    def __init__(self, runner, name, index, browser_config, test_batch_id, **kwargs):
         self._runner = runner
         self._name = name
         self._index = index
         self._browser_config = browser_config
         self._test_batch_id = test_batch_id
+        self._localhost_instance = kwargs.get('localhost_instance')
 
         self._crash_error = False
 
@@ -153,30 +155,28 @@ class BaseTest(object):
         """
         #LOCAL
         if self._browser_config.location == 'localhost':
-            """
             if self._browser_config.get('browserName').lower() in ['chrome', 'firefox'] \
-                and self._browser_config.get('use_broswermobproxy'):
-                    self.browsermobserver = Server(self._runner.brome.get_config_value("browsermobproxy:path"))
-                    self.browsermobserver.start()
-                    self.proxy = self.browsermobserver.create_proxy()
+                and self._browser_config.get('enable_proxy'):
+                mitm_proxy = "localhost:%s"%self._localhost_instance.proxy_port
 
-                    if self._browser_config.get('browserName').lower() == 'firefox':
-                        profile  = webdriver.FirefoxProfile()
-                        profile.set_proxy(self.proxy.selenium_proxy())
-                        driver = webdriver.Firefox(firefox_profile=profile)
-                    elif self._browser_config.get('browserName').lower() == 'chrome':
-                        chrome_options = webdriver.ChromeOptions()
-                        chrome_options.add_argument("--proxy-server={0}".format(self.proxy.proxy))
-                        driver = webdriver.Chrome(chrome_options = chrome_options)
-
-                    self.proxy.new_har(self._runner.brome.get_config_value("project:url"), options = {'captureContent': True, 'captureHeaders': True})
-
+                proxy = Proxy({
+                    'proxyType': ProxyType.MANUAL,
+                    'httpProxy': mitm_proxy,
+                    'sslProxy': mitm_proxy
+                })
+                if self._browser_config.get('browserName').lower() == 'firefox':
+                    profile  = webdriver.FirefoxProfile()
+                    profile.set_proxy(proxy = proxy)
+                    driver = webdriver.Firefox(firefox_profile=profile)
+                elif self._browser_config.get('browserName').lower() == 'chrome':
+                    chrome_options = webdriver.ChromeOptions()
+                    chrome_options.add_argument("--proxy-server={0}".format(proxy))
+                    driver = webdriver.Chrome(chrome_options = chrome_options)
             else:
-            """
-            try:
-                driver = getattr(webdriver, self._browser_config.get('browserName'))()
-            except AttributeError:
-                raise InvalidBrowserName("The browserName('%s') is invalid"%self._browser_config.get('browserName'))
+                try:
+                    driver = getattr(webdriver, self._browser_config.get('browserName'))()
+                except AttributeError:
+                    raise InvalidBrowserName("The browserName('%s') is invalid"%self._browser_config.get('browserName'))
 
         #APPIUM
         elif self._browser_config.location == 'appium':

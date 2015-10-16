@@ -10,4 +10,4 @@ Development Lead
 Contributors
 ------------
 
-* Jean-François Parent <jfparent@challengeu.com>
+* Jean-François Parent <parent.j.f@gmail.com>

@@ -26,6 +26,7 @@ Documentation
 
    installation
    configuration
+   brome
    location
    waiting
    interaction

@@ -44,7 +44,7 @@ class Brome(object):
             exit(1)
 
     def print_usage(self):
-        print 'brome_runner.py [admin | run | webserver | list | find]'
+        print '$ ./bro admin | run | webserver | list | find'
         exit(1)
 
     def execute(self, args):

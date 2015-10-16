@@ -16,7 +16,7 @@ You need to set the config `project:url` in order to use the state since the sta
     self.get_state_pickle_path()
     >>>/path/to/project/tests/states/Test1_example.com.pkl
 
-This is mainly to support switching the host name in your test. Maybe sometime the code to be tested in on another server, so the state won't exist on this server.
+This is mainly to support switching the host name in your test. Maybe sometime the code to be tested is on another server, so the state won't exist on this server.
 
 Stateful mixin
 --------------
@@ -79,7 +79,7 @@ However not build-in python class won't be saved into the state unless they inhe
 
             assert hasattr(self, 'dict_')
 
-**Note**: Your stateful class must access the pdriver in his __init__ function::
+**Note**: Your stateful class must accept the pdriver in his __init__ function::
 
     from brome.core.model.stateful import Stateful
 

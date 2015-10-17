@@ -3,4 +3,6 @@
 from .base_instance import BaseInstance
 
 class BrowserstackInstance(BaseInstance):
+    """Browserstack instance
+    """
     pass

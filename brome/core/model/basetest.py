@@ -7,16 +7,10 @@ import os
 import pickle
 from urlparse import urlparse
 
-try:
-    from castro import Castro
-except ImportError:
-    print "Castro not installed => pip install castro"
-    Castro = None
-
 from selenium.webdriver.common.proxy import *
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-#from browsermobproxy import Server
+from castroredux import CastroRedux
 
 from brome.core.model.utils import *
 from brome.core.model.stateful import Stateful
@@ -97,39 +91,34 @@ class BaseTest(object):
         session.close()
 
     def start_video_recording(self):
-        if not Castro:
-            self.warning_log("Castro is not installed so session recording won't work")
-            return False
-
         if self._browser_config.get('record_session'):
             node_ip = self.pdriver.get_ip_of_node()
 
             self._video_capture_file_path = os.path.join(
                 self._video_recording_dir,
-                string_to_filename('%s.mpeg'%(self._name.replace(' ', '_')))
+                string_to_filename('%s.flv'%(self._name.replace(' ', '_')))
             )
 
-            os.environ["CASTRO_DATA_DIR"] = self._video_recording_dir
-            self._castro = Castro(
-                filename = self._video_capture_file_path,
+            self._video_recorder = CastroRedux(
+                self._video_capture_file_path,
                 host = node_ip,
                 port = self._browser_config.get('vnc_port', 5900)
             )
 
             try:
-                self._castro.start()
-                self.info_log("Castro started (ip: %s)(output: %s)"%(node_ip, self._video_capture_file_path))
+                self._video_recorder.start()
+                self.info_log("CastroRedux started (ip: %s)(output: %s)"%(node_ip, self._video_capture_file_path))
             except Exception as e:
-                self.info_log("Castro exception: %s"%str(e))
+                self.info_log("CastroRedux exception: %s"%str(e))
 
     def stop_video_recording(self):
-        if hasattr(self, '_castro'):
+        if hasattr(self, '_video_recorder'):
             self.info_log("Finalizing the video capture...")
 
             #Let the time to the driver to quit so we have the full picture
             sleep(5)
 
-            self._castro.stop()
+            self._video_recorder.stop()
             """
             file_name = "%s/%s"%(self.video_capture_dir, self.config.get('name').replace(' ', '_'))
             Popen(["/usr/bin/ffmpeg", "-i", "%s.flv"%file_name, "-vcodec", "libvpx", "-acodec", "libvorbis", "%s.webm"%file_name], stdout=devnull, stderr=devnull)
@@ -155,7 +144,7 @@ class BaseTest(object):
         """
         #LOCAL
         if self._browser_config.location == 'localhost':
-            if self._browser_config.get('browserName').lower() in ['chrome', 'firefox'] \
+            if self._browser_config.get('browserName').lower() in ['chrome', 'firefox', 'phantomjs'] \
                 and self._browser_config.get('enable_proxy'):
                 mitm_proxy = "localhost:%s"%self._localhost_instance.proxy_port
 
@@ -164,14 +153,42 @@ class BaseTest(object):
                     'httpProxy': mitm_proxy,
                     'sslProxy': mitm_proxy
                 })
+
+                #NOTE http://www.seleniumhq.org/docs/04_webdriver_advanced.jsp#using-a-proxy
+                #FIREFOX
                 if self._browser_config.get('browserName').lower() == 'firefox':
                     profile  = webdriver.FirefoxProfile()
                     profile.set_proxy(proxy = proxy)
                     driver = webdriver.Firefox(firefox_profile=profile)
+
+                #CHROME
                 elif self._browser_config.get('browserName').lower() == 'chrome':
                     chrome_options = webdriver.ChromeOptions()
                     chrome_options.add_argument("--proxy-server={0}".format(proxy))
                     driver = webdriver.Chrome(chrome_options = chrome_options)
+
+                #PHANTOMJS
+                elif self._browser_config.get('browserName').lower() == 'phantomjs':
+
+                    #TODO investigate why this doesnt work in phantomjs
+                    """
+                    #WAY 1
+                    #http://stackoverflow.com/questions/14699718/how-do-i-set-a-proxy-for-phantomjs-ghostdriver-in-python-webdriver
+                    service_args = [
+                    '--proxy=127.0.0.1:%s'%self._localhost_instance.proxy_port,
+                    '--proxy-type=http',
+                    ]
+                    driver = webdriver.PhantomJS(service_args=service_args)
+
+                    #WAY 2
+                    desired_cap = self._browser_config.config
+                    proxy.add_to_capabilities(desired_cap)
+                    driver = webdriver.PhantomJS(desired_capabilities = desired_cap)
+                    """
+                    raise NotImplemented()
+
+                #NOTE: AFAIK Safari doesn't support proxy
+                #https://code.google.com/p/selenium/issues/detail?id=5051
             else:
                 try:
                     driver = getattr(webdriver, self._browser_config.get('browserName'))()

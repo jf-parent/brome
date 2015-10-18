@@ -32,11 +32,14 @@ class VirtualboxInstance(BaseInstance):
 
         return self.ip
 
-    def execute_command(self, command):
+    def execute_command(self, command, **kwargs):
         """Execute a command on the node
 
         Args:
             command (str)
+
+        Kwargs:
+            username (str)
         """
 
         self.info_log("executing command: %s"%command)
@@ -45,7 +48,7 @@ class VirtualboxInstance(BaseInstance):
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-            username = self.browser_config.get('username')
+            username = kwargs.get('username', self.browser_config.get('username'))
             password = self.browser_config.get('password')
 
             ssh.connect(self.ip, username = username, password = password)
@@ -177,7 +180,7 @@ class VirtualboxInstance(BaseInstance):
         self.info_log("Tearing down")
 
         if self.browser_config.get('platform').lower() == 'linux':
-            self.execute_command("shutdown -h now")
+            self.execute_command("shutdown -h now", username = 'root')
 
         elif self.browser_config.get('platform').lower() == 'windows':
             self.session.console.power_down()

@@ -216,7 +216,7 @@ class GridRunner(BaseRunner):
                                 "%s-%s"%(
                                     th.test._browser_config.browser_id,
                                     th.test._name
-                                ) for th in threading.enumerate() if type(th) != threading._MainThread
+                                ) for th in threading.enumerate() if type(th) != threading._MainThread and hasattr(th, 'test')
                             ])
                         ))
                     except Exception as e:

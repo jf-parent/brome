@@ -135,6 +135,7 @@ class BaseRunner(object):
         elif test_name:
             if test_name.endswith('.py'):
                 test_name = test_name[:-3]
+
             try:
                 available_tests.append(__import__('tests.%s'%test_name, fromlist = ['']))
             except ImportError:

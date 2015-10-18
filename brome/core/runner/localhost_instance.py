@@ -43,7 +43,8 @@ class LocalhostInstance(BaseInstance):
         #Get a random port that is available
         if not port:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.bind(('', 0))
+            sock.bind(('0.0.0.0', 0))
+            sock.listen(5)
             self.proxy_port = sock.getsockname()[1]
             sock.close()
 

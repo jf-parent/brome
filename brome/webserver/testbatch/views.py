@@ -202,13 +202,22 @@ def test_instances(testbatch_id):
 
     return render_template("testbatch/test_instances.html", testbatch_id = testbatch_id, data = data, websocket_alive = websocket_alive)
 
-@blueprint.route("/videocapture/<int:testbatch_id>")
+@blueprint.route("/video_player")
 @login_required
-def videocapture(testbatch_id):
+def video_player():
     data = {}
-    data['video_capture_list'] = []
+    data['title'] = request.args.get('video_title', '')
+    data['path'] = request.args.get('video_path', '')
 
-    return render_template("testbatch/video_capture.html", testbatch_id = testbatch_id, data = data)
+    return render_template("testbatch/video_player.html", data = data)
+
+@blueprint.route("/video_recording_list/<int:testbatch_id>")
+@login_required
+def video_recording_list(testbatch_id):
+    data = {}
+    data['video_recording_list'] = data_controller.get_test_batch_video_recording(blueprint.app, testbatch_id)
+
+    return render_template("testbatch/video_recording.html", testbatch_id = testbatch_id, data = data)
 
 @blueprint.route("/testresult/<int:testbatch_id>")
 @login_required

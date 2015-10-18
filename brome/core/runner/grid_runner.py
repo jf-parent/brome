@@ -19,6 +19,8 @@ from brome.core.runner.browser_config import BrowserConfig
 from brome.core.model.test_batch import TestBatch
 
 class GridRunner(BaseRunner):
+    """GridRunner run on Ec2, Virtualbox, Browserstack, saucelabs and also localhost
+    """
     def __init__(self, *args):
         super(GridRunner, self).__init__(*args)
 
@@ -30,12 +32,17 @@ class GridRunner(BaseRunner):
         self.browser_configs = {}
 
     def execute(self):
+        """Execute the test batch
+        """
+
         #START SELENIUM GRID
         if self.get_config_value('grid_runner:start_selenium_server'):
             self.start_selenium_server()
 
+        #Get all the browsers id
         self.browsers_id = self.get_config_value('runner:remote_runner').split(',')
 
+        #Start all the instances
         instance_threads = []
         for i, browser_id in enumerate(self.browsers_id):
             browser_config = BrowserConfig(
@@ -57,6 +64,7 @@ class GridRunner(BaseRunner):
                     nb_browser_by_instance:
 
                     nb_instance_to_launch = int(math.ceil(float(len(self.tests))/nb_browser_by_instance))
+
                 else:
                     nb_instance_to_launch = max_number_of_instance
 
@@ -74,6 +82,7 @@ class GridRunner(BaseRunner):
 
             #VIRTUALBOX
             elif browser_config.location == 'virtualbox':
+                #Instanciate only one vbox
                 if not hasattr(self, 'vbox'):
                     self.vbox = virtualbox.VirtualBox()
 
@@ -89,6 +98,7 @@ class GridRunner(BaseRunner):
 
                 instance_threads.append(vbox_instance_thread)
 
+            #SAUCELABS
             elif browser_config.location == 'saucelabs':
 
                 if not self.instances.get(browser_id):
@@ -96,6 +106,7 @@ class GridRunner(BaseRunner):
 
                 self.instances[browser_id].append(SauceLabsInstance())
 
+            #BROWSERSTACK
             elif browser_config.location == 'browserstack':
 
                 if not self.instances.get(browser_id):
@@ -103,6 +114,7 @@ class GridRunner(BaseRunner):
 
                 self.instances[browser_id].append(BrowserstackInstance())
 
+            #LOCALHOST
             elif browser_config.location == 'localhost':
 
                 max_number_of_instance = browser_config.get('max_number_of_instance', 1)
@@ -150,12 +162,17 @@ class GridRunner(BaseRunner):
         self.info_log("The test batch is finished.")
 
     def resolve_instance_by_ip(self, ip):
+        """Resolve an instance by his ip
+        """
         return self.instances_ip[ip]
 
     def run(self):
-        executed_tests = []
+        """Run all the test in the test batch
+        """
 
+        executed_tests = []
         try:
+
             active_thread = 0
             start_thread = True
             current_index = 0
@@ -173,11 +190,14 @@ class GridRunner(BaseRunner):
                 self.kill_test_batch_if_necessary()
 
                 for browser_id in self.browsers_id:
+
                     if active_thread_by_browser_id.get(browser_id) is None:
                         active_thread_by_browser_id[browser_id] = 0
                     else:
                         current_active_thread = 0
                         for thread in threading.enumerate():
+
+                            #Make sure that the thread is TestThread
                             if hasattr(thread, 'test'):
                                 if thread.test._browser_config.browser_id == browser_id:
                                     current_active_thread += 1
@@ -185,6 +205,7 @@ class GridRunner(BaseRunner):
                         active_thread_by_browser_id[browser_id] = current_active_thread
 
                     for j in range(0, len(self.instances[browser_id]) - active_thread_by_browser_id[browser_id]):
+
                         self.kill_test_batch_if_necessary()
 
                         if test_index_by_browser_id[browser_id] < len(self.tests):
@@ -249,6 +270,10 @@ class GridRunner(BaseRunner):
         self.print_test_summary(executed_tests)
 
     def kill_test_batch_if_necessary(self):
+        """Kill the test batch
+
+        If the test_batch.killed is set to true then the test batch will be kill
+        """
         session = Session()
         sa_test_batch = Session.query(TestBatch).filter(TestBatch.id == self.test_batch_id).one()
         session.close()
@@ -262,6 +287,9 @@ class GridRunner(BaseRunner):
             raise TestRunnerKilledException("Killed")
 
     def tear_down_instances(self):
+        """Tear down all instances
+        """
+
         self.info_log('Tearing down all instances...')
 
         for instance in self.alive_instances:
@@ -270,6 +298,9 @@ class GridRunner(BaseRunner):
         self.info_log('[Done]Tearing down all instances')
 
     def start_selenium_server(self):
+        """Start the selenium server
+        """
+
         ip = self.get_config_value("grid_runner:selenium_server_ip")
         port = self.get_config_value("grid_runner:selenium_server_port")
 
@@ -314,6 +345,8 @@ class GridRunner(BaseRunner):
         raise Exception("Selenium server did not start!")
 
 class InstanceThread(threading.Thread):
+    """Theard that start the instance
+    """
 
     def __init__(self, instance):
         threading.Thread.__init__(self)
@@ -337,6 +370,8 @@ class InstanceThread(threading.Thread):
         self.runner.alive_instances.append(self.instance)
 
 class TestThread(threading.Thread):
+    """Thread that run the test
+    """
 
     def __init__(self, test):
         threading.Thread.__init__(self)
@@ -346,4 +381,6 @@ class TestThread(threading.Thread):
         self.test.execute()
 
 class TestRunnerKilledException(Exception):
+    """Exception that is raised when the test batch is killed
+    """
     pass

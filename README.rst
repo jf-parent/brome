@@ -14,7 +14,8 @@ brome
 
 Framework for Selenium
 
-* Documentation: https://brome.readthedocs.org.
+* Documentation: https://brome.readthedocs.org
+* Blog: http://brome-hq.logdown.com/
 
 Features
 --------
@@ -25,7 +26,8 @@ Features
 * Runner for Amazon EC2, Saucelabs, Browserstack, Virtualbox and Appium
 * Javascript implementation of select, drag and drop, scroll into view
 * IPython embed on assertion for debugging
-* Video recording of the session
+* Session Video recording
+* Network capture with mitmproxy (firefox & chrome)
 * Persistent test report
 * Webserver
 * Test state persistence system

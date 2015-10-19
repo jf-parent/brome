@@ -7,11 +7,46 @@ import psutil
 from datetime import datetime
 import json
 
+from IPython import embed
 from brome.core.model.test_batch import TestBatch
 from brome.core.model.test_instance import TestInstance
 from brome.core.model.test_result import TestResult
 from brome.core.model.test import Test
 from brome.webserver.extensions import db
+
+def analyse_network_capture(app, testbatch_id, network_capture_path):
+    network_capture_path = os.path.join(app.brome.get_config_value('project:test_batch_result_path'), network_capture_path)
+
+    module = __import__(app.brome.get_config_value("webserver:analyse_network_capture_func"), fromlist = [''])
+    data = module.analyse(network_capture_path)
+    
+    return data
+
+def get_network_capture(app, testbatch_id):
+    data = []
+
+    relative_dir = os.path.join(
+        "tb_%s"%testbatch_id,
+        "network_data"
+    )
+
+    abs_dir = os.path.join(
+        app.brome.get_config_value('project:test_batch_result_path'),
+        relative_dir
+    )
+
+    if os.path.isdir(abs_dir):
+        for f in os.listdir(abs_dir):
+            network_capture = {}
+            network_capture['name'] = f.split('.')[0]
+            network_capture['path'] = os.path.join(relative_dir, f)
+            analyse = app.brome.get_config_value("webserver:analyse_network_capture_func")
+            if analyse:
+                network_capture['analyse'] = analyse
+
+            data.append(network_capture)
+
+    return data
 
 def get_test_batch_list():
     data = db.session.query(TestBatch).order_by(TestBatch.id.desc()).all()
@@ -206,8 +241,10 @@ def get_test_batch_log(app, testbatch_id):
     )
 
     runner_log = []
-    with open(os.path.join(abs_logs_dir, "brome_runner.log"), 'r') as f:
-        runner_log = f.read().replace('"', '&quot;').replace("'", '&quot;').splitlines()
+    log_path = os.path.join(abs_logs_dir, "brome_runner.log")
+    if os.path.isfile(log_path):
+        with open(log_path, 'r') as f:
+            runner_log = f.read().replace('"', '&quot;').replace("'", '&quot;').splitlines()
 
     return runner_log
 
@@ -269,5 +306,33 @@ def get_test_batch_crashes(app, testbatch_id):
                 'screenshot': os.path.join(relative_dir, '%s.png'%file_name),
                 'trace': trace
             })
+
+    return data
+
+def get_test_batch_video_recording(app, testbatch_id, only_total = False):
+    data = []
+
+    relative_dir = os.path.join(
+        "tb_%s"%testbatch_id,
+        "video_recording"
+    )
+
+    abs_dir = os.path.join(
+        app.brome.get_config_value('project:test_batch_result_path'),
+        relative_dir
+    )
+
+    if os.path.isdir(abs_dir):
+        for browser_dir in os.listdir(abs_dir):
+            video_recording_list = os.listdir(os.path.join(abs_dir, browser_dir))
+
+            for video_recording in video_recording_list:
+                data.append({
+                    'title': '%s - %s'%(video_recording.split('.')[0].replace('_', ' '), browser_dir.replace('_', ' ')),
+                    'path': os.path.join(relative_dir, browser_dir, video_recording)
+                })
+
+    if only_total:
+        return len(data)
 
     return data

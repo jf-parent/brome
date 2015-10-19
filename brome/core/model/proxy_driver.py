@@ -549,9 +549,9 @@ class ProxyDriver(object):
     def get_ip_of_node(self, **kwargs):
         if self.browser_config.location in ['localhost', 'appium']:
             return '127.0.0.1'
+
         elif self.browser_config.location == 'virtualbox':
-            #TODO
-            raise NotImplemented()
+            return self.runner.instances[self.browser_config.browser_id][0].get_ip()
 
         #EC2
         elif self.browser_config.location == 'ec2':

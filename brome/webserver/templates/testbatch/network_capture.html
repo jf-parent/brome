@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+{% if data['network_capture_list']|count %}
+    {% for network_capture in data['network_capture_list'] %}
+        <div class="panel panel-default">
+            <div class="panel-body" id="{{ network_capture.name }}">
+                    <p>{{ network_capture.name }}</p>
+                    {% if network_capture.analyse %}
+                        <button name="analyse" class="btn btn-default" onclick="Sijax.request('analyse', ['{{network_capture.name}}', '{{network_capture.path}}']);">Analyse</button>
+                    {% endif %}
+                    <a href="{{ url_for('testbatch.test_batch_report_file', filename = network_capture['path']) }}">Download raw file</a>
+                    <div name="result">
+                    </div>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="text-center">
+        <h1>There is no network capture</h1>
+    </div>
+{% endif %}
+{% endblock %}

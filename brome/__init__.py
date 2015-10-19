@@ -266,7 +266,8 @@ class Brome(object):
         elif parsed_args.reset:
             reset_database()
             delete_test_batch_result()
-            self.update_test()
+            if self.test_dict:
+                self.update_test()
             delete_test_states()
         elif parsed_args.generate_config:
             generate_brome_config(self.config_path)

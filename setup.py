@@ -8,7 +8,6 @@ with open('README.rst') as readme_file:
     readme = readme_file.read()
 
 requirements = []
-
 with open('requirements.txt', 'r') as fd:
     for line in fd:
         requirements.append(line)

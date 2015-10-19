@@ -38,6 +38,27 @@ def vnc(host):
 def test_batch_report_file(filename):
     return send_from_directory(blueprint.app.brome.get_config_value('project:test_batch_result_path'), filename)
 
+@flask_sijax.route(blueprint, "/network_capture/<int:testbatch_id>")
+@login_required
+def network_capture(testbatch_id):
+    def analyse(obj_response, network_capture_name, network_capture_path):
+        analysis = data_controller.analyse_network_capture(blueprint.app, testbatch_id, network_capture_path)
+
+        obj_response.script("$('#%s > div[name=\"result\"]').append('<div><p>Result:</p>%s</div>')"%(network_capture_name, analysis))
+
+    if g.sijax.is_sijax_request:
+        g.sijax.register_callback('analyse', analyse)
+        return g.sijax.process_request()
+
+    data = {}
+    data['network_capture_list'] = data_controller.get_network_capture(blueprint.app, testbatch_id)
+
+    return render_template(
+        "testbatch/network_capture.html",
+        testbatch_id = testbatch_id,
+        data = data
+    )
+
 @blueprint.route("/launch/", methods=['GET', 'POST'])
 @login_required
 def launch():
@@ -104,13 +125,15 @@ def detail(testbatch_id):
 
     show_video_capture = blueprint.app.brome.get_config_value("webserver:SHOW_VIDEO_CAPTURE")
     show_test_instances = blueprint.app.brome.get_config_value("webserver:SHOW_TEST_INSTANCES")
+    show_network_capture = blueprint.app.brome.get_config_value("webserver:SHOW_NETWORK_CAPTURE")
 
     return render_template(
         "testbatch/detail.html",
         testbatch_id = testbatch_id,
         data = data,
         show_test_instances = show_test_instances,
-        show_video_capture = show_video_capture
+        show_video_capture = show_video_capture,
+        show_network_capture = show_network_capture
     )
 
 @blueprint.route("/screenshot/<int:testbatch_id>")
@@ -179,13 +202,22 @@ def test_instances(testbatch_id):
 
     return render_template("testbatch/test_instances.html", testbatch_id = testbatch_id, data = data, websocket_alive = websocket_alive)
 
-@blueprint.route("/videocapture/<int:testbatch_id>")
+@blueprint.route("/video_player")
 @login_required
-def videocapture(testbatch_id):
+def video_player():
     data = {}
-    data['video_capture_list'] = []
+    data['title'] = request.args.get('video_title', '')
+    data['path'] = request.args.get('video_path', '')
 
-    return render_template("testbatch/video_capture.html", testbatch_id = testbatch_id, data = data)
+    return render_template("testbatch/video_player.html", data = data)
+
+@blueprint.route("/video_recording_list/<int:testbatch_id>")
+@login_required
+def video_recording_list(testbatch_id):
+    data = {}
+    data['video_recording_list'] = data_controller.get_test_batch_video_recording(blueprint.app, testbatch_id)
+
+    return render_template("testbatch/video_recording.html", testbatch_id = testbatch_id, data = data)
 
 @blueprint.route("/testresult/<int:testbatch_id>")
 @login_required

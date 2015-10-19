@@ -18,9 +18,17 @@ from brome.core.model.test_result import TestResult
 from brome.core.model.utils import *
 
 class BaseRunner(object):
+    """Base class for the brome runner
+
+    All brome runner inherit from this base class
+
+    Attributes:
+        brome (object)
+    """
 
     def __init__(self, brome):
         self.brome = brome
+
         self.brome_config_path = self.brome.config_path
         self.commandline_args = self.brome.parsed_args
         self.browsers_config = self.brome.browsers_config
@@ -29,21 +37,29 @@ class BaseRunner(object):
         self.config = runner_args_to_dict(self.commandline_args)
         self.brome_config = self.brome.config
 
+        #DATABASE
         setup_database(self.get_config_value('database:*'))
 
-        session = Session()
-
+        #Current pid of the runner
         current_pid = os.getpid()
 
+        #Get the activated tests list
         self.tests = self.get_activated_tests()
+
+        #Create test batch
+        session = Session()
 
         self.starting_timestamp = datetime.now()
         sa_test_batch = TestBatch(starting_timestamp = self.starting_timestamp)
         sa_test_batch.pid = current_pid
         sa_test_batch.total_tests = len(self.tests)
+
         session.add(sa_test_batch)
+
         session.commit()
+
         self.test_batch_id = sa_test_batch.id
+
         session.close()
 
         #RUNNER LOG DIR
@@ -62,11 +78,17 @@ class BaseRunner(object):
         #LOGGING
         self.configure_logger()
 
+        #SCREENSHOT CACHE
         if self.get_config_value('runner:cache_screenshot'):
             #Dictionary that contains all the screenshot name
             self.screenshot_cache = {}
 
     def kill_pid(self, pid):
+        """Kill process by pid
+
+        Args:
+            pid (int)
+        """
         try:
 
             p = psutil.Process(pid)
@@ -78,12 +100,24 @@ class BaseRunner(object):
             self.error_log('No such process: [pid:%s]'%pid)
 
     def kill(self, procname):
+        """Kill by process name
+
+        Args:
+            procname (str)
+        """
         for proc in psutil.process_iter():
             if proc.name() == procname:
                 self.info_log('[pid:%s][name:%s] killed'%(proc.pid, proc.name()))
                 proc.kill()
 
     def get_available_tests(self, search_query = None, test_name = None):
+        """Return a list of all the available tests
+
+        This function might call exit(1) if not test were found
+
+        Returns:
+            list
+        """
 
         available_tests = []
         if search_query:
@@ -101,6 +135,7 @@ class BaseRunner(object):
         elif test_name:
             if test_name.endswith('.py'):
                 test_name = test_name[:-3]
+
             try:
                 available_tests.append(__import__('tests.%s'%test_name, fromlist = ['']))
             except ImportError:
@@ -114,6 +149,13 @@ class BaseRunner(object):
         return available_tests
 
     def get_activated_tests(self):
+        """Return a list of all the activated tests
+
+        The behavior of this function is determined by the received CLI arguments
+
+        Returns:
+            list
+        """
         tests = []
 
         #test file
@@ -130,7 +172,7 @@ class BaseRunner(object):
         else:
             test_search_query = self.get_config_value('runner:test_search_query')
 
-            #by index slice eg: [0:12], [:], [0], [-1]
+            #by index or slice e.g.: [0:12], [:], [0], [-1]
             if test_search_query.find('[') != -1:
                 exec('tests = self.get_available_tests("*")%s'%test_search_query)
 
@@ -141,6 +183,15 @@ class BaseRunner(object):
         return tests
 
     def get_config_value(self, config_name):
+        """Return the effective config value
+
+        Args:
+            config_name (str)
+
+        Returns:
+            value (the type vary according to the config_name)
+        """
+
         config_list = [
             self.config,
             self.brome_config,
@@ -151,6 +202,9 @@ class BaseRunner(object):
         return value
 
     def configure_logger(self):
+        """Configure the test batch runner logger
+        """
+
         logger_name = 'brome_runner'
 
         self.logger = logging.getLogger(logger_name)
@@ -174,6 +228,14 @@ class BaseRunner(object):
         self.logger.setLevel(getattr(logging, self.get_config_value('logger_runner:level')))
 
     def print_test_summary(self, executed_tests):
+        """Print test summary
+
+        When the test batch is finished a test summary will be printed
+
+        Args:
+            executed_tests (list)
+        """
+
         separator = '---------------------'
 
         session = Session()

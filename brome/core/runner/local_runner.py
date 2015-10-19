@@ -10,10 +10,17 @@ from brome.core.runner.browser_config import BrowserConfig
 from brome.core.model.test_batch import TestBatch
 
 class LocalRunner(BaseRunner):
+    """The local runner only run browser on localhost
+    """
+
     def __init__(self, *args):
         super(LocalRunner, self).__init__(*args)
 
     def execute(self):
+        """Execute the test batch
+            
+        """
+
         self.browser_config = BrowserConfig(
             runner = self,
             browser_id = self.get_config_value("runner:localhost_runner"),
@@ -34,6 +41,9 @@ class LocalRunner(BaseRunner):
             self.terminate()
 
     def run(self):
+        """Run the test batch
+        """
+
         self.info_log("The test batch is ready.")
 
         self.executed_tests = []
@@ -63,6 +73,8 @@ class LocalRunner(BaseRunner):
             localhost_instance.tear_down()
 
     def terminate(self):
+        """Terminate the test batch
+        """
 
         self.info_log('The test batch is finished.')
 

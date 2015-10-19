@@ -11,17 +11,34 @@ from brome.core.model.utils import *
 from .base_instance import BaseInstance
 
 class EC2Instance(BaseInstance):
+    """EC2 instance
 
-    def __init__(self, **kwargs):
-        self.runner = kwargs.get('runner')
-        self.browser_config = kwargs.get('browser_config')
-        self.index = kwargs.get('index')
+    Attributes:
+        runner (object)
+        browser_config (object)
+        index (int)
+    """
+
+    def __init__(self, runner, browser_config, index):
+        self.runner = runner
+        self.browser_config = browser_config
+        self.index = index
         
     def get_ip(self):
+        """Return the ip address of the node
+        """
+
         return self.private_ip
 
     def execute_command(self, command):
+        """Execute a command on the node
+
+        Args:
+            command (str)
+        """
+
         self.info_log("executing command: %s"%command)
+
         try:
             ssh = paramiko.SSHClient()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -35,12 +52,17 @@ class EC2Instance(BaseInstance):
 
             ssh.close()
 
-            return output
+            return (stdout, stderr)
 
         except Exception as e:
-            self.error_log("execute_command exception: %s"%str(e))
+            msg = "Execute_command exception: %s"%str(e)
+            self.error_log(msg)
+            raise Exception(msg)
 
     def startup(self):
+        """Startup the ec2 instance
+        """
+
         if not self.browser_config.get('launch'):
             self.warning_log("Skipping launch")
             return
@@ -49,14 +71,17 @@ class EC2Instance(BaseInstance):
 
         instance = None
         try:
+
             #KEY NAME
             key_name = self.browser_config.get("ssh_key_path").split(os.sep)[-1][:-4]
             
             #SECURITY GROUP
             if type(self.browser_config.get("security_group_ids")) in [str, unicode]:
                 security_group_ids = [self.browser_config.get("security_group_ids")]
+
             elif type(self.browser_config.get("security_group_ids")) == list:
                 security_group_ids = self.browser_config.get("security_group_ids")
+
             else:
                 msg = "The config security_group_ids must be a string or a list of string"
                 self.critial_log(msg)
@@ -75,11 +100,13 @@ class EC2Instance(BaseInstance):
             if wait_after_instance_launched:
                 self.info_log("Waiting after instance launched: %s seconds..."%wait_after_instance_launched)
                 sleep(wait_after_instance_launched)
+
             else:
                 self.warning_log("Skipping waiting after instance launched")
 
             try:
                 instance = reservation.instances[0]
+
             except Exception as e:
                 self.critical_log('Instance reservation exception: %s'%str(e))
                 raise
@@ -93,6 +120,7 @@ class EC2Instance(BaseInstance):
                     status = instance.update()
                     if status == 'running':
                         break
+
                     else:
                         sleep(1)
                 except Exception as e:
@@ -118,12 +146,17 @@ class EC2Instance(BaseInstance):
 
             if self.runner.get_config_value("ec2:wait_until_system_and_instance_check_performed"):
                 check_successful = False
+
                 for i in range(5*60):
+
                     try:
+
                         if not i%60:
                             self.info_log('System_status: %s, instance_status: %s'%(status.system_status, status.instance_status))
+
                         status = ec2.get_all_instance_status(instance_ids=[instance.id])[0]
                         if status.system_status.status == u'ok' and status.instance_status.status == u'ok':
+
                             self.info_log('system_status: %s, instance_status: %s'%(status.system_status, status.instance_status))
                             check_successful = True
                             break
@@ -142,20 +175,13 @@ class EC2Instance(BaseInstance):
             self.info_log('Starting the selenium node server')
 
             #LINUX
-            if self.browser_config.get('platform').upper() == "LINUX":
-                ssh = paramiko.SSHClient()
-                ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-                k = paramiko.RSAKey.from_private_key_file(self.browser_config.get('ssh_key_path'))
-
-                ssh.connect(instance.ip_address, username=self.browser_config.get('username'), pkey = k)
-
+            if self.browser_config.get('platform').lower() == "linux":
                 command = self.browser_config.get("selenium_command").format(**self.browser_config.config)
-                self.info_log('Command: %s'%command)
-                stdin, stdout, stderr = ssh.exec_command(command)
-                #self.log('Command output: stdin(%s), stdout(%s), stderr(%s)'%(stdin, stdout, stderr))
+                self.execute_command(command)
 
-            elif self.browser_config.get('platform').upper() == "WINDOWS":
+            elif self.browser_config.get('platform').upper() == "windows":
+
+                #TODO this code is out of date
                 config = self.browser_config.config.copy()
                 config['instance_ip_address'] = instance.ip_address
                 command = self.browser_config("selenium_command").format(**config)
@@ -163,6 +189,7 @@ class EC2Instance(BaseInstance):
                 self.runner.xvfb_pids.append(process.pid)
 
             else:
+
                 msg = "The provided platform name is not supported: select either (WINDOWS) or (LINUX)"
                 self.critical_log(msg)
                 raise Exception(msg)
@@ -179,6 +206,9 @@ class EC2Instance(BaseInstance):
             raise
 
     def tear_down(self):
+        """Tear down the instance
+        """
+        
         if not self.browser_config.get('terminate'):
             self.warning_log("Skipping terminate")
             return

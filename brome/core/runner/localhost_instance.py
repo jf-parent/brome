@@ -16,8 +16,8 @@ class LocalhostInstance(BaseInstance):
     """
 
     def __init__(self, runner, browser_config, **kwargs):
-        self.runner = kwargs.get('runner')
-        self.browser_config = kwargs.get('browser_config')
+        self.runner = runner
+        self.browser_config = browser_config
         self.test_name = kwargs.get('test_name')
 
     def startup(self):

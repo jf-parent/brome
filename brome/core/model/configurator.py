@@ -5,10 +5,23 @@ import yaml
 from IPython import embed
 
 def save_brome_config(brome_config_path, config):
+    """Save the brome config to a yaml file
+
+    Args:
+        brome_config_path (str) the file path where the config will be save
+        config (dict) the brome config dict
+    """
+
     with open(brome_config_path, 'w') as fd:
         yaml.dump(config, fd, default_flow_style = False)
 
 def generate_brome_config(brome_config_path):
+    """Generate a brome config with default value
+
+    Args:
+        brome_config_path (str) the file path where the config will be save
+    """
+
     config = {}
     for key in default_config.iterkeys():
         for inner_key, value in default_config[key].iteritems():
@@ -20,6 +33,15 @@ def generate_brome_config(brome_config_path):
     save_brome_config(brome_config_path, config)
 
 def get_config_value(dict_list, config_name):
+    """Return a config value
+
+    Basically it traverse the dictionary list until it find a match for the config_name
+
+    Args:
+        dict_list (list of dict)
+        config_name (str) the name of the config you are looking for
+    """
+
     try:
         section, option = config_name.split(':')
     except ValueError:
@@ -39,6 +61,12 @@ def get_config_value(dict_list, config_name):
                     return dict_[section][option]
 
 def test_config_to_dict(test_config_string):
+    """Parse the test config to a dictionary
+
+    Args:
+        test_config_string (str) this string come from the --test-config flag of the bro executable run command
+    """
+
     test_config = {}
     if test_config_string:
         for config in test_config_string.split(','):
@@ -48,6 +76,12 @@ def test_config_to_dict(test_config_string):
     return test_config
 
 def load_brome_config(config_path):
+    """Load the brome config from the yaml file
+
+    Args:
+        config_path (str)
+    """
+
     config = {}
 
     with open(config_path, 'r') as fd:
@@ -56,6 +90,9 @@ def load_brome_config(config_path):
     return config
 
 def runner_args_to_dict(args):
+    """Parse the runner arguments
+    """
+
     config = {}
 
     brome_config_string = args.brome_config
@@ -88,6 +125,12 @@ def runner_args_to_dict(args):
     return config
 
 def parse_brome_config_from_browser_config(browser_config):
+    """Parse the browser config and look for brome specific config
+
+    Args:
+        browser_config (dict)
+    """
+    
     config = {}
 
     brome_keys = [key for key in browser_config.iterkeys() if key.find(':') != -1]

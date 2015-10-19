@@ -8,25 +8,48 @@ from brome.core.model.utils import *
 from .base_instance import BaseInstance
 
 class LocalhostInstance(BaseInstance):
+    """Localhost instance
 
-    def __init__(self, **kwargs):
+    Attributes:
+        runner (object)
+        browser_config (object)
+    """
+
+    def __init__(self, runner, browser_config, **kwargs):
         self.runner = kwargs.get('runner')
         self.browser_config = kwargs.get('browser_config')
         self.test_name = kwargs.get('test_name')
 
     def startup(self):
+        """Start the instance
+
+        This is mainly use to start the proxy
+        """
         self.runner.info_log("Startup")
 
         if self.browser_config.config.get('enable_proxy'):
             self.start_proxy()
         
     def tear_down(self):
+        """Tear down the instance
+
+        This is mainly use to stop the proxy
+        """
         self.runner.info_log("Tear down")
 
         if self.browser_config.config.get('enable_proxy'):
             self.stop_proxy()
 
     def execute_command(self, command):
+        """Execute a command
+
+        Args:
+            command (str)
+
+        Returns:
+            process (object)
+        """
+
         self.runner.info_log("Executing command: %s"%command)
 
         process = Popen(
@@ -38,6 +61,9 @@ class LocalhostInstance(BaseInstance):
         return process
 
     def start_proxy(self, port = None):
+        """Start the mitmproxy
+        """
+        
         self.runner.info_log("Starting proxy...")
         
         #Get a random port that is available
@@ -80,6 +106,9 @@ class LocalhostInstance(BaseInstance):
         self.runner.info_log("Proxy pid: %s"%self.proxy_pid)
 
     def stop_proxy(self):
+        """Stop the mitmproxy
+        """
+
         self.runner.info_log("Stopping proxy...")
 
         if hasattr(self, 'proxy_pid'):

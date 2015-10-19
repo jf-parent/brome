@@ -14,7 +14,8 @@ brome
 
 Framework for Selenium
 
-* Documentation: https://brome.readthedocs.org.
+* Documentation: https://brome.readthedocs.org
+* Blog: http://brome-hq.logdown.com/
 
 Features
 --------

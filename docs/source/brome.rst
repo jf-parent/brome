@@ -52,7 +52,7 @@ To get help for one specific command::
 
     >Brome admin
 
-    >optional arguments:
+    >optional flags:
     >  -h, --help            show this help message and exit
     >  --generate-config     Generate the default brome config
     >  --reset               Reset the database + delete the test batch results +
@@ -72,7 +72,7 @@ The run command can run your test remotely or locally.
 Local
 ~~~~~
 
-To run a test locally use the `-l` argument::
+To run a test locally use the `-l` flag::
 
     $ ./bro run -l 'browser-id' -s 'test-name'
 
@@ -83,14 +83,14 @@ So if you want to run the test named `/path/to/project/tests/test_login.py` on f
 Remote
 ~~~~~~
 
-If you want to run your test remotely then use the `-r` argument::
+If you want to run your test remotely then use the `-r` flag::
     
     $ ./bro run -r 'firefox_virtualbox' -s 'login'
 
 Brome config
 ~~~~~~~~~~~~
 
-You can overwrite a brome config for one particular run with the `--brome-config` argument. Let say you want to disable the sound on a test crash and on an assertion failure::
+You can overwrite a brome config for one particular run with the `--brome-config` flag. Let say you want to disable the sound on a test crash and on an assertion failure::
 
     $ ./bro run -l 'firefox' -s 'login' --brome-config "runner:play_sound_on_test_crash=False,runner:play_sound_on_assertion_failure=False"
 
@@ -121,12 +121,12 @@ You have 3 ways of telling brome which test scenario to run.
 Search
 ######
 
-The first one is with the `-s` argument. The `-s` stand for search. Brome will search for a test scenario under your `tests` folder that start with the prefix `test_` and end with `.py`. If you want to run the scenario named `test_login.py` then search for `login`. You can also use a python list index here. Let say you want to run the test scenario index `2` then use `-s [2]`. To find out your test scenario index use the `list` command (see :ref:`list`). Python slice are also supported e.g.: `-s [3:7]` will run the test scenario index from 3 to 7.
+The first one is with the `-s` flag. The `-s` stand for search. Brome will search for a test scenario under your `tests` folder that start with the prefix `test_` and end with `.py`. If you want to run the scenario named `test_login.py` then search for `login`. You can also use a python list index here. Let say you want to run the test scenario index `2` then use `-s [2]`. To find out your test scenario index use the `list` command (see :ref:`list`). Python slice are also supported e.g.: `-s [3:7]` will run the test scenario index from 3 to 7.
 
 Name
 ####
 
-The second way is with the `-n` argument. The `-n` argument stand for name. If your test scenario doesn't start with the prefix `test_` then brome won't consider it when you use the search argument. The use case for this is when you have some code that you don't want to run automatically (e.g.: data creation, administrative stuff, etc)::
+The second way is with the `-n` flag. The `-n` flag stand for name. If your test scenario doesn't start with the prefix `test_` then brome won't consider it when you use the search flag. The use case for this is when you have some code that you don't want to run automatically (e.g.: data creation, administrative stuff, etc)::
 
     $ ls /path/to/project/tests
     > register_user.py
@@ -140,7 +140,7 @@ This separation is pretty useful when you use the webserver to launch a test bat
 Test file
 #########
 
-The last way is by using a yaml file that contains a list of all the test scenario that you want to run (work only with the `-s` argument)::
+The last way is by using a yaml file that contains a list of all the test scenario that you want to run (work only with the `-s` flag)::
 
     $ cat test_file.yml
     > - wait_until_present
@@ -222,7 +222,7 @@ This use the build in Flask webserver.
 Tornado
 ~~~~~~~
 
-If you want to start a tornado webserver instead use the `-t` argument::
+If you want to start a tornado webserver instead use the `-t` flag::
 
     $ ./bro webserver -t
 

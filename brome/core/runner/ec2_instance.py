@@ -174,6 +174,11 @@ class EC2Instance(BaseInstance):
 
             self.info_log('Starting the selenium node server')
 
+            self.private_ip = instance.private_ip_address
+            self.public_dns = instance.public_dns_name
+            self.private_dns = instance.private_dns_name
+            self.public_ip = instance.ip_address
+
             #LINUX
             if self.browser_config.get('platform').lower() == "linux":
                 command = self.browser_config.get("selenium_command").format(**self.browser_config.config)
@@ -193,11 +198,6 @@ class EC2Instance(BaseInstance):
                 msg = "The provided platform name is not supported: select either (WINDOWS) or (LINUX)"
                 self.critical_log(msg)
                 raise Exception(msg)
-
-            self.private_ip = instance.private_ip_address
-            self.public_dns = instance.public_dns_name
-            self.private_dns = instance.private_dns_name
-            self.public_ip = instance.ip_address
 
             return True
 

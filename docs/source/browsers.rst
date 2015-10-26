@@ -21,7 +21,7 @@ The browser config look something like this::
     firefox:
       browserName: 'Firefox'
 
-    c:
+    chrome:
       browserName: 'Chrome'
 
 So when you want to run a test using firefox you specify it to the bro executable::
@@ -38,7 +38,7 @@ You can add brome config in the browser config also::
       maximize_window: true
       "runner:embed_on_test_crash": true
 
-    c:
+    chrome:
       browserName: 'Chrome'
       window_height: 950
       window_width: 1550

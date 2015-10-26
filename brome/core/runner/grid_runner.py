@@ -128,7 +128,7 @@ class GridRunner(BaseRunner):
                     if not self.instances.get(browser_id):
                         self.instances[browser_id] = []
 
-                    self.instances[browser_id].append(LocalhostInstance())
+                    self.instances[browser_id].append(LocalhostInstance(self, browser_config, test_name = i))
 
         for t in instance_threads:
             t.join()

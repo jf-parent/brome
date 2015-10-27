@@ -251,7 +251,7 @@ class EC2Instance(BaseInstance):
 
         path_to_mitmproxy = self.browser_config.get("mitmproxy:path", 'mitmdump')
 
-        filter_ = self.runner.browser_config.get("mitmproxy:filter")
+        filter_ = self.browser_config.get("mitmproxy:filter")
         command = [
             path_to_mitmproxy,
             "-p",

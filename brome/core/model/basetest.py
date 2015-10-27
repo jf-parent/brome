@@ -56,7 +56,7 @@ class BaseTest(object):
 
         #ASSIGN THE TEST NAME TO THE INSTANCE
         if self._browser_config.location in ['ec2', 'virtualbox']:
-            self._runner.resolve_instance_by_ip(self.pdriver.get_ip()).testname = self._name
+            self._runner.resolve_instance_by_ip(self.pdriver.get_ip_of_node()).testname = self._name
 
         #TEST RESULT DIRECTORY
         self.configure_test_result_dir()

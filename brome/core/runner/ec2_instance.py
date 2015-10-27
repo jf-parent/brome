@@ -152,7 +152,8 @@ class EC2Instance(BaseInstance):
                     try:
 
                         if not i%60:
-                            self.info_log('System_status: %s, instance_status: %s'%(status.system_status, status.instance_status))
+                            if not type(status) in [unicode, str]:
+                                self.info_log('System_status: %s, instance_status: %s'%(status.system_status, status.instance_status))
 
                         status = ec2.get_all_instance_status(instance_ids=[instance.id])[0]
                         if status.system_status.status == u'ok' and status.instance_status.status == u'ok':
@@ -239,7 +240,7 @@ class EC2Instance(BaseInstance):
             self.runner.runner_dir,
             'network_data'
         )
-        create_dir_if_doesnt_exist(network_data_path)
+        create_dir_if_doesnt_exist(self.network_data_path)
 
         self.local_proxy_output_path = os.path.join(
             self.network_data_path,

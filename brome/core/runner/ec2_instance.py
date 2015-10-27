@@ -30,7 +30,7 @@ class EC2Instance(BaseInstance):
 
         return self.private_ip
 
-    def execute_command(self, command):
+    def execute_command(self, command, read_output = True):
         """Execute a command on the node
 
         Args:
@@ -48,11 +48,14 @@ class EC2Instance(BaseInstance):
 
             stdin, stdout, stderr = ssh.exec_command(command)
 
-            output = stdout.read()
+            if read_output:
+                output = stdout.read()
+            else:
+                output = None
 
             ssh.close()
 
-            return (stdout, stderr)
+            return output
 
         except Exception as e:
             msg = "Execute_command exception: %s"%str(e)
@@ -253,6 +256,7 @@ class EC2Instance(BaseInstance):
 
         filter_ = self.browser_config.get("mitmproxy:filter")
         command = [
+            'nohup',
             path_to_mitmproxy,
             "-p",
             "%i"%self.proxy_port,

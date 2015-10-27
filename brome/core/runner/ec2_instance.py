@@ -249,9 +249,9 @@ class EC2Instance(BaseInstance):
 
         self.remote_proxy_output_path = string_to_filename('%s.data'%self.index)
 
-        path_to_mitmproxy = self.runner.brome.get_config_value("mitmproxy:path", 'mitmdump')
+        path_to_mitmproxy = self.browser_config.get("mitmproxy:path", 'mitmdump')
 
-        filter_ = self.runner.brome.get_config_value("mitmproxy:filter")
+        filter_ = self.runner.browser_config.get("mitmproxy:filter")
         command = [
             path_to_mitmproxy,
             "-p",

@@ -269,7 +269,7 @@ class EC2Instance(BaseInstance):
 
         command.append('&')
 
-        self.execute_command(' '.join(command))
+        self.execute_command(' '.join(command), read_output = False)
 
     def stop_proxy(self):
         """Stop the mitmproxy

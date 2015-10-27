@@ -257,12 +257,13 @@ class EC2Instance(BaseInstance):
             "-p",
             "%i"%self.proxy_port,
             "-w",
-            self.remote_proxy_output_path,
-            "&"
+            self.remote_proxy_output_path
         ]
 
         if filter_:
             command.append(filter_)
+
+        command.append('&')
 
         self.execute_command(' '.join(command))
 
@@ -278,7 +279,8 @@ class EC2Instance(BaseInstance):
             '%s@%s:%s'%(self.browser_config.get('username'), self.get_ip(), self.remote_proxy_output_path),
             self.local_proxy_output_path
         ]
-        self.execute_command(' '.join(scp_command))
+        p = subprocess.Popen(scp) 
+        p.wait()
 
         self.new_proxy_output_path = os.path.join(
             self.network_data_path,

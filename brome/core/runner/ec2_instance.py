@@ -199,6 +199,11 @@ class EC2Instance(BaseInstance):
                 self.critical_log(msg)
                 raise Exception(msg)
 
+            #PROXY
+            if self.browser_config.get('enable_proxy'):
+                port = self.browser_config.get('proxy_port', 8080)
+                self.start_proxy(port = port)
+
             return True
 
         except Exception as e:
@@ -217,6 +222,72 @@ class EC2Instance(BaseInstance):
         
         ec2 = boto.ec2.connect_to_region(self.browser_config.get("region"))
         ec2.terminate_instances(instance_ids=[self.instance_id])
+
+        #PROXY
+        if self.browser_config.config.get('enable_proxy'):
+            self.stop_proxy()
+
+    def start_proxy(self, port = None):
+        """Start the mitmproxy
+        """
+        
+        self.runner.info_log("Starting proxy...")
+
+        self.proxy_port = port
+        
+        self.network_data_path = os.path.join(
+            self.runner.runner_dir,
+            'network_data'
+        )
+        create_dir_if_doesnt_exist(network_data_path)
+
+        self.local_proxy_output_path = os.path.join(
+            self.network_data_path,
+            string_to_filename('%s.data'%self.index)
+        )
+
+        self.remote_proxy_output_path = string_to_filename('%s.data'%self.index)
+
+        path_to_mitmproxy = self.runner.brome.get_config_value("mitmproxy:path")
+
+        filter_ = self.runner.brome.get_config_value("mitmproxy:filter")
+        command = [
+            path_to_mitmproxy,
+            "-p",
+            "%i"%self.proxy_port,
+            "-w",
+            self.remote_proxy_output_path
+        ]
+
+        if filter_:
+            command.append(filter_)
+
+        self.execute_command(command)
+
+    def stop_proxy(self):
+        """Stop the mitmproxy
+        """
+
+        self.runner.info_log("Stopping proxy...")
+
+        #scp the network data
+        scp_command = [
+            'scp',
+            '%s@%s:%s'%(self.browser_config.get('username'), self.get_ip(), self.remote_proxy_output_path),
+            self.local_proxy_output_path
+        ]
+        self.execute_command(' '.join(scp_command))
+
+        self.new_proxy_output_path = os.path.join(
+            self.network_data_path,
+            string_to_filename('%s.data'%self.index)
+        )
+
+        os.rename(self.local_proxy_output_path, self.new_proxy_output_path)
+        os.remove(self.local_proxy_output_path)
+
+        #kill the proxy
+        self.execute_command("fuser -k %i/tcp"%self.proxy_port)
 
     def get_id(self):
         return '%s - %s'%(self.browser_config.browser_id, self.index)

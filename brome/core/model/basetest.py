@@ -54,6 +54,10 @@ class BaseTest(object):
         #DRIVER
         self.pdriver = self.init_driver()
 
+        #ASSIGN THE TEST NAME TO THE INSTANCE
+        if self._browser_config.location in ['ec2', 'virtualbox']:
+            self._runner.resolve_instance_by_ip(self.pdriver.get_ip()).testname = self._name
+
         #TEST RESULT DIRECTORY
         self.configure_test_result_dir()
 
@@ -231,10 +235,23 @@ class BaseTest(object):
             desired_cap['platform'] = config.get('platform')
             desired_cap['javascriptEnabled'] = True
 
+            if config.get('enable_proxy'):
+                mitm_proxy = "localhost:%s"%config.get('proxy_port', 8080)
+
+                proxy = Proxy({
+                    'proxyType': ProxyType.MANUAL,
+                    'httpProxy': mitm_proxy,
+                    'sslProxy': mitm_proxy
+                })
+
             if desired_cap['browserName'].lower() == "chrome":
                 chrome_options = Options()
                 chrome_options.add_argument("--test-type")
                 chrome_options.add_argument("--disable-application-cache")
+
+                if config.get('enable_proxy'):
+                    chrome_options.add_argument("--proxy-server={0}".format(proxy))
+
                 desired_cap=chrome_options.to_capabilities()
 
             try:
@@ -243,10 +260,18 @@ class BaseTest(object):
                     self.get_config_value("grid_runner:selenium_server_port")
                 )
 
-                driver = webdriver.Remote(
-                        command_executor = command_executor,
-                        desired_capabilities = desired_cap
-                )
+                if desired_cap['browserName'].lower() == "firefox":
+                    profile  = webdriver.FirefoxProfile()
+                    profile.set_proxy(proxy = proxy)
+                    driver = webdriver.Remote(
+                            browser_profile = profile,
+                            desired_capabilities = desired_cap,
+                            command_executor = executor)
+                else:
+                    driver = webdriver.Remote(
+                            command_executor = command_executor,
+                            desired_capabilities = desired_cap
+                    )
 
                 self.info_log('Got a session')
 

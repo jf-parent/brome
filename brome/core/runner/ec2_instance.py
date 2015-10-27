@@ -257,13 +257,14 @@ class EC2Instance(BaseInstance):
             "-p",
             "%i"%self.proxy_port,
             "-w",
-            self.remote_proxy_output_path
+            self.remote_proxy_output_path,
+            "&"
         ]
 
         if filter_:
             command.append(filter_)
 
-        self.execute_command(command)
+        self.execute_command(' '.join(command))
 
     def stop_proxy(self):
         """Stop the mitmproxy

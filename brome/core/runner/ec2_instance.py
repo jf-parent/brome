@@ -256,7 +256,7 @@ class EC2Instance(BaseInstance):
 
         filter_ = self.browser_config.get("mitmproxy:filter")
         command = [
-            'DISPLAY=:0'
+            'DISPLAY=:0',
             'nohup',
             path_to_mitmproxy,
             "-p",

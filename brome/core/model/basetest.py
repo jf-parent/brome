@@ -266,7 +266,7 @@ class BaseTest(object):
                     driver = webdriver.Remote(
                             browser_profile = profile,
                             desired_capabilities = desired_cap,
-                            command_executor = executor)
+                            command_executor = command_executor)
                 else:
                     driver = webdriver.Remote(
                             command_executor = command_executor,

@@ -15,6 +15,7 @@
                 {field:'browserid', headerText: 'Browser id', sortable: false},
                 {field:'result', headerText: 'Result', sortable: false},
                 {field:'screenshot', headerText: 'Screenshot', sortable: false},
+                {field: 'report', headerText: 'Report', sortable: false},
             ],
             datasource: [
                 {% for result in data['result_list'] %}
@@ -31,7 +32,16 @@
                                     {% else %}
                                         '<p class="text-center"> N/A </p>' +
                                     {% endif %}
-                                        '</div>'
+                                        '</div>',
+                        'report': '<div>' +
+                                    {% if not test_batch_is_running %}
+                                        '<a class="unlink" href="{{ url_for('testbatch.report', object_type = 'test_result', object_id = result.id) }}" target="_blank" >' +
+                                            'Report' +
+                                        '</a>' +
+                                    {% else %}
+                                        '<p class="text-center"> N/A </p>' +
+                                    {% endif %}
+                                '</div>'
                     },
                 {% endfor %}
             ]

@@ -76,7 +76,7 @@ class LocalhostInstance(BaseInstance):
 
         network_data_path = os.path.join(
             self.runner.runner_dir,
-            'network_data'
+            'network_capture'
         )
         create_dir_if_doesnt_exist(network_data_path)
 

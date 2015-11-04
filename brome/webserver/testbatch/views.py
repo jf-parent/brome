@@ -8,7 +8,7 @@ import flask_sijax
 from flask.ext.login import login_required
 from IPython import embed
 
-from brome.webserver.testbatch.forms import LaunchForm
+from brome.webserver.testbatch.forms import LaunchForm, ReportForm
 from brome.core.model.utils import *
 from brome.webserver import data_controller
 
@@ -41,8 +41,8 @@ def test_batch_report_file(filename):
 @flask_sijax.route(blueprint, "/network_capture/<int:testbatch_id>")
 @login_required
 def network_capture(testbatch_id):
-    def analyse(obj_response, network_capture_name, network_capture_path):
-        analysis = data_controller.analyse_network_capture(blueprint.app, testbatch_id, network_capture_path)
+    def analyse(obj_response, network_capture_name, network_capture_path, analyse_function):
+        analysis = data_controller.analyse_network_capture(blueprint.app, network_capture_path, analyse_function)
 
         obj_response.script("$('#%s > div[name=\"result\"]').append('<div><p>Result:</p>%s</div>')"%(network_capture_name, analysis))
 
@@ -58,6 +58,31 @@ def network_capture(testbatch_id):
         testbatch_id = testbatch_id,
         data = data
     )
+
+@flask_sijax.route(blueprint, "/report/<object_type>/<object_id>/", methods=['GET', 'POST'])
+@login_required
+def report(object_type, object_id):
+    form = ReportForm(blueprint.app, object_id, object_type)
+
+    def analyse(obj_response, network_capture_name, network_capture_path, analyse_function):
+        analysis = data_controller.analyse_network_capture(blueprint.app, network_capture_path, analyse_function)
+
+        obj_response.script("$('#%s > p > textarea[name=\"network_analysis\"]').val('%s')"%(network_capture_name, analysis))
+
+    if g.sijax.is_sijax_request:
+        g.sijax.register_callback('analyse', analyse)
+        return g.sijax.process_request()
+
+    if request and request.method in ("PUT", "POST"):
+        success, msg = form.report(request.form)
+        if success:
+            flash("The issue has been report!", 'success')
+            sleep(2)
+            return redirect(url_for('testbatch.list'))
+        else:
+            flash(msg, 'warning')
+
+    return render_template("testbatch/report.html", form = form)
 
 @blueprint.route("/launch/", methods=['GET', 'POST'])
 @login_required
@@ -224,8 +249,9 @@ def video_recording_list(testbatch_id):
 def testresult(testbatch_id):
     data = {}
     data['result_list'] = data_controller.get_test_batch_test_result(blueprint.app, testbatch_id)
+    test_batch_is_running = data_controller.get_test_batch(testbatch_id).ending_timestamp == None
 
-    return render_template("testbatch/testresult.html", testbatch_id = testbatch_id, data = data)
+    return render_template("testbatch/testresult.html", testbatch_id = testbatch_id, test_batch_is_running = test_batch_is_running, data = data)
 
 @blueprint.route("/crash/<int:testbatch_id>")
 @login_required

@@ -1,8 +1,10 @@
 #! -*- coding: utf-8 -*-
 
 from inspect import currentframe, getframeinfo
+import json
 import re
 
+from sqlalchemy.exc import ProgrammingError
 from selenium.webdriver.common.action_chains import ActionChains
 
 from brome.core.model.utils import *
@@ -1122,16 +1124,31 @@ class ProxyDriver(object):
         """
 
         embed = True
-        videocapture_path = ''
+        videocapture_path = self.test_instance._video_capture_file_relative_path
         screenshot_relative_path = ''
         extra_data = ''
+        extra_data_dict = {}
+
+        #JAVASCRIPT ERROR
+        if not result:
+            extra_data_dict['javascript_error'] = self.get_javascript_error()
+        
+        #NETWORK CAPTURE
+        if self.browser_config.get('enable_proxy'):
+            extra_data_dict['network_capture_path'] = os.path.join(self.test_instance._network_capture_relative_dir, string_to_filename('%s.data'%self.test_instance._name))
+
+        if extra_data_dict:
+            extra_data = json.dumps(extra_data_dict)
 
         session = Session()
 
-        if not session.query(Test).filter(Test.test_id == testid).count():
+        try:
+            if not session.query(Test).filter(Test.test_id == testid).count():
+                test = None
+            else:
+                test = session.query(Test).filter(Test.test_id == testid).one()
+        except ProgrammingError:
             test = None
-        else:
-            test = session.query(Test).filter(Test.test_id == testid).one()
 
         if self.brome.test_dict.has_key(testid):
             test_config = self.brome.test_dict[testid]
@@ -1209,7 +1226,7 @@ class ProxyDriver(object):
             extra_data = extra_data,
             title = test_name,
             test = test,
-            test_instance_id = self.test_instance.test_instance_id,
+            test_instance_id = self.test_instance._test_instance_id,
             test_batch_id = self.runner.test_batch_id
         )
         session.add(sa_test_result)

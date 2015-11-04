@@ -194,8 +194,7 @@ class BaseRunner(object):
 
         config_list = [
             self.config,
-            self.brome_config,
-            default_config
+            self.brome_config
         ]
         value = get_config_value(config_list,config_name)
 
@@ -284,7 +283,7 @@ class BaseRunner(object):
             #TITLE
             self.info_log('%s %s'%(test._name, test.pdriver.get_id()))
 
-            sa_test_instance = session.query(TestInstance).filter(TestInstance.id == test.test_instance_id).one()
+            sa_test_instance = session.query(TestInstance).filter(TestInstance.id == test._test_instance_id).one()
 
             #TEST EXECUTION TIME
             try:

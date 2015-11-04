@@ -11,14 +11,19 @@ from IPython import embed
 from brome.core.model.test_batch import TestBatch
 from brome.core.model.test_instance import TestInstance
 from brome.core.model.test_result import TestResult
+from brome.core.model.test_crash import TestCrash
 from brome.core.model.test import Test
 from brome.webserver.extensions import db
 
-def analyse_network_capture(app, testbatch_id, network_capture_path):
+def analyse_network_capture(app, network_capture_path, analyse_function):
     network_capture_path = os.path.join(app.brome.get_config_value('project:test_batch_result_path'), network_capture_path)
 
-    module = __import__(app.brome.get_config_value("webserver:analyse_network_capture_func"), fromlist = [''])
-    data = module.analyse(network_capture_path)
+    analyse_network_capture_func = app.brome.get_config_value("webserver:%s"%analyse_function)
+    module_name = analyse_network_capture_func.split(':')[0]
+    function_name = analyse_network_capture_func.split(':')[1]
+
+    module = __import__(module_name, fromlist = [''])
+    data = getattr(module, function_name)(network_capture_path)
     
     return data
 
@@ -222,6 +227,16 @@ def get_test_batch_screenshot(app, testbatch_id, only_total = False):
 
     return data
 
+def get_test_result(app, test_result_id):
+    return db.session.query(TestResult)\
+                .filter(TestResult.id == test_result_id)\
+                .one()
+
+def get_test_crash(app, test_crash_id):
+    return db.session.query(TestCrash)\
+                .filter(TestCrash.id == test_crash_id)\
+                .one()
+
 def get_test_batch_test_result(app, testbatch_id, only_total = False, only_failed_total = False):
     query_ = db.session.query(TestResult)\
                 .filter(TestResult.test_batch_id == testbatch_id)
@@ -278,36 +293,14 @@ def get_test_batch_test_instance_log(app, testbatch_id, index):
     return data[index:]
 
 def get_test_batch_crashes(app, testbatch_id):
-    data = []
+    result = db.session.query(TestCrash)\
+                        .filter(TestCrash.test_batch_id == testbatch_id)\
+                        .all()
 
-    relative_dir = os.path.join(
-        "tb_%s"%testbatch_id,
-        "crashes"
-    )
+    for crash in result:
+        crash.trace_list = crash.trace.split(os.linesep)
 
-    abs_logs_dir = os.path.join(
-        app.brome.get_config_value('project:test_batch_result_path'),
-        relative_dir
-    )
-
-    if os.path.isdir(abs_logs_dir):
-        crash_log_list = glob(os.path.join(abs_logs_dir, '*.log'))
-
-        for log in crash_log_list:
-            log_name = log.split(os.sep)[-1]
-            file_name = ''.join(log_name.split('.')[:-1])
-
-            with open(os.path.join(abs_logs_dir, log), 'r') as f:
-                trace = f.read()
-                trace = trace.split(os.linesep)
-
-            data.append({
-                'name': file_name.replace('_', ' ').title(),
-                'screenshot': os.path.join(relative_dir, '%s.png'%file_name),
-                'trace': trace
-            })
-
-    return data
+    return result
 
 def get_test_batch_video_recording(app, testbatch_id, only_total = False):
     data = []

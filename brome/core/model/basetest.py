@@ -18,6 +18,7 @@ from brome.core.model.proxy_driver import ProxyDriver
 from brome.core.model.meta.base import Session
 from brome.core.model.test_instance import TestInstance
 from brome.core.model.test_result import TestResult
+from brome.core.model.test_crash import TestCrash
 from brome.core.model.test import Test
 from brome.core.model.configurator import get_config_value, parse_brome_config_from_browser_config, default_config, test_config_to_dict
 
@@ -90,16 +91,23 @@ class BaseTest(object):
         session.add(sa_test_instance)
         session.commit()
 
-        self.test_instance_id = sa_test_instance.id
+        self._test_instance_id = sa_test_instance.id
 
         session.close()
 
     def start_video_recording(self):
+        self._video_capture_file_relative_path = False
+
         if self._browser_config.get('record_session'):
             node_ip = self.pdriver.get_ip_of_node()
 
             self._video_capture_file_path = os.path.join(
                 self._video_recording_dir,
+                string_to_filename('%s.flv'%(self._name.replace(' ', '_')))
+            )
+
+            self._video_capture_file_relative_path = os.path.join(
+                self._video_recording_relative_dir,
                 string_to_filename('%s.flv'%(self._name.replace(' ', '_')))
             )
 
@@ -535,7 +543,7 @@ class BaseTest(object):
             say(self.get_config_value("runner:sound_on_test_finished"))
 
         session = Session()
-        sa_test_instance =  session.query(TestInstance).filter(TestInstance.id == self.test_instance_id).one()
+        sa_test_instance =  session.query(TestInstance).filter(TestInstance.id == self._test_instance_id).one()
         sa_test_instance.ending_timestamp = datetime.now()
         session.commit()
         session.close()
@@ -575,18 +583,57 @@ class BaseTest(object):
     def create_crash_report(self, tb):
         self.info_log('Creating a crash report')
 
-        file_name = "%s - %s"%(self.pdriver.get_id(join_char = '_'), self._name)
+        crash_name = "%s - %s"%(self.pdriver.get_id(join_char = '_'), self._name)
+
+        extra_data = ''
+        extra_data_dict = {}
+
+        #JAVASCRIPT ERROR
+        extra_data_dict['javascript_error'] = self.pdriver.get_javascript_error()
+        
+        #NETWORK CAPTURE
+        if self._browser_config.get('enable_proxy'):
+            extra_data_dict['network_capture_path'] = os.path.join(self._network_capture_relative_dir, string_to_filename('%s.data'%self._name))
+
+        if extra_data_dict:
+            extra_data = json.dumps(extra_data_dict)
+
+        crash_screenshot_path = os.path.join(
+            self._crash_report_dir,
+            string_to_filename('%s.png'%crash_name)
+        )
+
+        crash_screenshot_relative_path = os.path.join(
+            self._crash_report_relative_dir,
+            string_to_filename('%s.png'%crash_name)
+        )
 
         if self._runner_dir:
             #CRASH LOG
-            with open(os.path.join(self._crash_report_dir, string_to_filename('%s.log'%file_name)), 'w') as f:
+            with open(os.path.join(self._crash_report_dir, string_to_filename('%s.log'%crash_name)), 'w') as f:
                 f.write(str(tb))
 
             #CRASH SCREENSHOT
-            self.pdriver.take_screenshot(screenshot_path = os.path.join(
-                self._crash_report_dir,
-                string_to_filename('%s.png'%file_name)
-            ))
+            self.pdriver.take_screenshot(screenshot_path = crash_screenshot_path)
+
+        #CRASH OBJECT
+        session = Session()
+
+        sa_test_crash = TestCrash(
+            timestamp = datetime.now(),
+            trace = str(tb),
+            browser_id = self.pdriver.get_id(),
+            screenshot_path = crash_screenshot_relative_path,
+            videocapture_path = self._video_capture_file_relative_path,
+            extra_data = extra_data,
+            title = crash_name,
+            test_instance_id = self._test_instance_id,
+            test_batch_id = self._test_batch_id
+        )
+
+        session.add(sa_test_crash)
+        session.commit()
+        session.close()
 
     def get_config_value(self, config_name):
         if not hasattr(self, 'browser_brome_config'):
@@ -595,8 +642,7 @@ class BaseTest(object):
         config_list = [
             self._browser_brome_config,
             self._runner.config,
-            self._runner.brome_config,
-            default_config
+            self._runner.brome_config
         ]
         value = get_config_value(config_list, config_name)
 
@@ -615,8 +661,12 @@ class BaseTest(object):
             self._runner_dir,
             'crashes'
         )
-
         create_dir_if_doesnt_exist(self._crash_report_dir)
+
+        self._crash_report_relative_dir = os.path.join(
+            self._runner.relative_runner_dir,
+            'crashes'
+        )
 
         #ASSERTION SCREENSHOT DIRECTORY
         self._assertion_screenshot_relative_dir = os.path.join(
@@ -649,12 +699,30 @@ class BaseTest(object):
             )
             create_dir_if_doesnt_exist(self._video_recording_dir)
 
+            self._video_recording_relative_dir = os.path.join(
+                self._runner.relative_runner_dir,
+                'video_recording',
+                self.pdriver.get_id(join_char = '_')
+            )
+
+        #NETWORK CAPTURE DIRECTORY
+        if self._browser_config.get('enable_proxy'):
+            self._network_capture_dir = os.path.join(
+                self._runner_dir,
+                'network_capture'
+            )
+            create_dir_if_doesnt_exist(self._network_capture_dir)
+            self._network_capture_relative_dir = os.path.join(
+                self._runner.relative_runner_dir,
+                'network_capture'
+            )
+
     def get_test_result_summary(self):
         results = []
 
         session = Session()
 
-        base_query = session.query(TestResult).filter(TestResult.test_instance_id == self.test_instance_id).filter(TestResult.browser_id == self.pdriver.get_id())
+        base_query = session.query(TestResult).filter(TestResult.test_instance_id == self._test_instance_id).filter(TestResult.browser_id == self.pdriver.get_id())
         total_test = base_query.count()
         total_test_successful = base_query.filter(TestResult.result == True).count()
         total_test_failed = base_query.filter(TestResult.result == False).count()

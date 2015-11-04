@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+{% block content %}
+<script type="text/javascript">
+    $(function() {
+        $('#accordion').puiaccordion({multiple:true});
+    });
+</script>
+<div>
+    <h1>Report an issue</h1>
+</div>
+<form id="reportForm" class="form form-report" method="POST" action="" role="form">
+    <h3>Title:</h3>
+    <div>
+        <p><input class="form-control" id="title" name="title" type="text"/ value="{{ form.data['title'] }}"></p>
+    </div>
+    <h3>Description:</h3>
+    <div>
+        <p><textarea class="form-control" id="desc" name="desc" type="text"></textarea></p>
+    </div>
+    {% if form.data['custom_fields']
+            or form.data['screenshot_path']
+            or form.data['video_path']
+            or form.data['network_capture_path']
+            or form.data['javascript_error']
+    %}
+        <div id="accordion">
+            {% if form.data['custom_fields'] %}
+                <h3>Custom fields</h3>
+                <div>
+                    {% for field_id, field in form.data['custom_fields'].iteritems() %}
+                        {% if field['visible'] %}
+                            <label for="custom_{{ field_id  }}">{{ field['title'] }}:</label>
+                            {% if field['type'] == 'input' %}
+                                <p><input class="form-control" id="custom_{{ field_id }}" name="custom_{{ field_id }}" type="text" value="{{ field['value'] }}"/></p>
+                            {% elif field['type'] == 'number' %}
+                                <p><input class="form-control" id="custom_{{ field_id }}" name="custom_{{ field_id }}" type="number" value="{{ field['value'] }}"/></p>
+                            {% elif field['type'] == 'checkbox' %}
+                                <p><input type="checkbox" id="custom_{{ field_id }}" name="custom_{{ field_id }}" {% if field['value'] %} checked {% endif %}/></p>
+                            {% elif field['type'] == 'dropdown' %}
+                                <select id="custom_{{ field_id }}" name="custom_{{ field_id }}" class="form-control">
+                                    {% for id, item in field['options'].iteritems() %}
+                                        <option value="{{ id }}" {% if item['selected'] %} selected {% endif %}>{{ item['title'] }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% if form.data['screenshot_path'] %}
+                <h3>Screenshot</h3>
+                <div>
+                    <img src="{{ url_for('testbatch.test_batch_report_file', filename = form.data['screenshot_path']) }}"/>
+                    <input type="hidden" name="screenshot" id="screenshot" value="{{ url_for('testbatch.test_batch_report_file', filename = form.data['screenshot_path']) }}"/>
+                </div>
+            {% endif %}
+            {% if form.data['video_path'] %}
+                <h3>Video capture</h3>
+                <div>
+                    <input type="hidden" name="video" id="video" value="{{ url_for('testbatch.test_batch_report_file', filename = form.data['video_path']) }}"/>
+                </div>
+            {% endif %}
+            {% if form.data['network_capture_path'] %}
+                <h3>Network capture</h3>
+                <div id="network_capture">
+                    {% if form.data['network_capture_analyse'] %}
+                        <button name="analyse" class="btn btn-default" onclick="Sijax.request('analyse', ['network_capture', '{{form.data['network_capture_path']}}', 'analyse_network_capture_report_func']); return false;">Analyse</button>
+                    {% endif %}
+                    <a class="unlink" href="{{ url_for('testbatch.test_batch_report_file', filename = form.data['network_capture_path']) }}"/>download</a>
+                    <p><textarea name="network_analysis"></textarea></p>
+                </div>
+            {% endif %}
+            {% if form.data['javascript_error'] %}
+                <h3>Javascript error</h3>
+                <div>
+                    <p><textarea class="form-control" id="desc" name="desc" type="text">{{ form.data['javascript_error'] }}</textarea></p>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+    <p><input class="btn btn-default btn-submit" type="submit" value="Report"></p>
+</form>
+{% endblock %}

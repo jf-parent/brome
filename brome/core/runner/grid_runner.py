@@ -232,7 +232,8 @@ class GridRunner(BaseRunner):
                 active_thread = threading.active_count() - 1
                 if active_thread:
                     try:
-                        self.info_log("Active thread number: %s"%active_thread)
+                        active_thread_test_number = len([tn for tn in threading.enumerate() if type(th) != threading._MainThread and hasattr(th, 'test')])
+                        self.info_log("Active thread number: %s"%active_thread_test_number)
                         self.info_log("Active thread name: %s"%(', '.join([
                                 "%s-%s"%(
                                     th.test._browser_config.browser_id,

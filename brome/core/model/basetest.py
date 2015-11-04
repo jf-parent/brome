@@ -542,11 +542,14 @@ class BaseTest(object):
         if self.get_config_value("runner:play_sound_on_test_finished"):
             say(self.get_config_value("runner:sound_on_test_finished"))
 
+        ending_timestamp = datetime.now()
         session = Session()
         sa_test_instance =  session.query(TestInstance).filter(TestInstance.id == self._test_instance_id).one()
-        sa_test_instance.ending_timestamp = datetime.now()
+        sa_test_instance.ending_timestamp = ending_timestamp
         session.commit()
         session.close()
+
+        self.info_log("Ending timestamp: %s"%ending_timestamp)
 
     def quit_driver(self):
         self.info_log("Quitting the browser...")

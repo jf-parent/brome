@@ -276,15 +276,15 @@ def get_test_batch_test_instance_log(app, testbatch_id, index):
         relative_logs_dir
     )
 
-    def ls_(dir_):
-        """
-        ctime = lambda f: os.stat(os.path.join(dir_, f)).st_ctime
-        return [f for f in sorted(os.listdir(dir_), key=ctime)]
-        """
-        return [f for f in os.listdir(dir_)]
+    #def ls_(dir_):
+    #    """
+    #    ctime = lambda f: os.stat(os.path.join(dir_, f)).st_ctime
+    #    return [f for f in sorted(os.listdir(dir_), key=ctime)]
+    #    """
+    #    return [f for f in os.listdir(dir_)]
 
     if os.path.isdir(abs_logs_dir):
-        for log in ls_(abs_logs_dir):
+        for log in os.listdir(abs_logs_dir):
             data.append({
                 'name': log,
                 'path': os.path.join(relative_logs_dir, log)

@@ -130,7 +130,11 @@ class BaseTest(object):
             #Let the time to the driver to quit so we have the full picture
             sleep(5)
 
-            self._video_recorder.stop()
+            try:
+                self._video_recorder.stop()
+            except Exception as e:
+                tb = traceback.format_exc()
+                self.error_log("CastroRedux error traceback: %s"%str(e))
             """
             file_name = "%s/%s"%(self.video_capture_dir, self.config.get('name').replace(' ', '_'))
             Popen(["/usr/bin/ffmpeg", "-i", "%s.flv"%file_name, "-vcodec", "libvpx", "-acodec", "libvorbis", "%s.webm"%file_name], stdout=devnull, stderr=devnull)

@@ -268,7 +268,7 @@ class BaseTest(object):
                     self.get_config_value("grid_runner:selenium_server_port")
                 )
 
-                if desired_cap['browserName'].lower() == "firefox":
+                if desired_cap['browserName'].lower() == "firefox" and config.get('enable_proxy'):
                     profile  = webdriver.FirefoxProfile()
                     profile.set_proxy(proxy = proxy)
                     driver = webdriver.Remote(

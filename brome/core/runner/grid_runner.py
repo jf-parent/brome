@@ -232,7 +232,7 @@ class GridRunner(BaseRunner):
                 active_thread = threading.active_count() - 1
                 if active_thread:
                     try:
-                        active_thread_test_number = len([tn for tn in threading.enumerate() if type(th) != threading._MainThread and hasattr(th, 'test')])
+                        active_thread_test_number = len([tn for tn in threading.enumerate() if type(tn) != threading._MainThread and hasattr(tn, 'test')])
                         self.info_log("Active thread number: %s"%active_thread_test_number)
                         self.info_log("Active thread name: %s"%(', '.join([
                                 "%s-%s"%(

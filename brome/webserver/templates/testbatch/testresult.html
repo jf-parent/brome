@@ -20,7 +20,7 @@
             datasource: [
                 {% for result in data['result_list'] %}
                     {
-                        'testid': '{{ result.test.test_id}}',
+                        'testid': {% if result.test.test_id %} '{{ result.test.test_id }}' {% else %} 'N/A' {% endif %},
                         'testname': '{{ result.title }}',
                         'browserid': '{{ result.browser_id }}',
                         'result': '<div class="text-center"><span class="label label-{% if result.result %}success{% else %}danger{% endif %}"> {% if result.result %} <i class="fa fa-check"></i> {% else %} <i class="fa fa-exclamation"></i> {% endif %}</span></div>',

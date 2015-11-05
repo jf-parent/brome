@@ -246,7 +246,7 @@ def get_test_batch_test_result(app, testbatch_id, only_total = False, only_faile
     elif only_failed_total:
         return query_.filter(TestResult.result == False).count()
     else:
-        query_ = query_.join(Test, TestResult.test_id == Test.id)
+        query_ = query_.outerjoin(Test, TestResult.test_id == Test.id)
         return query_.order_by(TestResult.result, Test.test_id).all()
 
 def get_test_batch_log(app, testbatch_id):

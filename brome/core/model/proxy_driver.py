@@ -1142,15 +1142,8 @@ class ProxyDriver(object):
 
         session = Session()
 
-        try:
-            if not session.query(Test).filter(Test.test_id == testid).count():
-                test = None
-            else:
-                test = session.query(Test).filter(Test.test_id == testid).one()
-        except ProgrammingError:
-            test = None
-
         if self.brome.test_dict.has_key(testid):
+            test = session.query(Test).filter(Test.test_id == testid).one()
             test_config = self.brome.test_dict[testid]
             if type(test_config) == dict:
                 if test_config.has_key('embed'):
@@ -1161,6 +1154,7 @@ class ProxyDriver(object):
 
             embed_title = '[%s] %s'%(testid, test_name)
         else:
+            test = None
             test_name = testid
             embed_title = test_name
 

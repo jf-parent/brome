@@ -284,7 +284,7 @@ def get_test_batch_test_instance_log(app, testbatch_id, index):
     #    return [f for f in os.listdir(dir_)]
 
     if os.path.isdir(abs_logs_dir):
-        for log in os.listdir(abs_logs_dir):
+        for log in sorted(os.listdir(abs_logs_dir)):
             data.append({
                 'name': log,
                 'path': os.path.join(relative_logs_dir, log)
@@ -316,7 +316,7 @@ def get_test_batch_video_recording(app, testbatch_id, only_total = False):
     )
 
     if os.path.isdir(abs_dir):
-        for browser_dir in os.listdir(abs_dir):
+        for browser_dir in sorted(os.listdir(abs_dir)):
             video_recording_list = os.listdir(os.path.join(abs_dir, browser_dir))
 
             for video_recording in video_recording_list:

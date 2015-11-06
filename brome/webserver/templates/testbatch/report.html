@@ -57,7 +57,10 @@
             {% if form.data['video_path'] %}
                 <h3>Video capture</h3>
                 <div>
+                    <a class="unlink" href="{{ url_for('testbatch.video_player', video_path = form.data['video_path'], video_title = form.data['video_title'], time = form.data['video_time_position']) }}">{{ form.data['video_title'] }}</a>
+                    <p>Time posision (sec): {{ form.data['video_time_position']  }}</p>
                     <input type="hidden" name="video" id="video" value="{{ url_for('testbatch.test_batch_report_file', filename = form.data['video_path']) }}"/>
+                    <input type="hidden" name="video_time_position" id="video_time_position" value="{{ form.data['video_time_position'] }}"/>
                 </div>
             {% endif %}
             {% if form.data['network_capture_path'] %}

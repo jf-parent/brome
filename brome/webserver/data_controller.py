@@ -58,18 +58,22 @@ def get_test_batch_list():
 
     return data
 
-def get_active_test_instance(app, testbatch_id):
+def get_test_instance_list(testbatch_id):
     test_instances = db.session.query(TestInstance)\
                             .filter(TestInstance.test_batch_id == testbatch_id)\
-                            .filter(TestInstance.ending_timestamp == None)\
                             .all()
 
     for test_instance in test_instances:
         extra_data = json.loads(test_instance.extra_data)
-        if extra_data.has_key('instance_public_ip'):
-            test_instance.public_ip = extra_data['instance_public_ip']
+        test_instance.private_ip = extra_data.get('instance_private_ip', 'Unknown')
+        test_instance.private_dns = extra_data.get('instance_private_dns', 'Unknown')
+        test_instance.public_ip = extra_data.get('instance_public_ip', 'Unknown')
+        test_instance.public_dns = extra_data.get('instance_public_dns', 'Unknown')
+
+        if test_instance.ending_timestamp is None:
+            test_instance.running_info = "Is running..."
         else:
-            test_instance.public_ip = False
+            test_instance.running_info = "Total execution time: %s"%(test_instance.ending_timestamp - test_instance.starting_timestamp)
 
     return test_instances
 
@@ -109,6 +113,11 @@ def stop_test_batch(app, testbatch_id):
 
 def get_test_batch(testbatch_id):
     data = db.session.query(TestBatch).filter(TestBatch.id == testbatch_id).one()
+
+    return data
+
+def get_test_instance(test_instance_id):
+    data = db.session.query(TestInstance).filter(TestInstance.id == test_instance_id).one()
 
     return data
 

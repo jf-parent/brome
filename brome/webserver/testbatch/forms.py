@@ -4,6 +4,7 @@ import subprocess
 import os
 import sys
 import json
+from datetime import datetime
 
 import yaml
 from IPython import embed
@@ -89,7 +90,7 @@ class ReportForm(object):
         #JAVASCRIPT ERROR
         try:
             self.data['javascript_error'] = json.loads(self.data_object.extra_data)['javascript_error']
-        except ValueError:
+        except (ValueError, KeyError):
             self.data['javascript_error'] = ''
             
         #SCREENSHOT
@@ -101,11 +102,15 @@ class ReportForm(object):
 
             if self.app.brome.get_config_value("webserver:analyse_network_capture_report_func"):
                 self.data['network_capture_analyse'] = True
-        except ValueError:
+        except (ValueError, KeyError):
             self.data['network_capture_path'] = ''
 
         #VIDEO
         self.data['video_path'] = self.data_object.videocapture_path
+        self.data['video_title'] = self.data_object.title.replace('_', ' ')
+
+        test_instance = data_controller.get_test_instance(self.data_object.test_instance_id)
+        self.data['video_time_position'] =  (self.data_object.timestamp - test_instance.starting_timestamp).total_seconds()
 
         #CUSTOM FIELDS
         self.data['custom_fields'] = self.app.brome.get_config_value("webserver:report")['custom_fields']

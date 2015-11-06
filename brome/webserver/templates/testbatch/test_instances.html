@@ -6,8 +6,8 @@
     });
 </script>
 {% if data['test_instance_list']|count %}
+    <div id="accordion">
     {% for test_instance in data['test_instance_list'] %}
-        <div id="accordion">
             <h3>{{ test_instance.name }}</h3>
             <div>
                 <p><b>Public ip:</b> {{ test_instance.public_ip }}</p>
@@ -16,8 +16,8 @@
                 <p><b>Private dns:</b> {{ test_instance.private_dns }}</p>
                 <p><b>{{ test_instance.running_info }}<b></p>
             </div>
-        </div>
     {% endfor %}
+    </div>
 {% else %}
     <div class="text-center">
         <h1>There is no test instance alive!</h1>

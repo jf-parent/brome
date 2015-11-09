@@ -1,6 +1,6 @@
 #! -*- coding: utf-8 -*-
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 import webbrowser
 import shutil
@@ -362,8 +362,7 @@ class Brome(object):
 
     def get_config_value(self, config_name):
         config_list = [
-            self.config,
-            default_config
+            self.config
         ]
         value = get_config_value(config_list,config_name)
 

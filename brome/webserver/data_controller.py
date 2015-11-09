@@ -11,14 +11,19 @@ from IPython import embed
 from brome.core.model.test_batch import TestBatch
 from brome.core.model.test_instance import TestInstance
 from brome.core.model.test_result import TestResult
+from brome.core.model.test_crash import TestCrash
 from brome.core.model.test import Test
 from brome.webserver.extensions import db
 
-def analyse_network_capture(app, testbatch_id, network_capture_path):
+def analyse_network_capture(app, network_capture_path, analyse_function):
     network_capture_path = os.path.join(app.brome.get_config_value('project:test_batch_result_path'), network_capture_path)
 
-    module = __import__(app.brome.get_config_value("webserver:analyse_network_capture_func"), fromlist = [''])
-    data = module.analyse(network_capture_path)
+    analyse_network_capture_func = app.brome.get_config_value("webserver:%s"%analyse_function)
+    module_name = analyse_network_capture_func.split(':')[0]
+    function_name = analyse_network_capture_func.split(':')[1]
+
+    module = __import__(module_name, fromlist = [''])
+    data = getattr(module, function_name)(network_capture_path)
     
     return data
 
@@ -53,18 +58,22 @@ def get_test_batch_list():
 
     return data
 
-def get_active_test_instance(app, testbatch_id):
+def get_test_instance_list(testbatch_id):
     test_instances = db.session.query(TestInstance)\
                             .filter(TestInstance.test_batch_id == testbatch_id)\
-                            .filter(TestInstance.ending_timestamp == None)\
                             .all()
 
     for test_instance in test_instances:
         extra_data = json.loads(test_instance.extra_data)
-        if extra_data.has_key('instance_public_ip'):
-            test_instance.public_ip = extra_data['instance_public_ip']
+        test_instance.private_ip = extra_data.get('instance_private_ip', 'Unknown')
+        test_instance.private_dns = extra_data.get('instance_private_dns', 'Unknown')
+        test_instance.public_ip = extra_data.get('instance_public_ip', 'Unknown')
+        test_instance.public_dns = extra_data.get('instance_public_dns', 'Unknown')
+
+        if test_instance.ending_timestamp is None:
+            test_instance.running_info = "Is running..."
         else:
-            test_instance.public_ip = False
+            test_instance.running_info = "Total execution time: %s"%(test_instance.ending_timestamp - test_instance.starting_timestamp)
 
     return test_instances
 
@@ -104,6 +113,11 @@ def stop_test_batch(app, testbatch_id):
 
 def get_test_batch(testbatch_id):
     data = db.session.query(TestBatch).filter(TestBatch.id == testbatch_id).one()
+
+    return data
+
+def get_test_instance(test_instance_id):
+    data = db.session.query(TestInstance).filter(TestInstance.id == test_instance_id).one()
 
     return data
 
@@ -222,6 +236,16 @@ def get_test_batch_screenshot(app, testbatch_id, only_total = False):
 
     return data
 
+def get_test_result(app, test_result_id):
+    return db.session.query(TestResult)\
+                .filter(TestResult.id == test_result_id)\
+                .one()
+
+def get_test_crash(app, test_crash_id):
+    return db.session.query(TestCrash)\
+                .filter(TestCrash.id == test_crash_id)\
+                .one()
+
 def get_test_batch_test_result(app, testbatch_id, only_total = False, only_failed_total = False):
     query_ = db.session.query(TestResult)\
                 .filter(TestResult.test_batch_id == testbatch_id)
@@ -231,7 +255,7 @@ def get_test_batch_test_result(app, testbatch_id, only_total = False, only_faile
     elif only_failed_total:
         return query_.filter(TestResult.result == False).count()
     else:
-        query_ = query_.join(Test, TestResult.test_id == Test.id)
+        query_ = query_.outerjoin(Test, TestResult.test_id == Test.id)
         return query_.order_by(TestResult.result, Test.test_id).all()
 
 def get_test_batch_log(app, testbatch_id):
@@ -261,15 +285,15 @@ def get_test_batch_test_instance_log(app, testbatch_id, index):
         relative_logs_dir
     )
 
-    def ls_(dir_):
-        """
-        ctime = lambda f: os.stat(os.path.join(dir_, f)).st_ctime
-        return [f for f in sorted(os.listdir(dir_), key=ctime)]
-        """
-        return [f for f in os.listdir(dir_)]
+    #def ls_(dir_):
+    #    """
+    #    ctime = lambda f: os.stat(os.path.join(dir_, f)).st_ctime
+    #    return [f for f in sorted(os.listdir(dir_), key=ctime)]
+    #    """
+    #    return [f for f in os.listdir(dir_)]
 
     if os.path.isdir(abs_logs_dir):
-        for log in ls_(abs_logs_dir):
+        for log in sorted(os.listdir(abs_logs_dir)):
             data.append({
                 'name': log,
                 'path': os.path.join(relative_logs_dir, log)
@@ -278,36 +302,14 @@ def get_test_batch_test_instance_log(app, testbatch_id, index):
     return data[index:]
 
 def get_test_batch_crashes(app, testbatch_id):
-    data = []
+    result = db.session.query(TestCrash)\
+                        .filter(TestCrash.test_batch_id == testbatch_id)\
+                        .all()
 
-    relative_dir = os.path.join(
-        "tb_%s"%testbatch_id,
-        "crashes"
-    )
+    for crash in result:
+        crash.trace_list = crash.trace.split(os.linesep)
 
-    abs_logs_dir = os.path.join(
-        app.brome.get_config_value('project:test_batch_result_path'),
-        relative_dir
-    )
-
-    if os.path.isdir(abs_logs_dir):
-        crash_log_list = glob(os.path.join(abs_logs_dir, '*.log'))
-
-        for log in crash_log_list:
-            log_name = log.split(os.sep)[-1]
-            file_name = ''.join(log_name.split('.')[:-1])
-
-            with open(os.path.join(abs_logs_dir, log), 'r') as f:
-                trace = f.read()
-                trace = trace.split(os.linesep)
-
-            data.append({
-                'name': file_name.replace('_', ' ').title(),
-                'screenshot': os.path.join(relative_dir, '%s.png'%file_name),
-                'trace': trace
-            })
-
-    return data
+    return result
 
 def get_test_batch_video_recording(app, testbatch_id, only_total = False):
     data = []
@@ -323,7 +325,7 @@ def get_test_batch_video_recording(app, testbatch_id, only_total = False):
     )
 
     if os.path.isdir(abs_dir):
-        for browser_dir in os.listdir(abs_dir):
+        for browser_dir in sorted(os.listdir(abs_dir)):
             video_recording_list = os.listdir(os.path.join(abs_dir, browser_dir))
 
             for video_recording in video_recording_list:

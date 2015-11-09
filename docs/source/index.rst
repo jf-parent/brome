@@ -34,6 +34,7 @@ Documentation
    browsers
    state
    network
+   session_recording
    resources
 
 Features

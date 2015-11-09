@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import tempfile
 import os
 import logging
 
@@ -32,12 +33,7 @@ def create_app(brome):
     app.config["SIJAX_STATIC_PATH"] = os.path.join('.', os.path.dirname(__file__), 'static/libs/sijax/')
     app.config["SIJAX_JSON_URI"] = '/static/libs/sijax/json2.js'
 
-    app.temp_path = os.path.join(
-        os.path.abspath(os.path.dirname(__file__)),
-        'tmp'
-    )
-
-    create_dir_if_doesnt_exist(app.temp_path)
+    app.temp_path = tempfile.gettempdir()
 
     register_extensions(app)
     register_blueprints(app)

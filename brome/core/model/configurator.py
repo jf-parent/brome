@@ -50,15 +50,23 @@ def get_config_value(dict_list, config_name):
             and the options separated by a colon (eg runner:tests_config)
         """)
 
+    value = None
     for dict_ in dict_list:
         if dict_.has_key(section):
             if option == '*':
-                return dict_[section]
+                value = dict_[section]
+                break
             if dict_[section].has_key(option):
-                if type(dict_[section][option]) is dict:
-                    return dict_[section][option].get('default')
-                else:
-                    return dict_[section][option]
+                value = dict_[section][option]
+                break
+
+    if value is None:
+        try:
+            value = default_config[section][option].get('default')
+        except KeyError:
+            pass
+
+    return value
 
 def test_config_to_dict(test_config_string):
     """Parse the test config to a dictionary

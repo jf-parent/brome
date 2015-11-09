@@ -8,14 +8,12 @@ import flask_sijax
 from flask.ext.login import login_required
 from IPython import embed
 
-from brome.webserver.testbatch.forms import LaunchForm
+from brome.webserver.testbatch.forms import LaunchForm, ReportForm
 from brome.core.model.utils import *
 from brome.webserver import data_controller
 
 blueprint = Blueprint("testbatch", __name__, url_prefix='/tb',
                       static_folder="../static")
-
-websocket_process = None
 
 def delete_test_batch(obj_response, testbatch_id):
     data_controller.delete_test_batch(blueprint.app, testbatch_id)
@@ -41,8 +39,8 @@ def test_batch_report_file(filename):
 @flask_sijax.route(blueprint, "/network_capture/<int:testbatch_id>")
 @login_required
 def network_capture(testbatch_id):
-    def analyse(obj_response, network_capture_name, network_capture_path):
-        analysis = data_controller.analyse_network_capture(blueprint.app, testbatch_id, network_capture_path)
+    def analyse(obj_response, network_capture_name, network_capture_path, analyse_function):
+        analysis = data_controller.analyse_network_capture(blueprint.app, network_capture_path, analyse_function)
 
         obj_response.script("$('#%s > div[name=\"result\"]').append('<div><p>Result:</p>%s</div>')"%(network_capture_name, analysis))
 
@@ -58,6 +56,31 @@ def network_capture(testbatch_id):
         testbatch_id = testbatch_id,
         data = data
     )
+
+@flask_sijax.route(blueprint, "/report/<object_type>/<object_id>/", methods=['GET', 'POST'])
+@login_required
+def report(object_type, object_id):
+    form = ReportForm(blueprint.app, object_id, object_type)
+
+    def analyse(obj_response, network_capture_name, network_capture_path, analyse_function):
+        analysis = data_controller.analyse_network_capture(blueprint.app, network_capture_path, analyse_function)
+
+        obj_response.script("$('#%s > p > textarea[name=\"network_analysis\"]').val('%s')"%(network_capture_name, analysis))
+
+    if g.sijax.is_sijax_request:
+        g.sijax.register_callback('analyse', analyse)
+        return g.sijax.process_request()
+
+    if request and request.method in ("PUT", "POST"):
+        success, msg = form.report(request.form)
+        if success:
+            flash("The issue has been report!", 'success')
+            sleep(2)
+            return redirect(url_for('testbatch.list'))
+        else:
+            flash(msg, 'warning')
+
+    return render_template("testbatch/report.html", form = form)
 
 @blueprint.route("/launch/", methods=['GET', 'POST'])
 @login_required
@@ -144,63 +167,13 @@ def screenshot(testbatch_id):
 
     return render_template("testbatch/screenshot.html", testbatch_id = testbatch_id, data = data)
 
-@flask_sijax.route(blueprint, "/test_instances/<int:testbatch_id>")
+@blueprint.route("/test_instances/<int:testbatch_id>")
 @login_required
 def test_instances(testbatch_id):
-    global websocket_process
     data = {}
-    data['test_instance_list'] = data_controller.get_active_test_instance(blueprint.app, testbatch_id)
+    data['test_instance_list'] = data_controller.get_test_instance_list(testbatch_id)
 
-    def start_websocket(obj_response, host):
-        global websocket_process
-        webserver_root = os.sep.join(os.path.abspath(os.path.dirname(__file__)).split(os.sep)[:-1])
-        websockify_exe = os.path.join(
-            webserver_root,
-            "websockify"
-        )
-    
-        src_addr = 'localhost'
-        src_port = 6880
-        dest_addr = host
-        dest_port = 5900
-
-        command = [
-            "%s%s%s"%(websockify_exe, os.sep, "websockify.py"),
-            '%s:%s'%(src_addr, src_port),
-            '%s:%s'%(dest_addr, dest_port)
-        ]
-        if not websocket_process:
-            process = subprocess.Popen(command)
-
-        obj_response.script("""
-            $('[name = "startWebsocket"]').each(function( index ) {
-                  $(this).prop('disabled', true);
-              });
-        """)
-
-        websocket_process = process
-
-    def stop_websocket(obj_response):
-        global websocket_process
-
-        websocket_process.kill()
-
-        obj_response.script("""
-            $('[name = "startWebsocket"]').each(function( index ) {
-                  $(this).prop('disabled', false);
-              });
-        """)
-
-        websocket_process = None
-
-    if g.sijax.is_sijax_request:
-        g.sijax.register_callback('start_websocket', start_websocket)
-        g.sijax.register_callback('stop_websocket', stop_websocket)
-        return g.sijax.process_request()
-
-    websocket_alive = websocket_process is not None
-
-    return render_template("testbatch/test_instances.html", testbatch_id = testbatch_id, data = data, websocket_alive = websocket_alive)
+    return render_template("testbatch/test_instances.html", testbatch_id = testbatch_id, data = data)
 
 @blueprint.route("/video_player")
 @login_required
@@ -208,6 +181,7 @@ def video_player():
     data = {}
     data['title'] = request.args.get('video_title', '')
     data['path'] = request.args.get('video_path', '')
+    data['time'] = request.args.get('time', 0)
 
     return render_template("testbatch/video_player.html", data = data)
 
@@ -224,8 +198,9 @@ def video_recording_list(testbatch_id):
 def testresult(testbatch_id):
     data = {}
     data['result_list'] = data_controller.get_test_batch_test_result(blueprint.app, testbatch_id)
+    test_batch_is_running = data_controller.get_test_batch(testbatch_id).ending_timestamp == None
 
-    return render_template("testbatch/testresult.html", testbatch_id = testbatch_id, data = data)
+    return render_template("testbatch/testresult.html", testbatch_id = testbatch_id, test_batch_is_running = test_batch_is_running, data = data)
 
 @blueprint.route("/crash/<int:testbatch_id>")
 @login_required

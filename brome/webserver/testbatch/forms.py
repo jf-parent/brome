@@ -3,8 +3,11 @@
 import subprocess
 import os
 import sys
+import json
+from datetime import datetime
 
 import yaml
+from IPython import embed
 
 from brome.webserver import data_controller
 
@@ -62,3 +65,65 @@ class LaunchForm(object):
         )
 
         return True, ''
+
+class ReportForm(object):
+    def __init__(self, app, object_id, object_type):
+        self.app = app
+        self.object_id = object_id
+        self.object_type = object_type
+
+        self.fetch_object()
+        self.init_data()
+
+    def fetch_object(self):
+        if self.object_type == 'test_result':
+            self.data_object = data_controller.get_test_result(self.app, self.object_id)
+        elif self.object_type == 'test_crash':
+            self.data_object = data_controller.get_test_crash(self.app, self.object_id)
+
+    def init_data(self):
+        self.data = {}
+
+        #TITLE
+        self.data['title'] = self.data_object.title
+
+        #JAVASCRIPT ERROR
+        try:
+            self.data['javascript_error'] = json.loads(self.data_object.extra_data)['javascript_error']
+        except (ValueError, KeyError):
+            self.data['javascript_error'] = ''
+            
+        #SCREENSHOT
+        self.data['screenshot_path'] = self.data_object.screenshot_path
+
+        #NETWORK CAPTURE
+        try:
+            self.data['network_capture_path'] = json.loads(self.data_object.extra_data)['network_capture_path']
+
+            if self.app.brome.get_config_value("webserver:analyse_network_capture_report_func"):
+                self.data['network_capture_analyse'] = True
+        except (ValueError, KeyError):
+            self.data['network_capture_path'] = ''
+
+        #VIDEO
+        self.data['video_path'] = self.data_object.videocapture_path
+        self.data['video_title'] = self.data_object.title.replace('_', ' ')
+
+        test_instance = data_controller.get_test_instance(self.data_object.test_instance_id)
+        self.data['video_time_position'] =  (self.data_object.timestamp - test_instance.starting_timestamp).total_seconds()
+
+        #CUSTOM FIELDS
+        self.data['custom_fields'] = self.app.brome.get_config_value("webserver:report")['custom_fields']
+
+    def report(self, data):
+        self.app.logger.info("Reported!")
+
+        on_submit = self.app.brome.get_config_value("webserver:report")['on_submit']
+        module_name = on_submit.split(':')[0]
+        function_name = on_submit.split(':')[1]
+
+        module = __import__(module_name, fromlist = [''])
+
+        success, msg = getattr(module, function_name)(dict(data))
+
+        return success, msg

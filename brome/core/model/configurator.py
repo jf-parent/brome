@@ -277,6 +277,13 @@ default_config["ec2"]['wait_until_system_and_instance_check_performed'] = {
     'title': 'Wait until system and instance checks are performed'
 }
 
+default_config["project"]["script_folder_name"] = {
+    'default': "tests",
+    'type': 'input',
+    'visible': True,
+    'title': 'The script folder name'
+}
+
 default_config["project"]["test_batch_result_path"] = {
     'default': "",
     'type': 'input',

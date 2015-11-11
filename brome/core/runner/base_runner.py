@@ -120,30 +120,34 @@ class BaseRunner(object):
         """
 
         available_tests = []
+
+        script_folder_name = self.get_config_value('project:script_folder_name')
+
         if search_query:
+
             tests_path = os.path.join(
                 self.get_config_value('project:absolute_path'), 
-                'tests',
+                script_folder_name,
                 'test_%s.py'%search_query
             )
             tests = sorted(glob.glob(tests_path))
 
             for test in tests:
                 module_test = test.split(os.sep)[-1][:-3]
-                available_tests.append(__import__('tests.%s'%module_test, fromlist = ['']))
+                available_tests.append(__import__('%s.%s'%(script_folder_name, module_test), fromlist = ['']))
 
         elif test_name:
             if test_name.endswith('.py'):
                 test_name = test_name[:-3]
 
             try:
-                available_tests.append(__import__('tests.%s'%test_name, fromlist = ['']))
+                available_tests.append(__import__('%s.%s'%(script_folder_name, test_name), fromlist = ['']))
             except ImportError:
                 pass
 
         if not len(available_tests):
             query = search_query if search_query else test_name
-            print "No test found with the provided query: %s"%query
+            print "No script found with the provided query: %s"%query
             exit(1)
         
         return available_tests

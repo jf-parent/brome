@@ -336,7 +336,7 @@ class BaseTest(object):
 
         states_dir = os.path.join(
             self.get_config_value("project:absolute_path"),
-            "tests",
+            self.get_config_value("project:script_folder_name"),
             "states"
         )
         create_dir_if_doesnt_exist(states_dir)

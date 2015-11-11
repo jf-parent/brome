@@ -14,7 +14,7 @@ with open('requirements.txt', 'r') as fd:
 
 setup(
     name='brome',
-    version='0.1.4',
+    version='0.1.6',
     description="Framework For Selenium",
     long_description=readme,
     author="Brome-HQ",

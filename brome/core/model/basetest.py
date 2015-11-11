@@ -605,17 +605,18 @@ class BaseTest(object):
         if extra_data_dict:
             extra_data = json.dumps(extra_data_dict)
 
-        crash_screenshot_path = os.path.join(
-            self._crash_report_dir,
-            string_to_filename('%s.png'%crash_name)
-        )
-
-        crash_screenshot_relative_path = os.path.join(
-            self._crash_report_relative_dir,
-            string_to_filename('%s.png'%crash_name)
-        )
-
+        crash_screenshot_relative_path = ''
         if self._runner_dir:
+            crash_screenshot_path = os.path.join(
+                self._crash_report_dir,
+                string_to_filename('%s.png'%crash_name)
+            )
+
+            crash_screenshot_relative_path = os.path.join(
+                self._crash_report_relative_dir,
+                string_to_filename('%s.png'%crash_name)
+            )
+
             #CRASH LOG
             with open(os.path.join(self._crash_report_dir, string_to_filename('%s.log'%crash_name)), 'w') as f:
                 f.write(str(tb))

@@ -172,7 +172,7 @@ def get_test_list(app):
 
     tests_dir = os.path.join(
         app.brome.get_config_value('project:absolute_path'),
-        "tests"
+        app.brome.get_config_value('project:script_folder_name')
     )
 
     if os.path.isdir(tests_dir):

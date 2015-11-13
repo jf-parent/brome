@@ -673,7 +673,6 @@ class ProxyDriver(object):
                 else:
                     return self.no_javascript_error_string
         else:
-            self.warning_log("get_javascript_error was called but proxy_driver:intercept_javascript_error is set to False.")
             return []
 
     def pdb(self):

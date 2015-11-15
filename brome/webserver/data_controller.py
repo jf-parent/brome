@@ -170,15 +170,17 @@ def get_total_executing_tests(testbatch_id):
 def get_test_list(app):
     data = []
 
+    script_test_prefix = app.brome.get_config_value('brome:script_test_prefix')
+
     tests_dir = os.path.join(
         app.brome.get_config_value('project:absolute_path'),
-        app.brome.get_config_value('project:script_folder_name')
+        app.brome.get_config_value('brome:script_folder_name')
     )
 
     if os.path.isdir(tests_dir):
-        tests = glob(os.path.join(tests_dir, 'test_*.py'))
+        tests = glob(os.path.join(tests_dir, '%s*.py'%script_test_prefix))
         for test in sorted(tests):
-            name = test.split(os.sep)[-1][len('test_'):-3]
+            name = test.split(os.sep)[-1][len(script_test_prefix):-3]
             data.append({'name': name})
 
     return data

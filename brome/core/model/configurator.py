@@ -157,6 +157,7 @@ def parse_brome_config_from_browser_config(browser_config):
 default_config = {}
 
 ###SECTIONS
+default_config["brome"] = {}
 default_config["project"] = {}
 default_config["saucelabs"] = {}
 default_config["browserstack"] = {}
@@ -173,6 +174,27 @@ default_config["grid_runner"] = {}
 default_config["webserver"] = {}
 
 #OPTIONS
+default_config["brome"]["script_folder_name"] = {
+    'default': 'tests',
+    'type': 'input',
+    'visible': False,
+    'title': 'The name of the folder holding the scripts'
+}
+
+default_config["brome"]["script_test_prefix"] = {
+    'default': 'test_',
+    'type': 'input',
+    'visible': False,
+    'title': 'The prefix of the script'
+}
+
+default_config["brome"]["brome_executable_name"] = {
+    'default': 'bro',
+    'type': 'input',
+    'visible': False,
+    'title': 'The brome executable name'
+}
+
 default_config["proxy_element"]["use_touch_instead_of_click"] = {
     'default': False,
     'type': 'checkbox',
@@ -803,4 +825,11 @@ default_config["webserver"]["open_browser"] = {
     'type': 'checkbox',
     'visible': True,
     'title': 'Open the webserver index in a new tab on start',
+}
+
+default_config["webserver"]["report"] = {
+    'default': False,
+    'type': 'input',
+    'visible': False,
+    'title': 'Config for the report system',
 }

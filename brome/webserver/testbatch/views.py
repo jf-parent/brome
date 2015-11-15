@@ -200,7 +200,20 @@ def testresult(testbatch_id):
     data['result_list'] = data_controller.get_test_batch_test_result(blueprint.app, testbatch_id)
     test_batch_is_running = data_controller.get_test_batch(testbatch_id).ending_timestamp == None
 
-    return render_template("testbatch/testresult.html", testbatch_id = testbatch_id, test_batch_is_running = test_batch_is_running, data = data)
+    report = blueprint.app.brome.get_config_value("webserver:report")
+    #NOTE the report config is suppose to be a dict so if it is a boolean it can only be false
+    if type(report) == bool:
+        show_report = False
+    else:
+        show_report = True
+
+    return render_template(
+        "testbatch/testresult.html",
+        testbatch_id = testbatch_id,
+        test_batch_is_running = test_batch_is_running,
+        show_report = show_report,
+        data = data
+    )
 
 @blueprint.route("/crash/<int:testbatch_id>")
 @login_required
@@ -208,7 +221,14 @@ def crash(testbatch_id):
     data = {}
     data['crash_list'] = data_controller.get_test_batch_crashes(blueprint.app, testbatch_id)
 
-    return render_template("testbatch/crash.html", testbatch_id = testbatch_id, data = data)
+    report = blueprint.app.brome.get_config_value("webserver:report")
+    #NOTE the report config is suppose to be a dict so if it is a boolean it can only be false
+    if type(report) == bool:
+        show_report = False
+    else:
+        show_report = True
+
+    return render_template("testbatch/crash.html", testbatch_id = testbatch_id, data = data, show_report = show_report)
 
 @flask_sijax.route(blueprint, "/list")
 @login_required

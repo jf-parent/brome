@@ -26,11 +26,14 @@
                     {% for t in crash.trace_list %}
                         {{ t }}</br>
                     {% endfor %}
-                 <p>
+                </p>
+                {% if show_report %}
+                <p>
                     <a class="unlink" href="{{ url_for('testbatch.report', object_type = 'test_crash', object_id = crash.id) }}" target="_blank" >
                         Report
                     </a>
                 </p>
+                {% endif %}
                </p>
             </div>
         {% endfor %}

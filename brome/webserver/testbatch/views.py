@@ -201,9 +201,8 @@ def testresult(testbatch_id):
     test_batch_is_running = data_controller.get_test_batch(testbatch_id).ending_timestamp == None
 
     report = blueprint.app.brome.get_config_value("webserver:report")
-    #NOTE the report config is suppose to be a dict so if it is a boolean it can only be false
     if type(report) == bool:
-        show_report = False
+        show_report = report
     else:
         show_report = True
 
@@ -222,9 +221,8 @@ def crash(testbatch_id):
     data['crash_list'] = data_controller.get_test_batch_crashes(blueprint.app, testbatch_id)
 
     report = blueprint.app.brome.get_config_value("webserver:report")
-    #NOTE the report config is suppose to be a dict so if it is a boolean it can only be false
     if type(report) == bool:
-        show_report = False
+        show_report = report
     else:
         show_report = True
 

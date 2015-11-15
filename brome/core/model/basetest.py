@@ -113,6 +113,7 @@ class BaseTest(object):
 
             self._video_recorder = CastroRedux(
                 self._video_capture_file_path,
+                framerate = 30,
                 host = node_ip,
                 port = self._browser_config.get('vnc_port', 5900)
             )

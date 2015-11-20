@@ -61,6 +61,7 @@ def get_test_batch_list():
 def get_test_instance_list(testbatch_id):
     test_instances = db.session.query(TestInstance)\
                             .filter(TestInstance.test_batch_id == testbatch_id)\
+                            .order_by(TestInstance.name)\
                             .all()
 
     for test_instance in test_instances:

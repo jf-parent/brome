@@ -110,6 +110,8 @@ class BrowserConfig(object):
             'launch': True,
             'record_session': False,
             'vnc_port': 5900,
+            'vnc_password': '',
+            'vnc_password_file': '~/.vnc/passwd',
             'nb_browser_by_instance': 1,
             'max_number_of_instance': 1,
             'hub_ip': 'localhost'
@@ -148,6 +150,8 @@ class BrowserConfig(object):
             'record_session': False,
             'vbox_type': 'gui',
             'vnc_port': 5900,
+            'vnc_password': '',
+            'vnc_password_file': '~/.vnc/passwd',
             'nb_browser_by_instance': 1,
             'max_number_of_instance': 1,
             'hub_ip': 'localhost'

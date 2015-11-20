@@ -113,17 +113,25 @@ class ReportForm(object):
         self.data['video_time_position'] =  (self.data_object.timestamp - test_instance.starting_timestamp).total_seconds()
 
         #CUSTOM FIELDS
-        self.data['custom_fields'] = self.app.brome.get_config_value("webserver:report")['custom_fields']
+        report = self.app.brome.get_config_value("webserver:report")
+        if type(report) == dict:
+            self.data['custom_fields'] = report.get('custom_fields')
+        else:
+            self.data['custom_fields'] = None
 
     def report(self, data):
         self.app.logger.info("Reported!")
+        
+        report = self.app.brome.get_config_value("webserver:report")
+        if type(report) == dict:
+            on_submit = report.get('on_submit')
+            module_name = on_submit.split(':')[0]
+            function_name = on_submit.split(':')[1]
 
-        on_submit = self.app.brome.get_config_value("webserver:report")['on_submit']
-        module_name = on_submit.split(':')[0]
-        function_name = on_submit.split(':')[1]
+            module = __import__(module_name, fromlist = [''])
 
-        module = __import__(module_name, fromlist = [''])
+            success, msg = getattr(module, function_name)(dict(data))
 
-        success, msg = getattr(module, function_name)(dict(data))
-
-        return success, msg
+            return success, msg
+        else:
+            return False, 'webserver:report:on_submit is not configured!'

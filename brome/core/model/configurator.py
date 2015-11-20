@@ -476,6 +476,13 @@ default_config["proxy_driver"]["take_screenshot_on_assertion_failure"] = {
     'title': 'Take screenshot on assertion failure'
 }
 
+default_config["browser"]["castroredux_framerate"] = {
+    'default': 30,
+    'type': 'number',
+    'visible': True,
+    'title': 'CastroRedux framerate'
+}
+
 default_config["browser"]["window_x_position"] = {
     'default': 0,
     'type': 'number',

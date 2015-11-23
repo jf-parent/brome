@@ -148,7 +148,7 @@ class BaseTest(object):
             Popen(["/usr/bin/ffmpeg", "-i", "%s.flv"%file_name, "-vcodec", "libvpx", "-acodec", "libvorbis", "%s.webm"%file_name], stdout=devnull, stderr=devnull)
             """
 
-    def init_driver(self, retry = 10):
+    def init_driver(self, retry = 30):
         """Init driver will instanciate a webdriver according to the browser config
 
         First a webdriver is instanciate according to the provided browser config

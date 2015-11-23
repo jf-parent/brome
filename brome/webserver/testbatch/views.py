@@ -11,6 +11,7 @@ from IPython import embed
 from brome.webserver.testbatch.forms import LaunchForm, ReportForm
 from brome.core.model.utils import *
 from brome.webserver import data_controller
+from brome.webserver.utils import annotate_video
 
 blueprint = Blueprint("testbatch", __name__, url_prefix='/tb',
                       static_folder="../static")
@@ -67,8 +68,16 @@ def report(object_type, object_id):
 
         obj_response.script("$('#%s > p > textarea[name=\"network_analysis\"]').val('%s')"%(network_capture_name, analysis))
 
+    def annotate(obj_response, title):
+        response, annotated_video_path = annotate_video(blueprint, title, form.data)
+        if annotated_video_path:
+            obj_response.script("$('#video').val('%s')"%annotated_video_path)
+            obj_response.script("$('#video_link').prop('href', '%s')"%url_for('testbatch.video_player', video_path = annotated_video_path))
+        obj_response.alert(response)
+
     if g.sijax.is_sijax_request:
         g.sijax.register_callback('analyse', analyse)
+        g.sijax.register_callback('annotate', annotate)
         return g.sijax.process_request()
 
     if request and request.method in ("PUT", "POST"):

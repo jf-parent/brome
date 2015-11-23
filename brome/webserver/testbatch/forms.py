@@ -93,12 +93,14 @@ class ReportForm(object):
         except (ValueError, KeyError):
             self.data['javascript_error'] = ''
             
+        extra_data = json.loads(self.data_object.extra_data)
         #SCREENSHOT
         self.data['screenshot_path'] = self.data_object.screenshot_path
+        self.data['extra_data'] = extra_data
 
         #NETWORK CAPTURE
         try:
-            self.data['network_capture_path'] = json.loads(self.data_object.extra_data)['network_capture_path']
+            self.data['network_capture_path'] = extra_data['network_capture_path']
 
             if self.app.brome.get_config_value("webserver:analyse_network_capture_report_func"):
                 self.data['network_capture_analyse'] = True
@@ -110,7 +112,8 @@ class ReportForm(object):
         self.data['video_title'] = self.data_object.title.replace('_', ' ')
 
         test_instance = data_controller.get_test_instance(self.data_object.test_instance_id)
-        self.data['video_time_position'] =  (self.data_object.timestamp - test_instance.starting_timestamp).total_seconds()
+        m, s = divmod((self.data_object.timestamp - test_instance.starting_timestamp).total_seconds(), 60)
+        self.data['video_time_position'] =  "%02d min %02d sec" % (m, s)
 
         #CUSTOM FIELDS
         report = self.app.brome.get_config_value("webserver:report")

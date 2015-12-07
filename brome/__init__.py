@@ -1,6 +1,6 @@
 #! -*- coding: utf-8 -*-
 
-__version__ = "0.1.7"
+__version__ = "0.1.9"
 
 import webbrowser
 import shutil
@@ -240,7 +240,7 @@ class Brome(object):
         def delete_test_states():
             states_dir = os.path.join(
                 self.get_config_value("project:absolute_path"),
-                "tests",
+                self.get_config_value("brome:script_folder_name"),
                 "states"
             )
             try:
@@ -316,8 +316,8 @@ class Brome(object):
     def list_(self, args):
         query = os.path.join(
                         self.get_config_value("project:absolute_path"),
-                        "tests",
-                        "test_*.py"
+                        self.get_config_value("brome:script_folder_name"),
+                        "%s*.py"%self.get_config_value('brome:script_test_prefix')
                     )
 
         tests = glob(query)

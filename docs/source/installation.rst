@@ -12,7 +12,7 @@ Create the brome project::
 
     $ mkdir brome_project
     $ cd brome_project
-    $ cookiecutter https://github.com/brome-hq/cookiecutter-brome
+    $ cookiecutter https://github.com/brome-hq/cookiecutter-brome -f
 
 Create a virtual env *[optional]*
 ---------------------------------

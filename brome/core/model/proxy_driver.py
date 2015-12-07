@@ -673,7 +673,6 @@ class ProxyDriver(object):
                 else:
                     return self.no_javascript_error_string
         else:
-            self.warning_log("get_javascript_error was called but proxy_driver:intercept_javascript_error is set to False.")
             return []
 
     def pdb(self):
@@ -974,6 +973,8 @@ class ProxyDriver(object):
 
         element = self.find(selector, raise_exception = False, wait_until_visible = False, wait_until_present = False)
         if element and element.is_displayed(raise_exception = False):
+            data = self.execute_script("return arguments[0].getBoundingClientRect();", element._element)
+
             if highlight:
                 element.highlight(
                     style = self.get_config_value(
@@ -981,7 +982,11 @@ class ProxyDriver(object):
                             )
                 )
             if testid is not None:
-                self.create_test_result(testid, False)
+                self.create_test_result(testid, False, extra_data_dict = {
+                    'bounding_client_rect' : data,
+                    'video_x_offset' : self.browser_config.get('video_x_offset', 0),
+                    'video_y_offset' : self.browser_config.get('video_y_offset', 0)
+                })
 
             return False
         else:
@@ -1112,12 +1117,15 @@ class ProxyDriver(object):
 
             return False
 
-    def create_test_result(self, testid, result):
+    def create_test_result(self, testid, result, **kwargs):
         """Create a test result entry in the persistence layer
 
         Args:
             testid (str)
             result (bool)
+
+        Keyword Args:
+            extra_data_dict (dict): the extra data that will be saved with the test result
 
         Returns:
             None
@@ -1127,7 +1135,7 @@ class ProxyDriver(object):
         videocapture_path = self.test_instance._video_capture_file_relative_path
         screenshot_relative_path = ''
         extra_data = ''
-        extra_data_dict = {}
+        extra_data_dict = kwargs.get('extra_data_dict', {})
 
         #JAVASCRIPT ERROR
         if not result:

@@ -2,7 +2,6 @@
 
 import json
 import logging
-import os.path
 import os
 import pickle
 from urlparse import urlparse
@@ -99,6 +98,13 @@ class BaseTest(object):
         self._video_capture_file_relative_path = False
 
         if self._browser_config.get('record_session'):
+            vnc_passwd_file = os.path.expanduser(self._browser_config.get('vnc_password_file'))
+            #Check if the vnc_password_file exist
+            if not os.path.exists(vnc_passwd_file):
+                #Create it
+                with open(vnc_passwd_file, 'w') as fd:
+                    fd.write(self._browser_config.get('vnc_password'))
+
             node_ip = self.pdriver.get_ip_of_node()
 
             self._video_capture_file_path = os.path.join(
@@ -113,8 +119,10 @@ class BaseTest(object):
 
             self._video_recorder = CastroRedux(
                 self._video_capture_file_path,
+                framerate = self.get_config_value("browser:castroredux_framerate"),
                 host = node_ip,
-                port = self._browser_config.get('vnc_port', 5900)
+                port = self._browser_config.get('vnc_port'),
+                pwdfile = vnc_passwd_file
             )
 
             try:
@@ -140,7 +148,7 @@ class BaseTest(object):
             Popen(["/usr/bin/ffmpeg", "-i", "%s.flv"%file_name, "-vcodec", "libvpx", "-acodec", "libvorbis", "%s.webm"%file_name], stdout=devnull, stderr=devnull)
             """
 
-    def init_driver(self, retry = 10):
+    def init_driver(self, retry = 30):
         """Init driver will instanciate a webdriver according to the browser config
 
         First a webdriver is instanciate according to the provided browser config
@@ -605,17 +613,18 @@ class BaseTest(object):
         if extra_data_dict:
             extra_data = json.dumps(extra_data_dict)
 
-        crash_screenshot_path = os.path.join(
-            self._crash_report_dir,
-            string_to_filename('%s.png'%crash_name)
-        )
-
-        crash_screenshot_relative_path = os.path.join(
-            self._crash_report_relative_dir,
-            string_to_filename('%s.png'%crash_name)
-        )
-
+        crash_screenshot_relative_path = ''
         if self._runner_dir:
+            crash_screenshot_path = os.path.join(
+                self._crash_report_dir,
+                string_to_filename('%s.png'%crash_name)
+            )
+
+            crash_screenshot_relative_path = os.path.join(
+                self._crash_report_relative_dir,
+                string_to_filename('%s.png'%crash_name)
+            )
+
             #CRASH LOG
             with open(os.path.join(self._crash_report_dir, string_to_filename('%s.log'%crash_name)), 'w') as f:
                 f.write(str(tb))

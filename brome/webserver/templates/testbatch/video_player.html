@@ -2,12 +2,13 @@
 {% block content %}
 <div>
 <h2>{{ data['title'] }}</h2>
-<video id="video" class="video-js vjs-default-skin vjs-big-play-centered"
-  controls width="1024" height="768" >
+<video id="video" preload="auto" class="video-js vjs-default-skin vjs-big-play-centered"
+  controls width="1024" height="768" data-setup='{}'>
  <source src="{{url_for('testbatch.test_batch_report_file', filename = data['path']) }}" type='video/flv' />
  <p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
 </video>
 </div>
+<!--
 <script>
 videojs("video").ready(function(){
     var video = this;
@@ -20,8 +21,9 @@ videojs("video").ready(function(){
         }, 100);
     });
 
-    function set_video_time(cvideo,destination_time){
+    function set_video_time(cvideo, destination_time) {
         cvideo.currentTime(destination_time);
     }
 </script>
+-->
 {% endblock %}

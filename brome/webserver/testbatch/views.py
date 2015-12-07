@@ -11,6 +11,7 @@ from IPython import embed
 from brome.webserver.testbatch.forms import LaunchForm, ReportForm
 from brome.core.model.utils import *
 from brome.webserver import data_controller
+from brome.webserver.utils import annotate_video
 
 blueprint = Blueprint("testbatch", __name__, url_prefix='/tb',
                       static_folder="../static")
@@ -67,8 +68,16 @@ def report(object_type, object_id):
 
         obj_response.script("$('#%s > p > textarea[name=\"network_analysis\"]').val('%s')"%(network_capture_name, analysis))
 
+    def annotate(obj_response, title):
+        response, annotated_video_path = annotate_video(blueprint, title, form.data)
+        if annotated_video_path:
+            obj_response.script("$('#video').val('%s')"%annotated_video_path)
+            obj_response.script("$('#video_link').prop('href', '%s')"%url_for('testbatch.video_player', video_path = annotated_video_path))
+        obj_response.alert(response)
+
     if g.sijax.is_sijax_request:
         g.sijax.register_callback('analyse', analyse)
+        g.sijax.register_callback('annotate', annotate)
         return g.sijax.process_request()
 
     if request and request.method in ("PUT", "POST"):
@@ -200,7 +209,19 @@ def testresult(testbatch_id):
     data['result_list'] = data_controller.get_test_batch_test_result(blueprint.app, testbatch_id)
     test_batch_is_running = data_controller.get_test_batch(testbatch_id).ending_timestamp == None
 
-    return render_template("testbatch/testresult.html", testbatch_id = testbatch_id, test_batch_is_running = test_batch_is_running, data = data)
+    report = blueprint.app.brome.get_config_value("webserver:report")
+    if type(report) == bool:
+        show_report = report
+    else:
+        show_report = True
+
+    return render_template(
+        "testbatch/testresult.html",
+        testbatch_id = testbatch_id,
+        test_batch_is_running = test_batch_is_running,
+        show_report = show_report,
+        data = data
+    )
 
 @blueprint.route("/crash/<int:testbatch_id>")
 @login_required
@@ -208,7 +229,13 @@ def crash(testbatch_id):
     data = {}
     data['crash_list'] = data_controller.get_test_batch_crashes(blueprint.app, testbatch_id)
 
-    return render_template("testbatch/crash.html", testbatch_id = testbatch_id, data = data)
+    report = blueprint.app.brome.get_config_value("webserver:report")
+    if type(report) == bool:
+        show_report = report
+    else:
+        show_report = True
+
+    return render_template("testbatch/crash.html", testbatch_id = testbatch_id, data = data, show_report = show_report)
 
 @flask_sijax.route(blueprint, "/list")
 @login_required

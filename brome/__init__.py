@@ -1,6 +1,6 @@
 #! -*- coding: utf-8 -*-
 
-__version__ = "0.1.4"
+__version__ = "0.1.7"
 
 import webbrowser
 import shutil
@@ -17,6 +17,7 @@ import yaml
 from tornado.wsgi import WSGIContainer
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
+from IPython import embed
 
 from core.model.utils import *
 from core.model.meta import Session
@@ -335,22 +336,38 @@ class Brome(object):
         )
 
         parser.add_argument(
+                            '--unused-test-id',
+                            dest = 'unused_test_id', 
+                            action = 'store_true',
+                            help = 'Find all unused test id in model and test directory'
+        )
+
+        parser.add_argument(
                             '--selector',
                             dest = 'selector', 
                             help = 'Find a selector in model and test directory'
         )
 
+        parser.add_argument(
+                            '--unused-selector',
+                            dest = 'unused_selector', 
+                            action = 'store_true',
+                            help = 'Find all unused selector variable in model and test directory'
+        )
+
         parsed_args = parser.parse_args(args)
 
+        test_id_regex = "[\'\"]+(%s){1}[\'\"]+"
+        selector_regex = "\..*\(+[\'\"]+.*(%s)+.*[\'\"]+"
         if parsed_args.test_id:
-            pattern = "\.(assert_.*|create_test_result)+\(.*[\'\"]+(%s)+[\'\"]+"%parsed_args.test_id
+            pattern = test_id_regex%parsed_args.test_id
         elif parsed_args.selector:
-            pattern = "\..*\(+[\'\"]+.*(%s)+.*[\'\"]+"%parsed_args.selector
+            pattern = selector_regex%parsed_args.selector
 
         paths = [
             os.path.join(
                 self.get_config_value("project:absolute_path"),
-                "tests"
+                self.get_config_value("brome:script_folder_name")
             ),
             os.path.join(
                 self.get_config_value("project:absolute_path"),
@@ -358,7 +375,28 @@ class Brome(object):
             ),
         ]
 
-        grep_files(paths, pattern, True)
+        if parsed_args.test_id or parsed_args.selector:
+            result = grep_files(paths, pattern, True)
+        else:
+            if parsed_args.unused_selector:
+                print 'Unused selector variable:'
+                dict_ = self.selector_dict
+                regex_ = selector_regex
+
+            elif parsed_args.unused_test_id:
+                print 'Unused test id:'
+                dict_ = self.test_dict
+                regex_ = test_id_regex
+
+            try:
+                for key in dict_.iterkeys():
+                    pattern = regex_%key
+                    result = grep_files(paths, pattern, True, return_list = True)
+                    if not result:
+                        print key
+
+            except KeyboardInterrupt:
+                pass
 
     def get_config_value(self, config_name):
         config_list = [

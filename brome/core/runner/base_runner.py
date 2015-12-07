@@ -121,14 +121,15 @@ class BaseRunner(object):
 
         available_tests = []
 
-        script_folder_name = self.get_config_value('project:script_folder_name')
+        script_folder_name = self.get_config_value('brome:script_folder_name')
+        script_test_prefix = self.get_config_value('brome:script_test_prefix')
 
         if search_query:
 
             tests_path = os.path.join(
                 self.get_config_value('project:absolute_path'), 
                 script_folder_name,
-                'test_%s.py'%search_query
+                '%s%s.py'%(script_test_prefix, search_query)
             )
             tests = sorted(glob.glob(tests_path))
 

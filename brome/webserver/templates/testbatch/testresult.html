@@ -34,7 +34,7 @@
                                     {% endif %}
                                         '</div>',
                         'report': '<div>' +
-                                    {% if not test_batch_is_running %}
+                                    {% if not test_batch_is_running and show_report %}
                                         '<a class="unlink" href="{{ url_for('testbatch.report', object_type = 'test_result', object_id = result.id) }}" target="_blank" >' +
                                             'Report' +
                                         '</a>' +

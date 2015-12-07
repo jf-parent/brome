@@ -38,7 +38,7 @@ Quick-start
 
     ::
 
-    $ cookiecutter https://github.com/brome-hq/cookiecutter-brome
+    $ cookiecutter https://github.com/brome-hq/cookiecutter-brome -f
     $ chmod +x bro
     $ pip install brome
     $ vim config/brome.yml

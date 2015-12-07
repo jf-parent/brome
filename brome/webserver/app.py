@@ -60,7 +60,7 @@ def configure_logging(app):
         fh = logging.FileHandler(os.path.join(app.runner_dir, '%s.log'%logger_name))
         app.logger.addHandler(fh)
 
-    brome.logger.setLevel(getattr(logging, self.get_config_value('webserver:logger_level')))
+    app.logger.setLevel(getattr(logging, self.get_config_value('webserver:logger_level')))
 
 def register_extensions(app):
     assets.init_app(app)

@@ -10,6 +10,7 @@ from selenium.webdriver.common.proxy import *
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from castroredux import CastroRedux
+from IPython import embed
 
 from brome.core.model.utils import *
 from brome.core.model.stateful import Stateful
@@ -168,8 +169,8 @@ class BaseTest(object):
         """
         #LOCAL
         if self._browser_config.location == 'localhost':
-            if self._browser_config.get('browserName').lower() in ['chrome', 'firefox', 'phantomjs'] \
-                and self._browser_config.get('enable_proxy'):
+
+            def get_proxy():
                 mitm_proxy = "localhost:%s"%self._localhost_instance.proxy_port
 
                 proxy = Proxy({
@@ -178,18 +179,25 @@ class BaseTest(object):
                     'sslProxy': mitm_proxy
                 })
 
+            #CHROME
+            if self._browser_config.get('browserName').lower() == 'chrome':
+                chrome_options = webdriver.ChromeOptions()
+
+                if self._browser_config.get('mobile_emulation'):
+                    chrome_options.add_experimental_option("mobileEmulation", self._browser_config.get('mobile_emulation'))
+                elif self._browser_config.get('enable_proxy'):
+                    chrome_options.add_argument("--proxy-server={0}".format(get_proxy()))
+
+                driver = webdriver.Chrome(chrome_options = chrome_options)
+
+            elif self._browser_config.get('browserName').lower() in ['firefox', 'phantomjs'] \
+                and self._browser_config.get('enable_proxy'):
                 #NOTE http://www.seleniumhq.org/docs/04_webdriver_advanced.jsp#using-a-proxy
                 #FIREFOX
                 if self._browser_config.get('browserName').lower() == 'firefox':
                     profile  = webdriver.FirefoxProfile()
-                    profile.set_proxy(proxy = proxy)
+                    profile.set_proxy(proxy = get_proxy())
                     driver = webdriver.Firefox(firefox_profile=profile)
-
-                #CHROME
-                elif self._browser_config.get('browserName').lower() == 'chrome':
-                    chrome_options = webdriver.ChromeOptions()
-                    chrome_options.add_argument("--proxy-server={0}".format(proxy))
-                    driver = webdriver.Chrome(chrome_options = chrome_options)
 
                 #PHANTOMJS
                 elif self._browser_config.get('browserName').lower() == 'phantomjs':

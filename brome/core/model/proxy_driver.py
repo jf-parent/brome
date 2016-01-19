@@ -532,6 +532,8 @@ class ProxyDriver(object):
         #Maximaze window
         if self.get_config_value('browser:maximize_window'):
             self._driver.maximize_window()
+        elif self.get_config_value('browser:dont_resize'):
+            return
         else:
             #Window position
             self._driver.set_window_position(
@@ -578,7 +580,10 @@ class ProxyDriver(object):
                 ])
 
     def get_browser_name(self):
-        return self._driver.capabilities['browserName']
+        if self.browser_config.get('fakeIdentity'):
+            return self.browser_config.get('fakeIdentity')
+        else:
+            return self._driver.capabilities['browserName']
 
     def get_browser_version(self):
         return self._driver.capabilities['version'].replace('.', '_')

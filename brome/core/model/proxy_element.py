@@ -223,7 +223,7 @@ class ProxyElement(object):
         try:
             self.pdriver.execute_script("arguments[0].scrollIntoView()", self._element)
 
-        except WebDriverException as e:
+        except (WebDriverException, StaleElementReferenceException) as e:
             if raise_exception:
                 raise
             else:

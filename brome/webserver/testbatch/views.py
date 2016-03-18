@@ -137,6 +137,9 @@ def detail(testbatch_id):
             if str(progress) != current_progress.replace('%', ''):
                 obj_response.script("$('#testprogress').puiprogressbar('option', 'value', %s);"%progress)
 
+            total_execution_time = data_controller.get_total_execution_time(blueprint.app, testbatch_id)
+            obj_response.script("$('#testexecutiontimespan > strong').html('%s');"%total_execution_time)
+
             obj_response.script("$('#total_crashes').html(%s)"%test_batch.total_crashes)
             obj_response.script("$('#total_executing_tests').html(%s)"%test_batch.total_executing_tests)
             obj_response.script("$('#total_finished_tests').html(%s)"%test_batch.total_finished_tests)

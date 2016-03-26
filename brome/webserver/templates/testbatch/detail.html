@@ -70,6 +70,11 @@
                     <a class="unlink" href="{{ url_for('testbatch.video_recording_list', testbatch_id = testbatch_id) }}"><i class="fa fa-television"></i> Video recordings</a>
                 </li>
             {% endif %}
+            {% if show_bot_diary %}
+                <li>
+                    <a class="unlink" href="{{ url_for('testbatch.bot_diary_list', testbatch_id = testbatch_id) }}"><i class="fa fa-pencil"></i> Bot diaries</a>
+                </li>
+            {% endif %}
             {% if show_test_instances %}
                 <li>
                     <a class="unlink" href="{{ url_for('testbatch.test_instances', testbatch_id = testbatch_id) }}"><i class="fa fa-eye"></i> Test intances</a>

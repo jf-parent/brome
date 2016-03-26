@@ -23,7 +23,7 @@ class ProxyElement(object):
         self.pdriver.debug_log(u"[%s] %s"%(self.__repr__(), msg))
 
     def __repr__(self):
-        msg = [u"WebElement (selector: '%s')"%self.selector]
+        msg = [u"WebElement (selector: '%s')"%self.selector.get_selector()]
 
         try:
             if self._element.get_attribute('id'):
@@ -60,7 +60,7 @@ class ProxyElement(object):
                 #NOTE this is an imperfect solution since we can have found the element with find_last
                 #TODO find a better way to handle this edge case
                 self.debug_log(u"StaleElementReferenceException; retrying...")
-                self._element = self.pdriver.find(self.selector, raise_exception = False)
+                self._element = self.pdriver.find(self.selector.get_selector(), raise_exception = False)
                 if self._element:
                     return self.is_displayed(retry = False)
                 else:
@@ -89,7 +89,7 @@ class ProxyElement(object):
 
         if wait_until_clickable:
             #TODO manage the raise exception better
-            self.pdriver.wait_until_clickable(self.selector, raise_exception = True)
+            self.pdriver.wait_until_clickable(self.selector.get_selector(), raise_exception = True)
 
         if highlight:
             self.highlight(
@@ -105,6 +105,8 @@ class ProxyElement(object):
             else:
                 self._element.click()
 
+        self.pdriver.bot_diary.add_auto_entry("I clicked on", selector = self.selector._selector)
+
         try:
             _click()
         except (InvalidElementStateException, WebDriverException) as e:
@@ -115,7 +117,7 @@ class ProxyElement(object):
         except StaleElementReferenceException as e:
             self.debug_log(u"click exception StaleElementReferenceException: %s"%unicode(e))
             sleep(2)
-            self._element = self.pdriver.find(self.selector)
+            self._element = self.pdriver.find(self.selector.get_selector())
             _click()
 
         return True
@@ -138,7 +140,7 @@ class ProxyElement(object):
 
         if wait_until_clickable:
             #TODO manage the raise exception better
-            self.pdriver.wait_until_clickable(self.selector, raise_exception = True)
+            self.pdriver.wait_until_clickable(self.selector.get_selector(), raise_exception = True)
 
         if highlight:
             self.highlight(
@@ -152,12 +154,14 @@ class ProxyElement(object):
         if clear:
             self.clear()
 
+        self.pdriver.bot_diary.add_auto_entry("I typed '%s' in"%value, selector = self.selector._selector)
+        
         try:
             self._element.send_keys(value)
         except StaleElementReferenceException as e:
             self.debug_log(u"send_keys exception StaleElementReferenceException: %s"%unicode(e))
             sleep(2)
-            self._element = self.pdriver.find(self.selector)
+            self._element = self.pdriver.find(self.selector.get_selector())
             self._element.send_keys(value)
         except (InvalidElementStateException, WebDriverException) as e:
             self.debug_log(u"send_keys exception: %s"%unicode(e))
@@ -178,7 +182,7 @@ class ProxyElement(object):
         except StaleElementReferenceException as e:
             self.debug_log(u"send_keys exception StaleElementReferenceException: %s"%unicode(e))
             sleep(2)
-            self._element = self.pdriver.find(self.selector)
+            self._element = self.pdriver.find(self.selector.get_selector())
             self._element.clear()
 
         return True

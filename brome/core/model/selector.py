@@ -59,6 +59,20 @@ class Selector(object):
         """
         return self._effective_selector
 
+    def get_human_readable(self):
+        if len(self._selector_list) == 1:
+            if self.get_type(self._selector_list[0]) == 'selector_variable':
+                selector_config = self._pdriver.selector_dict[self._selector[3:]]
+                if type(selector_config) == dict:
+                    if selector_config.has_key('hr'):
+                        return selector_config['hr']
+                    else:
+                        return selector_config['default']
+                else:
+                    return selector_config
+
+        return self.get_selector()
+
     def _get_selector(self, selector):
         """Get the selector without his brome specific prefix
         """

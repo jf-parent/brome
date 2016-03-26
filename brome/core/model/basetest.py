@@ -599,6 +599,13 @@ class BaseTest(object):
         if self.get_config_value("runner:embed_on_test_crash"):
             self.pdriver.embed()
 
+        if not self.pdriver.bot_diary.is_empty():
+            traceback = tb
+            tb = '\nBot Diary:\n'
+            tb += self.pdriver.bot_diary.get_section(-1, join = True) + '\n'
+            tb += 'And it failed\n'
+            tb += str(traceback)
+            
         self._crash_error = '[!]%s %s crashed: %s'%(self._name, self._browser_config.get_id(), str(tb))
 
         self.create_crash_report(tb)

@@ -161,6 +161,7 @@ def detail(testbatch_id):
     show_video_capture = blueprint.app.brome.get_config_value("webserver:SHOW_VIDEO_CAPTURE")
     show_test_instances = blueprint.app.brome.get_config_value("webserver:SHOW_TEST_INSTANCES")
     show_network_capture = blueprint.app.brome.get_config_value("webserver:SHOW_NETWORK_CAPTURE")
+    show_bot_diary = blueprint.app.brome.get_config_value("webserver:SHOW_BOT_DIARY")
 
     return render_template(
         "testbatch/detail.html",
@@ -168,8 +169,24 @@ def detail(testbatch_id):
         data = data,
         show_test_instances = show_test_instances,
         show_video_capture = show_video_capture,
-        show_network_capture = show_network_capture
+        show_network_capture = show_network_capture,
+        show_bot_diary = show_bot_diary
     )
+
+@blueprint.route("/bot_diary_list/<int:testbatch_id>")
+@login_required
+def bot_diary_list(testbatch_id):
+    data = {}
+    data['bot_diary_list'] = data_controller.get_bot_diary_list(blueprint.app, testbatch_id)
+
+    return render_template("testbatch/bot_diaries_list.html", testbatch_id = testbatch_id, data = data)
+
+@blueprint.route("/<int:testbatch_id>/bot_diary/<bot_diary_name>")
+@login_required
+def bot_diary(testbatch_id, bot_diary_name):
+    bot_diary = data_controller.get_bot_diary(blueprint.app, testbatch_id, bot_diary_name)
+
+    return render_template("testbatch/bot_diary.html", testbatch_id = testbatch_id, bot_diary = bot_diary)
 
 @blueprint.route("/screenshot/<int:testbatch_id>")
 @login_required

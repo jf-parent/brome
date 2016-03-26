@@ -1,13 +1,16 @@
 #! -*- coding: utf-8 -*-
 
+from tempfile import tempdir
 from inspect import currentframe, getframeinfo
 import json
 import re
 
+from PIL import Image
 from sqlalchemy.exc import ProgrammingError
 from selenium.webdriver.common.action_chains import ActionChains
 
 from brome.core.model.utils import *
+from brome.core.model.bot_diary import BotDiary
 from brome.core.model.meta.base import Session
 from brome.core.model.selector import Selector
 from brome.core.model.test import Test
@@ -37,6 +40,11 @@ class ProxyDriver(object):
         self._driver = driver
         self.test_instance = test_instance
         self.runner = runner
+
+        if self.get_config_value("bot_diary:enable_bot_diary"):
+            self.bot_diary = BotDiary(self)
+        else:
+            self.bot_diary = False
 
         self.browser_config = self.test_instance._browser_config
         self.brome = self.runner.brome
@@ -258,7 +266,7 @@ class ProxyDriver(object):
         if type(elements) == list:
             if len(elements):
                 self.debug_log(u"find_all (%s): Element found"%_selector)
-                return ProxyElementList(elements, selector, self)
+                return ProxyElementList(elements, _selector, self)
             else:
                 msg = u"find_all (%s): No element found"%_selector
                 self.debug_log(msg)
@@ -269,7 +277,7 @@ class ProxyDriver(object):
                     return []
         else:
             self.debug_log(u"find_all (%s): Element found"%_selector)
-            return [ProxyElement(elements, selector, self)]
+            return [ProxyElement(elements, _selector, self)]
 
     #WAIT
     def wait_until_clickable(self, selector, **kwargs):
@@ -319,6 +327,7 @@ class ProxyDriver(object):
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
+                self.bot_diary.add_auto_entry("I waited for the clickability of", selector = selector)
                 raise TimeoutException(msg)
             else:
                 return False
@@ -363,12 +372,13 @@ class ProxyDriver(object):
         try:
             el = WebDriverWait(self._driver, timeout).until(EC.presence_of_element_located((getattr(By, _selector.find_by), _selector.get_selector())))
             self.debug_log(u"wait_until_present (%s): element is present"%_selector)
-            return ProxyElement(el, selector, self)
+            return ProxyElement(el, _selector, self)
         except TimeoutException:
             msg = u"wait_until_present (%s): element is still not present"%_selector
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
+                self.bot_diary.add_auto_entry("I waited for the presence of", selector = selector)
                 raise TimeoutException(msg)
             else:
                 return False
@@ -419,6 +429,7 @@ class ProxyDriver(object):
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
+                self.bot_diary.add_auto_entry("I waited for the absence of", selector = selector)
                 raise TimeoutException(msg)
             else:
                 return False
@@ -463,12 +474,13 @@ class ProxyDriver(object):
         try:
             el = WebDriverWait(self._driver, timeout).until(EC.visibility_of_element_located((getattr(By, _selector.find_by), _selector.get_selector())))
             self.debug_log(u"wait_until_visible (%s): element is visible"%_selector)
-            return ProxyElement(el, selector, self)
+            return ProxyElement(el, _selector, self)
         except TimeoutException:
             msg = u"wait_until_visible (%s): element is still not visible"%_selector
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
+                self.bot_diary.add_auto_entry("I waited for the visibility of", selector = selector)
                 raise TimeoutException(msg)
             else:
                 return False
@@ -519,6 +531,7 @@ class ProxyDriver(object):
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
+                self.bot_diary.add_auto_entry("I waited for the invisibility of", selector = selector)
                 raise TimeoutException(msg)
             else:
                 return False
@@ -604,7 +617,10 @@ class ProxyDriver(object):
         Returns:
             bool
         """
+
         self._driver.get(url)
+
+        self.bot_diary.add_auto_entry("I went on", target = url, take_screenshot = True)
 
         if self.get_config_value("proxy_driver:intercept_javascript_error"):
             self.init_javascript_error_interception()
@@ -767,6 +783,35 @@ class ProxyDriver(object):
         msg = 'Stopped at %s and line %s;'%(frame.f_code.co_filename, frame.f_lineno)
 
         ipshell(msg, stack_depth = stack_depth)
+
+    def take_node_screenshot(self, element, screenshot_path):
+        """Take a screenshot of a node
+
+        Args:
+            element (object): the proxy_element
+            screenshot_path (str): the path where the screenshot will be saved
+        """
+
+        temp_path = os.path.join(tempdir, screenshot_path)
+
+        bounding_box = (
+            element.location['x'],
+            element.location['y'],
+            (element.location['x'] + element.size['width']),
+            (element.location['y'] + element.size['height'])
+        )
+
+        self._driver.save_screenshot(temp_path)
+
+        base_image = Image.open(temp_path)
+
+        cropped_image = base_image.crop(bounding_box)
+
+        base_image = base_image.resize(cropped_image.size)
+
+        base_image.paste(cropped_image, (0, 0))
+
+        base_image.save(screenshot_path)
 
     def take_screenshot(self, screenshot_name = None, screenshot_path = None):
         """Take a screenshot

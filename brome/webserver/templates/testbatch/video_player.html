@@ -2,6 +2,7 @@
 {% block content %}
 <div>
 <h2>{{ data['title'] }}</h2>
+ <a href="{{url_for('testbatch.test_batch_report_file', filename = data['path']) }}" type='video/flv'>Direct link</a>
 <video id="video" preload="auto" class="video-js vjs-default-skin vjs-big-play-centered"
   controls width="1024" height="768" data-setup='{}'>
  <source src="{{url_for('testbatch.test_batch_report_file', filename = data['path']) }}" type='video/flv' />

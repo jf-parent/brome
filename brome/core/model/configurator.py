@@ -168,6 +168,7 @@ default_config["highlight"] = {}
 default_config["runner"] = {}
 default_config["database"] = {}
 default_config["logger_runner"] = {}
+default_config["bot_diary"] = {}
 default_config["logger_test"] = {}
 default_config["ec2"] = {}
 default_config["grid_runner"] = {}
@@ -714,6 +715,41 @@ default_config["database"]["sqlalchemy.url"] = {
     'title': 'Sqlalchemy url'
 }
 
+default_config["bot_diary"]["enable_auto_bot_diary"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Enable auto bot diary'
+}
+
+default_config["bot_diary"]["enable_auto_bot_diary_component_screenshot"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Enable auto bot diary component screenshot'
+}
+
+default_config["bot_diary"]["enable_bot_diary"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Enable bot diary'
+}
+
+default_config["bot_diary"]["streamlogger"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Use stream logger'
+}
+
+default_config["bot_diary"]["filelogger"] = {
+    'default': True,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Use file logger'
+}
+
 default_config["webserver"]["level"] = {
     'default': 'INFO',
     'type': 'dropdown',
@@ -804,6 +840,13 @@ default_config["webserver"]["SHOW_NETWORK_CAPTURE"] = {
     'type': 'checkbox',
     'visible': True,
     'title': 'Show the network capture in the detail of a test batch',
+}
+
+default_config["webserver"]["SHOW_BOT_DIARY"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Show the bot diary in the detail of a test batch',
 }
 
 default_config["webserver"]["SHOW_VIDEO_CAPTURE"] = {

@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block content %}
+<div style="background-color: white;">
+    <div style="padding: 10px">
+        <h1>{{ name }}</h1>
+        {% for entry in bot_diary['entries'] %}
+            <p>{{ entry.text }}
+            {% if entry.screenshot_path %}
+                <span>
+                    <a target="_blank" href="{{ url_for('testbatch.test_batch_report_file', filename = entry.screenshot_path) }}">
+                        <img style="max-width:400px;max-height:400px" src="{{ url_for('testbatch.test_batch_report_file', filename = entry.screenshot_path) }}"/>
+                    </a>
+                </span>
+            {% endif %}
+            </p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

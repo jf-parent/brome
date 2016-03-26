@@ -261,6 +261,68 @@ def get_test_batch_test_result(app, testbatch_id, only_total = False, only_faile
         query_ = query_.outerjoin(Test, TestResult.test_id == Test.id)
         return query_.order_by(TestResult.result, Test.test_id).all()
 
+def get_bot_diary(app, testbatch_id, bot_diary_name):
+    abs_bot_diary_path = os.path.join(
+        app.brome.get_config_value('project:test_batch_result_path'),
+        "tb_%s"%testbatch_id,
+        "bot_diary",
+        bot_diary_name
+    )
+
+    bot_diary = {}
+    bot_diary['name'] = bot_diary_name[:-4]
+    bot_diary['entries'] = []
+
+    relative_bot_diary_screenshot_dir = os.path.join(
+        "tb_%s"%testbatch_id,
+        "bot_diary",
+        bot_diary['name']
+    )
+
+    abs_bot_diary_screenshot_dir = os.path.join(
+        app.brome.get_config_value('project:test_batch_result_path'),
+        relative_bot_diary_screenshot_dir
+    )
+
+    with open(abs_bot_diary_path, 'r') as fd:
+        lines = fd.readlines()
+        for line in lines:
+            entry = {}
+            entry['text'] = line
+            entry_id = line.split(']')[0][1:]
+            screenshot_name = "%s.png"%entry_id
+            screenshot_path = os.path.join(abs_bot_diary_screenshot_dir, screenshot_name)
+
+            if os.path.isfile(screenshot_path):
+                entry['screenshot_path'] = os.path.join(relative_bot_diary_screenshot_dir, screenshot_name)
+
+            bot_diary['entries'].append(entry)
+
+    return bot_diary
+
+def get_bot_diary_list(app, testbatch_id):
+    data = []
+
+    relative_bot_diary_dir = os.path.join(
+        "tb_%s"%testbatch_id,
+        "bot_diary"
+    )
+
+    abs_bot_diary_dir = os.path.join(
+        app.brome.get_config_value('project:test_batch_result_path'),
+        relative_bot_diary_dir
+    )
+
+    if os.path.isdir(abs_bot_diary_dir):
+        for log in sorted(os.listdir(abs_bot_diary_dir)):
+            if log.endswith('.log'):
+                data.append({
+                    'name': log,
+                    'path': "tb/%d/bot_diary/%s"%(testbatch_id, log)
+                })
+
+    return data
+
 def get_test_batch_log(app, testbatch_id):
     abs_logs_dir = os.path.join(
         app.brome.get_config_value('project:test_batch_result_path'),

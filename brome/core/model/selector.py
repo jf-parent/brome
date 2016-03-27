@@ -89,7 +89,8 @@ class Selector(object):
             raise Exception("""
                 All selector need to start with either:
                     'nm:' (name), 'xp:' (xpath), 'cn:' (classname), 'id:' (id), 'cs:' (css), 'tn:' (tag name), 'lt:' (link text), 'pl:' (partial link text)
-            """)
+                selector = %s
+            """%selector)
 
     #RESOLVE
     def resolve_selector(self):

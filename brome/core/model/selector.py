@@ -118,7 +118,7 @@ class Selector(object):
                 if type(effective_selector) is dict:
                     current_browser_id = False
 
-                    keys = [key for key in effective_selector.keys() if key != 'default' and key != 'hr']
+                    keys = [key for key in effective_selector.keys() if key not in ['default', 'hr']]
                     for key in keys:
                         for target in key.split('|'):
                             try:

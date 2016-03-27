@@ -602,7 +602,7 @@ class BaseTest(object):
         if not self.pdriver.bot_diary.is_empty():
             traceback = tb
             tb = '\nBot Diary:\n'
-            tb += self.pdriver.bot_diary.get_section(-1, join = True) + '\n'
+            tb += self.pdriver.bot_diary.get_section(-1)[-1] + '\n'
             tb += 'And it failed\n'
             tb += str(traceback)
             

@@ -329,7 +329,7 @@ class ProxyDriver(object):
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
-                self.bot_diary.add_auto_entry("I waited for the clickability of", selector = selector)
+                self.bot_diary.add_auto_entry("I waited for the clickability of", target = _selector.get_human_readable())
                 raise TimeoutException(msg)
             else:
                 return False
@@ -380,7 +380,7 @@ class ProxyDriver(object):
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
-                self.bot_diary.add_auto_entry("I waited for the presence of", selector = selector)
+                self.bot_diary.add_auto_entry("I waited for the presence of", target = _selector.get_human_readable())
                 raise TimeoutException(msg)
             else:
                 return False
@@ -431,7 +431,7 @@ class ProxyDriver(object):
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
-                self.bot_diary.add_auto_entry("I waited for the absence of", selector = selector)
+                self.bot_diary.add_auto_entry("I waited for the absence of", target = _selector.get_human_readable())
                 raise TimeoutException(msg)
             else:
                 return False
@@ -482,7 +482,7 @@ class ProxyDriver(object):
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
-                self.bot_diary.add_auto_entry("I waited for the visibility of", selector = selector)
+                self.bot_diary.add_auto_entry("I waited for the visibility of", target = _selector.get_human_readable())
                 raise TimeoutException(msg)
             else:
                 return False
@@ -533,7 +533,7 @@ class ProxyDriver(object):
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
-                self.bot_diary.add_auto_entry("I waited for the invisibility of", selector = selector)
+                self.bot_diary.add_auto_entry("I waited for the invisibility of", target = _selector.get_human_readable())
                 raise TimeoutException(msg)
             else:
                 return False

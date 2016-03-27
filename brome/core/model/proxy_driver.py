@@ -4,10 +4,12 @@ from tempfile import tempdir
 from inspect import currentframe, getframeinfo
 import json
 import re
+import traceback
 
 from PIL import Image
 from sqlalchemy.exc import ProgrammingError
 from selenium.webdriver.common.action_chains import ActionChains
+from IPython import embed
 
 from brome.core.model.utils import *
 from brome.core.model.bot_diary import BotDiary
@@ -793,12 +795,17 @@ class ProxyDriver(object):
         """
 
         temp_path = os.path.join(tempdir, screenshot_path)
+        
+        el_x = int(element.location['x'])
+        el_y = int(element.location['y'])
+        el_height = int(element.size['height'])
+        el_width = int(element.size['width'])
 
         bounding_box = (
-            element.location['x'],
-            element.location['y'],
-            (element.location['x'] + element.size['width']),
-            (element.location['y'] + element.size['height'])
+            el_x,
+            el_y,
+            (el_x + el_width),
+            (el_y + el_height)
         )
 
         self._driver.save_screenshot(temp_path)
@@ -812,6 +819,12 @@ class ProxyDriver(object):
         base_image.paste(cropped_image, (0, 0))
 
         base_image.save(screenshot_path)
+        """
+        except Exception as e:
+            tb = traceback.format_exc()
+            print unicode(tb)
+            embed()
+        """
 
     def take_screenshot(self, screenshot_name = None, screenshot_path = None):
         """Take a screenshot

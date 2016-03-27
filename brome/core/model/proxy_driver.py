@@ -801,6 +801,10 @@ class ProxyDriver(object):
         el_height = int(element.size['height'])
         el_width = int(element.size['width'])
 
+        if el_height == 0 or el_width == 0:
+            self.debug_log(u"take_node_screenshot cannot be taken because element width or height equal zero")
+            return False
+
         bounding_box = (
             el_x,
             el_y,
@@ -819,6 +823,7 @@ class ProxyDriver(object):
         base_image.paste(cropped_image, (0, 0))
 
         base_image.save(screenshot_path)
+
         """
         except Exception as e:
             tb = traceback.format_exc()

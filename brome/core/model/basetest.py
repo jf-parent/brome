@@ -278,7 +278,7 @@ class BaseTest(object):
                 chrome_options.add_argument("--disable-application-cache")
 
                 if config.get('enable_proxy'):
-                    chrome_options.add_argument("--proxy-server={0}".format(proxy))
+                    chrome_options.add_argument('--proxy-server="http://%s"'%mitm_proxy)
 
                 desired_cap=chrome_options.to_capabilities()
 

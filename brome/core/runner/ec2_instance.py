@@ -268,7 +268,7 @@ class EC2Instance(BaseInstance):
         if filter_:
             command.append(filter_)
 
-        command.extend(['>', 'mitmdump.out', '2>&1&'])
+        command.extend(['>', 'mitmdump.out', '2>&1'])
         command.append('&')
 
         self.execute_command(' '.join(command), read_output = False)

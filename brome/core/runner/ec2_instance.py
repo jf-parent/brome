@@ -285,7 +285,7 @@ class EC2Instance(BaseInstance):
             '%s@%s:%s'%(self.browser_config.get('username'), self.get_ip(), self.remote_proxy_output_path),
             self.local_proxy_output_path
         ]
-        p = Popen(scp) 
+        p = Popen(scp_command) 
         p.wait()
 
         self.new_proxy_output_path = os.path.join(

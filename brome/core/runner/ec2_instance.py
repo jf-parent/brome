@@ -241,7 +241,7 @@ class EC2Instance(BaseInstance):
         
         self.network_data_path = os.path.join(
             self.runner.runner_dir,
-            'network_data'
+            'network_capture'
         )
         create_dir_if_doesnt_exist(self.network_data_path)
 
@@ -268,6 +268,7 @@ class EC2Instance(BaseInstance):
         if filter_:
             command.append(filter_)
 
+        command.append(['>', 'mitmdump.out', '2>&1&'])
         command.append('&')
 
         self.execute_command(' '.join(command), read_output = False)

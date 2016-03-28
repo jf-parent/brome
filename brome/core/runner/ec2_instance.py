@@ -229,9 +229,7 @@ class EC2Instance(BaseInstance):
 
         #PROXY
         if self.browser_config.config.get('enable_proxy'):
-            #TODO fixme
-            #self.stop_proxy()
-            pass
+            self.stop_proxy()
 
     def start_proxy(self, port = None):
         """Start the mitmproxy
@@ -287,7 +285,8 @@ class EC2Instance(BaseInstance):
             '%s@%s:%s'%(self.browser_config.get('username'), self.get_ip(), self.remote_proxy_output_path),
             self.local_proxy_output_path
         ]
-        p = Popen(scp_command) 
+        self.info_log("executing command: %s"%scp_command)
+        p = Popen(scp_command)
         p.wait()
 
         self.new_proxy_output_path = os.path.join(
@@ -295,7 +294,9 @@ class EC2Instance(BaseInstance):
             string_to_filename('%s.data'%self.index)
         )
 
+        self.info_log("executing command: mv %s %s"%(self.local_proxy_output_path, self.new_proxy_output_path))
         os.rename(self.local_proxy_output_path, self.new_proxy_output_path)
+        self.info_log("executing command: rm %s"%self.local_proxy_output_path)
         os.remove(self.local_proxy_output_path)
 
         #kill the proxy

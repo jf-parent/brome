@@ -75,11 +75,11 @@ class BaseTest(object):
 
         extra_data = {} 
         if self._browser_config.location == 'ec2':
-            private_ip = self.pdriver.get_ip_of_node()
-            extra_data['instance_private_ip'] = self._runner.instances_ip[private_ip].private_ip
-            extra_data['instance_public_ip'] = self._runner.instances_ip[private_ip].public_ip
-            extra_data['instance_public_dns'] = self._runner.instances_ip[private_ip].public_dns
-            extra_data['instance_private_dns'] = self._runner.instances_ip[private_ip].private_dns
+            self._private_ip = self.pdriver.get_ip_of_node()
+            extra_data['instance_private_ip'] = self._runner.instances_ip[self._private_ip].private_ip
+            extra_data['instance_public_ip'] = self._runner.instances_ip[self._private_ip].public_ip
+            extra_data['instance_public_dns'] = self._runner.instances_ip[self._private_ip].public_dns
+            extra_data['instance_private_dns'] = self._runner.instances_ip[self._private_ip].private_dns
 
         sa_test_instance = TestInstance(
             starting_timestamp = datetime.now(),
@@ -94,6 +94,12 @@ class BaseTest(object):
         self._test_instance_id = sa_test_instance.id
 
         session.close()
+
+        #START PROXY
+        if self._browser_config.location == 'ec2':
+            instance = self._runner.resolve_instance_by_ip(self._private_ip)
+            if instance.browser_config.get('enable_proxy'):
+                instance.start_proxy()
 
     def start_video_recording(self):
         self._video_capture_file_relative_path = False
@@ -558,6 +564,12 @@ class BaseTest(object):
         self.quit_driver()
 
         self.stop_video_recording()
+
+        #STOP PROXY
+        if self._browser_config.location == 'ec2':
+            instance = self._runner.resolve_instance_by_ip(self._private_ip)
+            if instance.browser_config.get('enable_proxy'):
+                instance.stop_proxy()
 
         if self.get_config_value("runner:play_sound_on_test_finished"):
             say(self.get_config_value("runner:sound_on_test_finished"))

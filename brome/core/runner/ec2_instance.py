@@ -231,13 +231,13 @@ class EC2Instance(BaseInstance):
         if self.browser_config.config.get('enable_proxy'):
             self.stop_proxy()
 
-    def start_proxy(self, port = None):
+    def start_proxy(self):
         """Start the mitmproxy
         """
         
         self.runner.info_log("Starting proxy...")
 
-        self.proxy_port = port
+        self.proxy_port = self.browser_config.get('proxy_port', 8080)
         
         self.network_data_path = os.path.join(
             self.runner.runner_dir,
@@ -247,10 +247,10 @@ class EC2Instance(BaseInstance):
 
         self.local_proxy_output_path = os.path.join(
             self.network_data_path,
-            string_to_filename('%s.data'%self.index)
+            string_to_filename('%s.data'%self.testname)
         )
 
-        self.remote_proxy_output_path = string_to_filename('%s.data'%self.index)
+        self.remote_proxy_output_path = string_to_filename('%s.data'%self.testname)
 
         path_to_mitmproxy = self.browser_config.get("mitmproxy:path", 'mitmdump')
 
@@ -282,22 +282,14 @@ class EC2Instance(BaseInstance):
         #scp the network data
         scp_command = [
             'scp',
-            '%s@%s:%s'%(self.browser_config.get('username'), self.get_ip(), self.remote_proxy_output_path),
+            '-i',
+            self.browser_config.get('ssh_key_path'),
+            '%s@%s:"%s"'%(self.browser_config.get('username'), self.get_ip(), self.remote_proxy_output_path),
             self.local_proxy_output_path
         ]
         self.info_log("executing command: %s"%scp_command)
         p = Popen(scp_command)
         p.wait()
-
-        self.new_proxy_output_path = os.path.join(
-            self.network_data_path,
-            string_to_filename('%s.data'%self.index)
-        )
-
-        self.info_log("executing command: mv %s %s"%(self.local_proxy_output_path, self.new_proxy_output_path))
-        os.rename(self.local_proxy_output_path, self.new_proxy_output_path)
-        self.info_log("executing command: rm %s"%self.local_proxy_output_path)
-        os.remove(self.local_proxy_output_path)
 
         #kill the proxy
         self.execute_command("fuser -k %i/tcp"%self.proxy_port)

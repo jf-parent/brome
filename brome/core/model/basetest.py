@@ -173,7 +173,7 @@ class BaseTest(object):
             def get_proxy():
                 mitm_proxy = "localhost:%s"%self._localhost_instance.proxy_port
 
-                proxy = Proxy({
+                return Proxy({
                     'proxyType': ProxyType.MANUAL,
                     'httpProxy': mitm_proxy,
                     'sslProxy': mitm_proxy

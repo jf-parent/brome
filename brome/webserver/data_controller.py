@@ -32,7 +32,7 @@ def get_network_capture(app, testbatch_id):
 
     relative_dir = os.path.join(
         "tb_%s"%testbatch_id,
-        "network_data"
+        "network_capture"
     )
 
     abs_dir = os.path.join(

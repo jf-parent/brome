@@ -229,7 +229,9 @@ class EC2Instance(BaseInstance):
 
         #PROXY
         if self.browser_config.config.get('enable_proxy'):
-            self.stop_proxy()
+            #TODO fixme
+            #self.stop_proxy()
+            pass
 
     def start_proxy(self, port = None):
         """Start the mitmproxy

@@ -50,7 +50,9 @@
             {% if form.data['screenshot_path'] %}
                 <h3>Screenshot</h3>
                 <div>
-                    <img src="{{ url_for('testbatch.test_batch_report_file', filename = form.data['screenshot_path']) }}"/>
+                    <a href="{{ url_for('testbatch.test_batch_report_file', filename = form.data['screenshot_path']) }}">
+                        <img style="max-height: 500px; max-width: 500px" src="{{ url_for('testbatch.test_batch_report_file', filename = form.data['screenshot_path']) }}"/>
+                    </a>
                     <input type="hidden" name="screenshot" id="screenshot" value="{{ url_for('testbatch.test_batch_report_file', filename = form.data['screenshot_path']) }}"/>
                 </div>
             {% endif %}

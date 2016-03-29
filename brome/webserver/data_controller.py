@@ -41,7 +41,7 @@ def get_network_capture(app, testbatch_id):
     )
 
     if os.path.isdir(abs_dir):
-        for f in os.listdir(abs_dir):
+        for f in sorted(os.listdir(abs_dir)):
             network_capture = {}
             network_capture['name'] = f.split('.')[0]
             network_capture['path'] = os.path.join(relative_dir, f)
@@ -391,8 +391,8 @@ def get_test_batch_video_recording(app, testbatch_id, only_total = False):
     )
 
     if os.path.isdir(abs_dir):
-        for browser_dir in sorted(os.listdir(abs_dir)):
-            video_recording_list = os.listdir(os.path.join(abs_dir, browser_dir))
+        for browser_dir in os.listdir(abs_dir):
+            video_recording_list = sorted(os.listdir(os.path.join(abs_dir, browser_dir)))
 
             for video_recording in video_recording_list:
                 data.append({

@@ -72,7 +72,8 @@ def get_test_instance_list(testbatch_id):
         test_instance.public_dns = extra_data.get('instance_public_dns', 'Unknown')
 
         if test_instance.ending_timestamp is None:
-            test_instance.running_info = "Is running..."
+            execution_time = ''.join(str(datetime.now() - test_instance.starting_timestamp).split('.')[:-1])
+            test_instance.running_info = 'Still running after %s...'%(execution_time)
         else:
             test_instance.running_info = "Total execution time: %s"%(test_instance.ending_timestamp - test_instance.starting_timestamp)
 

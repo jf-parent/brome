@@ -253,7 +253,7 @@ class EC2Instance(BaseInstance):
             "-p",
             "%i"%self.proxy_port,
             "-w",
-            self.remote_proxy_output_path
+            "'%s'"%self.remote_proxy_output_path
         ]
 
         if filter_:

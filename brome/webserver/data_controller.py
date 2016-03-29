@@ -85,7 +85,7 @@ def get_total_execution_time(app, testbatch_id):
         total_execution_time = test_batch.ending_timestamp - test_batch.starting_timestamp
     else:
         execution_time = ''.join(str(datetime.now() - test_batch.starting_timestamp).split('.')[:-1])
-        total_execution_time = 'still running (%s)...'%(execution_time)
+        total_execution_time = 'still running after %s...'%(execution_time)
 
     return total_execution_time
 

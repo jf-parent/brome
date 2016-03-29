@@ -273,12 +273,14 @@ class EC2Instance(BaseInstance):
         #scp the network data
         scp_command = [
             'scp',
+            '-o',
+            'StrictHostKeyChecking=no',
             '-i',
             self.browser_config.get('ssh_key_path'),
             '%s@%s:"%s"'%(self.browser_config.get('username'), self.get_ip(), self.remote_proxy_output_path),
             self.local_proxy_output_path
         ]
-        self.info_log("executing command: %s"%scp_command)
+        self.info_log("executing command: %s"%' '.join(scp_command))
         p = Popen(scp_command)
         p.wait()
 

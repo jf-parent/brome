@@ -25,7 +25,7 @@
         <ul>
             {% for screenshot in data['screenshot_list'] %}
                 <li style="overflow: scroll;">
-                    <img onclick="OpenInNewTab('{{ url_for('testbatch.test_batch_report_file', filename = screenshot['path']) }}');" src="{{ url_for('testbatch.test_batch_report_file', filename = screenshot['path']) }}" alt="{{ screenshot['browser_id'] }}" title="{{ screenshot['title'] }}" style="cursor: pointer;"/>
+                    <img onclick="OpenInNewTab('{{ url_for('testbatch.test_batch_report_file', filename = screenshot['path']) }}');" src="{{ url_for('testbatch.test_batch_report_file', filename = screenshot['path']) }}" alt="{{ screenshot['browser_id'] }}" title="{{ screenshot['title'] }}" style="cursor: pointer; max-width: 1200px; max-height: 1200px;"/>
                 </li>
             {% endfor %}
         </ul>

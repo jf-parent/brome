@@ -733,6 +733,14 @@ class BaseTest(object):
         )
         create_dir_if_doesnt_exist(self._screenshot_dir)
 
+        #QUALITY SCREENSHOT DIRECTORY
+        self._quality_screenshot_dir = os.path.join(
+            self._runner_dir,
+            'quality_screenshots',
+            self.pdriver.get_id(join_char = '_')
+        )
+        create_dir_if_doesnt_exist(self._quality_screenshot_dir)
+
         #VIDEO RECORDING DIRECTORY
         if self._browser_config.get('record_session'):
             self._video_recording_dir = os.path.join(

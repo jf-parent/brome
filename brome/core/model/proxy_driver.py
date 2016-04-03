@@ -17,6 +17,7 @@ from brome.core.model.meta.base import Session
 from brome.core.model.selector import Selector
 from brome.core.model.test import Test
 from brome.core.model.test_result import TestResult
+from brome.core.model.test_quality_screenshot import TestQualityScreenshot
 from brome.core.model.proxy_element import ProxyElement
 from brome.core.model.proxy_element_list import ProxyElementList
 
@@ -877,6 +878,44 @@ class ProxyDriver(object):
                     screenshot_path
                 )
                 self.debug_log(u"Screenshot taken (%s)"%screenshot_path)
+
+    def take_quality_screenshot(self, screenshot_name):
+        """Take a quality screenshot
+            
+        Use the screenshot_name args when you want to take a screenshot for reference
+
+        Args:
+            screenshot_name (str) the name of the screenshot
+        """
+        self.info_log("Taking a quality screenshot...")
+
+        if self.test_instance._runner_dir:
+            screenshot_path = os.path.join(
+                    self.test_instance._quality_screenshot_dir,
+                    '%s.png'%string_to_filename(screenshot_name)
+                )
+            self._driver.save_screenshot(
+                screenshot_path
+            )
+
+            session = Session()
+
+            sa_quality_screenshot = TestQualityScreenshot(
+                timestamp = datetime.now(),
+                browser_id = self.get_id(),
+                screenshot_path = screenshot_path,
+                extra_data = None,
+                title = screenshot_name,
+                test_instance_id = self.test_instance._test_instance_id,
+                test_batch_id = self.test_instance._test_batch_id
+            )
+
+            session.add(sa_quality_screenshot)
+            session.commit()
+
+            session.close()
+
+            self.debug_log(u"Quality screenshot taken (%s)"%screenshot_path)
 
     #ASSERT
     def assert_present(self, selector, testid = None, **kwargs):

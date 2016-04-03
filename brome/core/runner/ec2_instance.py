@@ -249,6 +249,9 @@ class EC2Instance(BaseInstance):
         
         self.runner.info_log("Starting proxy...")
 
+        #kill the proxy
+        self.execute_command("fuser -k %i/tcp"%self.proxy_port)
+
         self.proxy_port = self.browser_config.get('proxy_port', 8080)
         
         self.network_data_path = os.path.join(

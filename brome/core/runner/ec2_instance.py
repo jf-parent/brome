@@ -30,6 +30,27 @@ class EC2Instance(BaseInstance):
 
         return self.private_ip
 
+    def scp_file_remote_to_local(self, remote_path, local_path):
+        """Scp a remote file to local
+
+        Args:
+            remote_path (str)
+            local_path (str)
+        """
+
+        scp_command = [
+            'scp',
+            '-o',
+            'StrictHostKeyChecking=no',
+            '-i',
+            self.browser_config.get('ssh_key_path'),
+            '%s@%s:"%s"'%(self.browser_config.get('username'), self.get_ip(), remote_path),
+            local_path
+        ]
+        self.info_log("executing command: %s"%' '.join(scp_command))
+        p = Popen(scp_command)
+        p.wait()
+
     def execute_command(self, command, read_output = True):
         """Execute a command on the node
 
@@ -240,8 +261,13 @@ class EC2Instance(BaseInstance):
             self.network_data_path,
             string_to_filename('%s.data'%self.testname)
         )
+        self.local_proxy_log_path = os.path.join(
+            self.network_data_path,
+            string_to_filename('%s_mitm.log'%self.testname)
+        )
 
         self.remote_proxy_output_path = string_to_filename('%s.data'%self.testname)
+        self.remote_proxy_log_path = string_to_filename('%s_mitm.log'%self.testname)
 
         path_to_mitmproxy = self.browser_config.get("mitmproxy:path", 'mitmdump')
 
@@ -259,7 +285,7 @@ class EC2Instance(BaseInstance):
         if filter_:
             command.append(filter_)
 
-        command.extend(['>', 'mitmdump.out', '2>&1'])
+        command.extend(['>', self.remote_proxy_log_path, '2>&1'])
         command.append('&')
 
         self.execute_command(' '.join(command), read_output = False)
@@ -270,19 +296,12 @@ class EC2Instance(BaseInstance):
 
         self.runner.info_log("Stopping proxy...")
 
-        #scp the network data
-        scp_command = [
-            'scp',
-            '-o',
-            'StrictHostKeyChecking=no',
-            '-i',
-            self.browser_config.get('ssh_key_path'),
-            '%s@%s:"%s"'%(self.browser_config.get('username'), self.get_ip(), self.remote_proxy_output_path),
-            self.local_proxy_output_path
+        files = [
+            (self.remote_proxy_output_path, self.local_proxy_output_path),
+            (self.remote_proxy_log_path, self.local_proxy_log_path)
         ]
-        self.info_log("executing command: %s"%' '.join(scp_command))
-        p = Popen(scp_command)
-        p.wait()
+        for remote_file_path, local_file_path in files:
+            self.scp_file_remote_to_local(remote_file_path, local_file_path)
 
         #kill the proxy
         self.execute_command("fuser -k %i/tcp"%self.proxy_port)

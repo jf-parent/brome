@@ -285,7 +285,7 @@ class EC2Instance(BaseInstance):
         if filter_:
             command.append(filter_)
 
-        command.extend(['>', self.remote_proxy_log_path, '2>&1'])
+        command.extend(['>', "'%s'"%self.remote_proxy_log_path, '2>&1'])
         command.append('&')
 
         self.execute_command(' '.join(command), read_output = False)

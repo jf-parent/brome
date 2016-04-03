@@ -8,6 +8,8 @@ class TestQualityScreenshot(SurrogatePK, Base):
     screenshot_path = Column(Text())
     extra_data = Column(Text())
     title = Column(Text())
+    approved = Column(Boolean())
+    rejected = Column(Boolean())
 
     test_instance_id = Column(Integer, ForeignKey('testinstance.id'))
     test_batch_id = Column(Integer, ForeignKey('testbatch.id'))

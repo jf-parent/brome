@@ -561,15 +561,15 @@ class BaseTest(object):
     def end(self):
         self.info_log("Test ended")
 
-        self.quit_driver()
-
-        self.stop_video_recording()
-
         #STOP PROXY
         if self._browser_config.location == 'ec2':
             instance = self._runner.resolve_instance_by_ip(self._private_ip)
             if instance.browser_config.get('enable_proxy'):
                 instance.stop_proxy()
+
+        self.quit_driver()
+
+        self.stop_video_recording()
 
         if self.get_config_value("runner:play_sound_on_test_finished"):
             say(self.get_config_value("runner:sound_on_test_finished"))

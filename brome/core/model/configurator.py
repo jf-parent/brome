@@ -835,6 +835,13 @@ default_config["webserver"]["PORT"] = {
     'title': 'webserver port',
 }
 
+default_config["webserver"]["SHOW_QUALITY_SCREENSHOT"] = {
+    'default': False,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Show the quality screenshot in the detail of a test batch',
+}
+
 default_config["webserver"]["SHOW_NETWORK_CAPTURE"] = {
     'default': False,
     'type': 'checkbox',

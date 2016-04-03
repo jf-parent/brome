@@ -77,7 +77,12 @@
             {% endif %}
             {% if show_test_instances %}
                 <li>
-                    <a class="unlink" href="{{ url_for('testbatch.test_instances', testbatch_id = testbatch_id) }}"><i class="fa fa-eye"></i> Test intances</a>
+                    <a class="unlink" href="{{ url_for('testbatch.test_instances', testbatch_id = testbatch_id) }}"><i class="fa fa-list"></i> Test intances</a>
+                </li>
+            {% endif %}
+            {% if show_quality_screenshot %}
+                <li>
+                    <a class="unlink" href="{{ url_for('testbatch.quality_screenshot', testbatch_id = testbatch_id) }}"><i class="fa fa-eye"></i> Quality Screenshot</a>
                 </li>
             {% endif %}
             <li>

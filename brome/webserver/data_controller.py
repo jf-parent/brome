@@ -212,6 +212,35 @@ def get_browser_list(app):
 
     return data
 
+def get_test_batch_quality_screenshot(app, testbatch_id, only_total = False):
+    data = []
+
+    relative_dir = os.path.join(
+        "tb_%s"%testbatch_id,
+        "quality_screenshots"
+    )
+
+    abs_dir = os.path.join(
+        app.brome.get_config_value('project:test_batch_result_path'),
+        relative_dir
+    )
+
+    if os.path.isdir(abs_dir):
+        for browser_dir in os.listdir(abs_dir):
+            screenshot_list = os.listdir(os.path.join(abs_dir, browser_dir))
+
+            for screenshot in screenshot_list:
+                data.append({
+                    'title': screenshot.split('.')[0].replace('_', ' '),
+                    'browser_id': browser_dir.replace('_', ' '),
+                    'path': os.path.join(relative_dir, browser_dir, screenshot)
+                })
+
+    if only_total:
+        return len(data)
+
+    return data
+
 def get_test_batch_screenshot(app, testbatch_id, only_total = False):
     data = []
 

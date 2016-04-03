@@ -158,10 +158,12 @@ def detail(testbatch_id):
     data['logs'] = data_controller.get_test_batch_test_instance_log(blueprint.app, testbatch_id, 0)
     data['runner_log'] = data_controller.get_test_batch_log(blueprint.app, testbatch_id)
 
+    #TODO clean up this
     show_video_capture = blueprint.app.brome.get_config_value("webserver:SHOW_VIDEO_CAPTURE")
     show_test_instances = blueprint.app.brome.get_config_value("webserver:SHOW_TEST_INSTANCES")
     show_network_capture = blueprint.app.brome.get_config_value("webserver:SHOW_NETWORK_CAPTURE")
     show_bot_diary = blueprint.app.brome.get_config_value("webserver:SHOW_BOT_DIARY")
+    show_quality_screenshot = blueprint.app.brome.get_config_value("webserver:SHOW_QUALITY_SCREENSHOT")
 
     return render_template(
         "testbatch/detail.html",
@@ -170,7 +172,8 @@ def detail(testbatch_id):
         show_test_instances = show_test_instances,
         show_video_capture = show_video_capture,
         show_network_capture = show_network_capture,
-        show_bot_diary = show_bot_diary
+        show_bot_diary = show_bot_diary,
+        show_quality_screenshot = show_quality_screenshot
     )
 
 @blueprint.route("/bot_diary_list/<int:testbatch_id>")
@@ -187,6 +190,14 @@ def bot_diary(testbatch_id, bot_diary_name):
     bot_diary = data_controller.get_bot_diary(blueprint.app, testbatch_id, bot_diary_name)
 
     return render_template("testbatch/bot_diary.html", testbatch_id = testbatch_id, bot_diary = bot_diary)
+
+@blueprint.route("/quality_screenshot/<int:testbatch_id>")
+@login_required
+def quality_screenshot(testbatch_id):
+    data = {}
+    data['screenshot_list'] = data_controller.get_test_batch_quality_screenshot(blueprint.app, testbatch_id)
+
+    return render_template("testbatch/quality_screenshot.html", testbatch_id = testbatch_id, data = data)
 
 @blueprint.route("/screenshot/<int:testbatch_id>")
 @login_required

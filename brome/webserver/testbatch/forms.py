@@ -108,14 +108,15 @@ class ReportForm(object):
             self.data['network_capture_path'] = ''
 
         #VIDEO
-        self.data['video_path'] = self.data_object.videocapture_path
-        self.data['video_title'] = self.data_object.title.replace('_', ' ')
+        if self.data_object.videocapture_path != '0':
+            self.data['video_path'] = self.data_object.videocapture_path
+            self.data['video_title'] = self.data_object.title.replace('_', ' ')
 
-        test_instance = data_controller.get_test_instance(self.data_object.test_instance_id)
-        video_time_position = (self.data_object.timestamp - test_instance.starting_timestamp).total_seconds()
-        m, s = divmod(video_time_position, 60)
-        self.data['video_time_position'] =  video_time_position
-        self.data['video_time_position_hr'] =  "%02d min %02d sec" % (m, s)
+            test_instance = data_controller.get_test_instance(self.data_object.test_instance_id)
+            video_time_position = (self.data_object.timestamp - test_instance.starting_timestamp).total_seconds()
+            m, s = divmod(video_time_position, 60)
+            self.data['video_time_position'] =  video_time_position
+            self.data['video_time_position_hr'] =  "%02d min %02d sec" % (m, s)
 
         #CUSTOM FIELDS
         report = self.app.brome.get_config_value("webserver:report")

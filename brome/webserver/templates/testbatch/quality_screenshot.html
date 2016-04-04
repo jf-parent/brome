@@ -17,8 +17,8 @@
             <h3>{{ screenshot.title }}</h3>
             <div>
                 <div class='text-center'>
-                    <a target='_blank' href='{{ url_for("testbatch.test_batch_report_file", filename = screenshot.screenshot_path) }}'>
-                        <img src='{{ url_for("testbatch.test_batch_report_file", filename = screenshot.screenshot_path) }}' style="cursor: pointer; max-width: 1200px; max-height: 1200px;" />
+                    <a target='_blank' href='{{ url_for("testbatch.test_batch_report_file", filename = screenshot.path) }}'>
+                        <img src='{{ url_for("testbatch.test_batch_report_file", filename = screenshot.path) }}' style="cursor: pointer; max-width: 1200px; max-height: 1200px;" />
                     </a>
                 </div>
                 <button>Approve</button>

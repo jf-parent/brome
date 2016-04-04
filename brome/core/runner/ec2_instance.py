@@ -263,11 +263,11 @@ class EC2Instance(BaseInstance):
         )
         self.local_proxy_log_path = os.path.join(
             self.network_data_path,
-            string_to_filename('%s_mitm.log'%self.testname)
+            string_to_filename('%s.mitm'%self.testname)
         )
 
         self.remote_proxy_output_path = string_to_filename('%s.data'%self.testname)
-        self.remote_proxy_log_path = string_to_filename('%s_mitm.log'%self.testname)
+        self.remote_proxy_log_path = string_to_filename('%s.mitm'%self.testname)
 
         path_to_mitmproxy = self.browser_config.get("mitmproxy:path", 'mitmdump')
 

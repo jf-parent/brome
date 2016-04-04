@@ -890,6 +890,11 @@ class ProxyDriver(object):
         self.info_log("Taking a quality screenshot...")
 
         if self.test_instance._runner_dir:
+            relative_screenshot_path = os.path.join(
+                    self.test_instance._quality_screenshot_relative_dir,
+                    '%s.png'%string_to_filename(screenshot_name)
+                )
+
             screenshot_path = os.path.join(
                     self.test_instance._quality_screenshot_dir,
                     '%s.png'%string_to_filename(screenshot_name)
@@ -903,7 +908,7 @@ class ProxyDriver(object):
             sa_quality_screenshot = TestQualityScreenshot(
                 timestamp = datetime.now(),
                 browser_id = self.get_id(),
-                screenshot_path = screenshot_path,
+                screenshot_path = relative_screenshot_path,
                 extra_data = None,
                 title = screenshot_name,
                 test_instance_id = self.test_instance._test_instance_id,

@@ -10,6 +10,7 @@ import json
 from IPython import embed
 from brome.core.model.test_batch import TestBatch
 from brome.core.model.test_instance import TestInstance
+from brome.core.model.test_quality_screenshot import TestQualityScreenshot
 from brome.core.model.test_result import TestResult
 from brome.core.model.test_crash import TestCrash
 from brome.core.model.test import Test
@@ -41,9 +42,10 @@ def get_network_capture(app, testbatch_id):
     )
 
     if os.path.isdir(abs_dir):
-        for f in sorted(os.listdir(abs_dir)):
+        network_capture_datas = glob(os.path.join(abs_dir, '*.data'))
+        for f in sorted(network_capture_datas):
             network_capture = {}
-            network_capture['name'] = f.split('.')[0]
+            network_capture['name'] = f.split('/')[-1].split('.')[0]
             network_capture['path'] = os.path.join(relative_dir, f)
             analyse = app.brome.get_config_value("webserver:analyse_network_capture_func")
             if analyse:
@@ -215,26 +217,21 @@ def get_browser_list(app):
 def get_test_batch_quality_screenshot(app, testbatch_id, only_total = False):
     data = []
 
-    relative_dir = os.path.join(
-        "tb_%s"%testbatch_id,
-        "quality_screenshots"
-    )
+    quality_screenshots = db.session.query(TestQualityScreenshot)\
+                            .filter(TestQualityScreenshot.test_batch_id == testbatch_id)\
+                            .all()
 
-    abs_dir = os.path.join(
-        app.brome.get_config_value('project:test_batch_result_path'),
-        relative_dir
-    )
+    for screenshot in quality_screenshots:
+        screenshot_list = os.listdir(os.path.join(abs_dir, browser_dir))
 
-    if os.path.isdir(abs_dir):
-        for browser_dir in os.listdir(abs_dir):
-            screenshot_list = os.listdir(os.path.join(abs_dir, browser_dir))
-
-            for screenshot in screenshot_list:
-                data.append({
-                    'title': screenshot.split('.')[0].replace('_', ' '),
-                    'browser_id': browser_dir.replace('_', ' '),
-                    'path': os.path.join(relative_dir, browser_dir, screenshot)
-                })
+        for screenshot in screenshot_list:
+            data.append({
+                'title': screenshot.title,
+                'browser_id': screenshot.browser_id,
+                'path': screenshot.screenshot_path,
+                'approved': screenshot.approved,
+                'rejected': screenshot.rejected
+            })
 
     if only_total:
         return len(data)

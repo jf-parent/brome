@@ -567,8 +567,6 @@ class BaseTest(object):
             if instance.browser_config.get('enable_proxy'):
                 instance.stop_proxy()
 
-        #Add some padding to the video
-        sleep(30)
         self.stop_video_recording()
 
         self.quit_driver()

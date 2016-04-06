@@ -567,9 +567,11 @@ class BaseTest(object):
             if instance.browser_config.get('enable_proxy'):
                 instance.stop_proxy()
 
-        self.quit_driver()
-
+        #Add some padding to the video
+        sleep(30)
         self.stop_video_recording()
+
+        self.quit_driver()
 
         if self.get_config_value("runner:play_sound_on_test_finished"):
             say(self.get_config_value("runner:sound_on_test_finished"))

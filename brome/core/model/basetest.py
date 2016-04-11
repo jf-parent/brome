@@ -129,7 +129,7 @@ class BaseTest(object):
                 framerate = self.get_config_value("browser:castroredux_framerate"),
                 host = node_ip,
                 port = self._browser_config.get('vnc_port', 5900),
-                logger_level = "INFO",
+                logger_level = "DEBUG",
                 logger_name = "%s_%s"%(string_to_filename(self._name), self._browser_config.get_id()),
                 logger_log_dir = self._test_log_dir,
                 pwdfile = vnc_passwd_file

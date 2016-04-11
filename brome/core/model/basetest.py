@@ -105,7 +105,7 @@ class BaseTest(object):
         self._video_capture_file_relative_path = False
 
         if self._browser_config.get('record_session'):
-            vnc_passwd_file = os.path.expanduser(self._browser_config.get('vnc_password_file'))
+            vnc_passwd_file = os.path.expanduser(self._browser_config.get('vnc_password_file', '~/.vnc/passwd'))
             #Check if the vnc_password_file exist
             if not os.path.exists(vnc_passwd_file):
                 #Create it
@@ -128,7 +128,10 @@ class BaseTest(object):
                 self._video_capture_file_path,
                 framerate = self.get_config_value("browser:castroredux_framerate"),
                 host = node_ip,
-                port = self._browser_config.get('vnc_port'),
+                port = self._browser_config.get('vnc_port', 5900),
+                logger_level = "INFO",
+                logger_name = "%s_%s"%(string_to_filename(self._name), self._browser_config.get_id()),
+                logger_log_dir = self._test_log_dir,
                 pwdfile = vnc_passwd_file
             )
 
@@ -149,7 +152,7 @@ class BaseTest(object):
                 self._video_recorder.stop()
             except Exception as e:
                 tb = traceback.format_exc()
-                self.error_log("CastroRedux error traceback: %s"%str(e))
+                self.error_log("CastroRedux error traceback: %s"%unicode(tb))
             """
             file_name = "%s/%s"%(self.video_capture_dir, self.config.get('name').replace(' ', '_'))
             Popen(["/usr/bin/ffmpeg", "-i", "%s.flv"%file_name, "-vcodec", "libvpx", "-acodec", "libvorbis", "%s.webm"%file_name], stdout=devnull, stderr=devnull)
@@ -476,17 +479,19 @@ class BaseTest(object):
 
         #Log directory
         if self._runner_dir:
-            self.test_log_dir = os.path.join(
+            self._test_log_dir = os.path.join(
                 self._runner_dir,
                 "logs"
             )
+        else:
+            self._test_log_dir = False
 
         #Logger
         self._logger = logging.getLogger(logger_name)
 
         #Create the log directory
         if self._runner_dir:
-            create_dir_if_doesnt_exist(self.test_log_dir)
+            create_dir_if_doesnt_exist(self._test_log_dir)
 
         #Format
         format_ = self.get_config_value("logger_test:format")
@@ -503,7 +508,7 @@ class BaseTest(object):
             if self.get_config_value('logger_test:filelogger'):
                 test_name = string_to_filename(self._name)
                 fh = logging.FileHandler(os.path.join(
-                    self.test_log_dir,
+                    self._test_log_dir,
                     "%s_%s.log"%(test_name, self._browser_config.get_id())
                 ))
                 file_formatter = logging.Formatter(format_)

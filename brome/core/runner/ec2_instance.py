@@ -252,7 +252,7 @@ class EC2Instance(BaseInstance):
         self.local_video_recording_file_path = local_video_file_path
         self.remote_video_recording_file_path = video_filename
 
-        self.execute_command("./start_recording.sh '%s.mp4'"%self.remote_video_recording_file_path, read_output = False)
+        self.execute_command("./start_recording.sh '%s'"%self.remote_video_recording_file_path, read_output = False)
 
     def stop_video_recording(self):
         """Stop the video recording

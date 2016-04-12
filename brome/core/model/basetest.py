@@ -103,7 +103,8 @@ class BaseTest(object):
     def start_video_recording(self):
         self._video_capture_file_relative_path = False
 
-        if self._browser_config.get('record_session'):
+        #TODO support virutalbox, localhost and more
+        if self._browser_config.get('record_session') and self._browser_config.location == 'ec2':
             self.info_log("Starting screen capture...")
 
             video_capture_file = string_to_filename('%s.mp4'%(self._name.replace(' ', '_')))
@@ -118,7 +119,8 @@ class BaseTest(object):
                 video_capture_file
             )
 
-            instance = self._runner.resolve_instance_by_ip(self._private_ip)
+            private_ip = self.pdriver.get_ip_of_node()
+            instance = self._runner.resolve_instance_by_ip(private_ip)
             instance.start_video_recording(self._video_capture_file_path, video_capture_file)
 
     def stop_video_recording(self):

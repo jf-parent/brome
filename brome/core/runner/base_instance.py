@@ -14,6 +14,18 @@ class BaseInstance(object):
     def tear_down(self):
         pass
 
+    def start_proxy(self):
+        pass
+
+    def stop_proxy(self):
+        pass
+
+    def start_video_recording(self, local_video_file_path, video_filename):
+        pass
+
+    def stop_video_recording(self):
+        pass
+
     def debug_log(self, msg):
         print msg
 

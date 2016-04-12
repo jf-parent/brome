@@ -243,6 +243,29 @@ class EC2Instance(BaseInstance):
         ec2 = boto.ec2.connect_to_region(self.browser_config.get("region"))
         ec2.terminate_instances(instance_ids=[self.instance_id])
 
+    def start_video_recording(self, local_video_file_path, video_filename):
+        """Start the video recording
+        """
+        
+        self.runner.info_log("Starting recordscreen...")
+
+        self.local_video_recording_file_path = local_video_file_path
+        self.remote_video_recording_file_path = video_filename
+
+        self.execute_command("./start_recording.sh '%s.mp4'"%self.remote_video_recording_file_path, read_output = False)
+
+    def stop_video_recording(self):
+        """Stop the video recording
+        """
+
+        self.runner.info_log("Stopping recordscreen...")
+
+        self.execute_command("./stop_recording.sh")
+
+        sleep(5)
+
+        self.scp_file_remote_to_local(self.remote_video_recording_file_path, self.local_video_recording_file_path)
+
     def start_proxy(self):
         """Start the mitmproxy
         """

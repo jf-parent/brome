@@ -1,6 +1,5 @@
 wheel
 Pillow
-castroredux
 tornado
 netifaces
 selenium

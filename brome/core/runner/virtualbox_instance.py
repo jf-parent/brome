@@ -97,7 +97,6 @@ class VirtualboxInstance(BaseInstance):
 
             user_session = vm.create_session()
             #NOTE this is another way to record the session
-            #now castro is used
             #user_session.machine.video_capture_enabled = False 
 
             #User session

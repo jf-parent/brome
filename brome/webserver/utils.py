@@ -35,9 +35,9 @@ def annotate_video(blueprint, title, obj_data):
         data['title'] = "Bug (@%ss) %s"%(obj_data['video_time_position'], title)
         data['in'] = os.path.join(blueprint.app.brome.get_config_value('project:test_batch_result_path'), obj_data['video_path'])
         data['font_path'] = blueprint.app.brome.get_config_value("webserver:report")['font_path']
-        data['copied_video_path'] = os.path.join(video_folder, 'copy-%s.flv'%video_hash)
-        data['annotated_video_path'] = os.path.join(video_folder, '%s.flv'%video_hash)
-        data['relative_annotated_video_path'] = os.path.join(relative_video_folder, '%s.flv'%video_hash)
+        data['copied_video_path'] = os.path.join(video_folder, 'copy-%s.mp4'%video_hash)
+        data['annotated_video_path'] = os.path.join(video_folder, '%s.mp4'%video_hash)
+        data['relative_annotated_video_path'] = os.path.join(relative_video_folder, '%s.mp4'%video_hash)
 
         script = """
             rm {annotated_video_path}

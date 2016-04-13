@@ -67,10 +67,33 @@ class EC2Instance(BaseInstance):
             k = paramiko.RSAKey.from_private_key_file(self.browser_config.get('ssh_key_path'))
             ssh.connect(self.private_ip, username = self.browser_config.get('username'), pkey = k)
 
-            stdin, stdout, stderr = ssh.exec_command(command)
+            sleep_time = 0.1
+            output = []
+            error_output = []
+
+            ssh_transport = ssh.get_transport()
+            channel = ssh_transport.open_session()
+            channel.setblocking(0)
+            channel.exec_command(command)
+
+            while True:
+
+                while channel.recv_ready():
+                    output.append(channel.recv(1000))
+
+                while channel.recv_stderr_ready():
+                    error_output.append(channel.recv_stderr(1000))
+
+                if channel.exit_status_ready():
+                    break
+
+                time.sleep(sleep_time)
+
+            ret = channel.recv_exit_status()
+            ssh_transport.close()
 
             if read_output:
-                output = stdout.read()
+                output = 'stdout: %s ###stderr: %s'%(''.join(output), ''.join(error_output))
             else:
                 output = None
 

@@ -23,7 +23,7 @@ def get_timestamp():
     return datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 
 def string_to_filename(s):
-    valid_chars = "-_.() %s%s" % (string.ascii_letters, string.digits)
+    valid_chars = "-_. %s%s" % (string.ascii_letters, string.digits)
     filename = ''.join(c for c in s if c in valid_chars)
     filename = filename.replace(' ','_')
     return filename

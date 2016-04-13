@@ -87,7 +87,7 @@ class EC2Instance(BaseInstance):
                 if channel.exit_status_ready():
                     break
 
-                time.sleep(sleep_time)
+                sleep(sleep_time)
 
             ret = channel.recv_exit_status()
             ssh_transport.close()

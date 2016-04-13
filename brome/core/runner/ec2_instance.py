@@ -51,7 +51,7 @@ class EC2Instance(BaseInstance):
         p = Popen(scp_command)
         p.wait()
 
-    def execute_command(self, command, read_output = True):
+    def execute_command(self, command):
         """Execute a command on the node
 
         Args:
@@ -92,10 +92,7 @@ class EC2Instance(BaseInstance):
             ret = channel.recv_exit_status()
             ssh_transport.close()
 
-            if read_output:
-                output = 'stdout: %s ###stderr: %s'%(''.join(output), ''.join(error_output))
-            else:
-                output = None
+            output = 'stdout: %s ###stderr: %s'%(''.join(output), ''.join(error_output))
 
             ssh.close()
 
@@ -275,7 +272,7 @@ class EC2Instance(BaseInstance):
         self.local_video_recording_file_path = local_video_file_path
         self.remote_video_recording_file_path = video_filename
 
-        self.execute_command("./start_recording.sh '%s'"%self.remote_video_recording_file_path, read_output = False)
+        self.execute_command("./start_recording.sh '%s'"%self.remote_video_recording_file_path)
 
     def stop_video_recording(self):
         """Stop the video recording
@@ -283,7 +280,8 @@ class EC2Instance(BaseInstance):
 
         self.runner.info_log("Stopping recordscreen...")
 
-        self.execute_command("./stop_recording.sh")
+        output = self.execute_command("./stop_recording.sh")
+        self.runner.info_log("output: %s"%output)
 
         sleep(5)
 
@@ -334,7 +332,7 @@ class EC2Instance(BaseInstance):
         command.extend(['>', "'%s'"%self.remote_proxy_log_path, '2>&1'])
         command.append('&')
 
-        self.execute_command(' '.join(command), read_output = False)
+        self.execute_command(' '.join(command))
 
     def stop_proxy(self):
         """Stop the mitmproxy

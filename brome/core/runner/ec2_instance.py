@@ -280,8 +280,8 @@ class EC2Instance(BaseInstance):
 
         self.runner.info_log("Stopping recordscreen...")
 
-        output = self.execute_command("./stop_recording.sh")
-        self.runner.info_log("output: %s"%output)
+        self.execute_command("./stop_recording.sh")
+        #self.runner.info_log("output: %s"%output)
 
         sleep(5)
 

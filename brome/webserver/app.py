@@ -43,6 +43,11 @@ def create_app(brome):
     def setup():
         Base.metadata.create_all(bind=db.engine)
 
+    @app.after_request
+    def after_request(response):
+        response.headers.add('Accept-Ranges', 'bytes')
+        return response
+
     return app
 
 def configure_logging(app):

@@ -11,7 +11,7 @@ from IPython import embed
 from brome.webserver.testbatch.forms import LaunchForm, ReportForm
 from brome.core.model.utils import *
 from brome.webserver import data_controller
-from brome.webserver.utils import annotate_video
+from brome.webserver.utils import annotate_video, send_file_partial
 
 blueprint = Blueprint("testbatch", __name__, url_prefix='/tb',
                       static_folder="../static")
@@ -32,10 +32,22 @@ def vnc(host):
     #TODO make this configurable
     return render_template("testbatch/vnc.html", title = 'VNC', host = host, port = 5900, password = '1asdf!!')
 
+@blueprint.route("/file_partial/<path:filename>")
+@login_required
+def test_batch_report_partial_file(filename):
+    file_path = os.path.join(
+        blueprint.app.brome.get_config_value('project:test_batch_result_path'),
+        filename
+    )
+    return send_file_partial(file_path)
+
 @blueprint.route("/file/<path:filename>")
 @login_required
 def test_batch_report_file(filename):
-    return send_from_directory(blueprint.app.brome.get_config_value('project:test_batch_result_path'), filename)
+    return send_from_directory(
+        blueprint.app.brome.get_config_value('project:test_batch_result_path'),
+        filename
+    )
 
 @flask_sijax.route(blueprint, "/network_capture/<int:testbatch_id>")
 @login_required

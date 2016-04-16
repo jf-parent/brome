@@ -186,7 +186,7 @@ class Brome(object):
                             '--reset',
                             dest = 'reset', 
                             action = 'store_true',
-                            help = 'Reset the database + delete the test batch results + update the test table + delete all the test state'
+                            help = 'Reset the database + delete the test batch results + update the test table'
         )
 
         parser.add_argument(
@@ -269,7 +269,6 @@ class Brome(object):
             delete_test_batch_result()
             if self.test_dict:
                 self.update_test()
-            delete_test_states()
         elif parsed_args.generate_config:
             generate_brome_config(self.config_path)
         elif parsed_args.delete_test_result:

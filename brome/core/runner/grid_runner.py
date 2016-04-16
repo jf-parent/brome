@@ -282,8 +282,9 @@ class GridRunner(BaseRunner):
         if sa_test_batch.killed:
             self.info_log("Killing itself")
             for t in [t for t in threading.enumerate() if type(t) != threading._MainThread]:
-                self.info_log("Killing: %s"%t.test._name)
-                t.test.end()
+                if not t.test.ending_timestamp:
+                    self.info_log("Killing: %s"%t.test._name)
+                    t.test.end()
 
             raise TestRunnerKilledException("Killed")
 

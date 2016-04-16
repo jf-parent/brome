@@ -66,6 +66,7 @@ class BaseTest(object):
 
         #VIDEO RECORDING
         self.start_video_recording()
+        starting_timestamp = datetime.now()
 
         #TEST KWARGS
         self._test_config = test_config_to_dict(self.get_config_value("runner:test_config"))
@@ -81,7 +82,7 @@ class BaseTest(object):
             extra_data['instance_private_dns'] = self._runner.instances_ip[self._private_ip].private_dns
 
         sa_test_instance = TestInstance(
-            starting_timestamp = datetime.now(),
+            starting_timestamp = starting_timestamp,
             name = self._name,
             test_batch_id = self._test_batch_id,
             extra_data = json.dumps(extra_data)
@@ -545,13 +546,14 @@ class BaseTest(object):
                 instance.stop_proxy()
 
         self.stop_video_recording()
+        ending_timestamp = datetime.now()
 
         self.quit_driver()
 
         if self.get_config_value("runner:play_sound_on_test_finished"):
             say(self.get_config_value("runner:sound_on_test_finished"))
 
-        ending_timestamp = datetime.now()
+        ending_timestamp = ending_timestamp
         session = Session()
         sa_test_instance =  session.query(TestInstance).filter(TestInstance.id == self._test_instance_id).one()
         sa_test_instance.ending_timestamp = ending_timestamp

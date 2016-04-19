@@ -3,6 +3,24 @@
 <script type="text/javascript">
     $(function() {
         $('#accordion').puiaccordion({multiple:true});
+
+        $( "#annotateBtn" ).click(function() {
+            var trimCheckbox = document.getElementById('trimCheckbox'),
+                trim = false;
+
+            if (trimCheckbox.checked) {
+                var trimFrom = document.getElementById('trimFromInput').value,
+                    trimTo = document.getElementById('trimToInput').value;
+
+                trim = trimFrom + ':' + trimTo;
+            }
+            Sijax.request('annotate', [
+                $('#title').val(),
+                trim
+            ]); 
+            return false;
+        });
+        
     });
 </script>
 <div>
@@ -59,11 +77,18 @@
             {% if form.data['video_path'] %}
                 <h3>Video capture</h3>
                 <div>
-                    <a class="unlink" id="video_link" href="{{ url_for('testbatch.video_player', video_path = form.data['video_path'], video_title = form.data['video_title'], time = form.data['video_time_position']) }}">{{ form.data['video_title'] }}</a>
-                    <p>Time position: {{ form.data['video_time_position_hr']  }}</p>
+                    Video: <a class="unlink" id="video_link" href="{{ url_for('testbatch.video_player', video_path = form.data['video_path'], video_title = form.data['video_title'], time = form.data['video_time_position_adjusted']) }}" target="_blank">{{ form.data['video_title'] }}</a>
+                    <p>Bug time position: {{ form.data['video_time_position_hr']  }}</p>
+                    <p>Video total duration: {{ form.data['video_total_duration']  }}</p>
                     <input type="hidden" name="video" id="video" value="{{ url_for('testbatch.test_batch_report_file', filename = form.data['video_path']) }}"/>
                     <input type="hidden" name="video_time_position" id="video_time_position" value="{{ form.data['video_time_position'] }}"/>
-                    <button name="annotate" class="btn btn-default" onclick="Sijax.request('annotate', [$('#title').val()]); return false;">Annotate</button>
+                    <div style="border: 1px solid black; padding: 4px;">
+                        <p>Trim video: <input type="checkbox" id="trimCheckbox" checked></p>
+                        Trim From: <input type="input" id="trimFromInput" value="{{ form.data['video_trim_from'] }}"></input>
+                        Trim to: <input type="input" id="trimToInput" value="{{ form.data['video_trim_to'] }}"></input>
+                    </div>
+                    <br>
+                    <button id="annotateBtn" class="btn btn-default">Annotate</button>
                 </div>
             {% endif %}
             {% if form.data['network_capture_path'] %}

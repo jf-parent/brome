@@ -18,8 +18,12 @@ def flash_errors(form, category="warning"):
             flash("{0} - {1}"
                   .format(getattr(form, field).label.text, error), category)
 
-def annotate_video(blueprint, title, obj_data):
+def annotate_video(blueprint, title, obj_data, trim):
     try:
+        #TODO fix this mess
+        if obj_data['video_path'] == '0':
+            return 'No video!', None
+
         m = md5.new()
         m.update(title)
         video_hash = m.hexdigest()
@@ -31,23 +35,27 @@ def annotate_video(blueprint, title, obj_data):
             os.sep.join(obj_data['video_path'].split(os.sep)[:-1])
         )
 
-        if obj_data['video_path'] == '0':
-            return 'No video!', None
+        if trim:
+            data['trim_from'], data['trim_to'] = trim.split(":")
+            bug_time_position = obj_data['video_time_position'] - int(data['trim_from'])
+        else:
+            bug_time_position = obj_data['video_time_position']
 
-        data['title'] = "Bug (@%ss) %s"%(obj_data['video_time_position'], title)
+        data['title'] = "Bug (@%ss) %s"%(bug_time_position, title)
         data['in'] = os.path.join(blueprint.app.brome.get_config_value('project:test_batch_result_path'), obj_data['video_path'])
         data['font_path'] = blueprint.app.brome.get_config_value("webserver:report")['font_path']
         data['copied_video_path'] = os.path.join(video_folder, 'copy-%s.mp4'%video_hash)
-        data['annotated_video_path'] = os.path.join(video_folder, '%s.mp4'%video_hash)
+        data['annotated_video_path'] = os.path.join(video_folder, 'annotated-%s.mp4'%video_hash)
+        data['trimmed_video_path'] = os.path.join(video_folder, 'trimmed-%s.mp4'%video_hash)
+        data['final_video_path'] = os.path.join(video_folder, '%s.mp4'%video_hash)
         data['relative_annotated_video_path'] = os.path.join(relative_video_folder, '%s.mp4'%video_hash)
 
-        script = """
-            rm {annotated_video_path}
-            cp {in} {copied_video_path}
-            ffmpeg -i {copied_video_path} -vf "drawtext=':fontfile={font_path}: text='{title}': box=1: boxcolor=white@0.5: fontsize=32: y=(h - 30):" -acodec copy {annotated_video_path}
-            rm {copied_video_path}
-        """.format(**data)
+        script_list = [
+            "rm {final_video_path}",
+            "cp {in} {copied_video_path}"
+        ]
 
+        #Annotation
         if obj_data['extra_data'].get('bounding_client_rect'):
             bounding_client_rect = obj_data['extra_data'].get('bounding_client_rect')
             data['box_start_time'] = int(obj_data['video_time_position'] - 5)
@@ -57,20 +65,26 @@ def annotate_video(blueprint, title, obj_data):
             data['box_h'] = int(bounding_client_rect['height'])
             data['box_w'] = int(bounding_client_rect['width'])
 
-            script = """
-                rm {annotated_video_path}
-                cp {in} {copied_video_path}
-                ffmpeg -i {copied_video_path} -vf "drawtext=':fontfile={font_path}: text='{title}': box=1: boxcolor=white@0.5: fontsize=32: y=(h - 30):, drawbox=enable='between(t,{box_start_time},{box_end_time})': x={box_x_position}: y={box_y_position}: c=red: h={box_h}: w={box_w}:" -acodec copy {annotated_video_path}
-                rm {copied_video_path}
-            """.format(**data)
+            script_list.append("ffmpeg -i {copied_video_path} -vf \"drawtext=':fontfile={font_path}: text='{title}': box=1: boxcolor=white@0.5: fontsize=32: y=(h - 30):, drawbox=enable='between(t,{box_start_time},{box_end_time})': x={box_x_position}: y={box_y_position}: c=red: h={box_h}: w={box_w}:\" -acodec copy {annotated_video_path}")
+        else:
+            script_list.append("ffmpeg -i {copied_video_path} -vf \"drawtext=':fontfile={font_path}: text='{title}': box=1: boxcolor=white@0.5: fontsize=32: y=(h - 30):\" -acodec copy {annotated_video_path}")
+        script_list.append("mv {annotated_video_path} {final_video_path}")
 
+        #Trimming
+        if trim:
+            script_list.append("ffmpeg -i {final_video_path} -vf trim={trim_from}:{trim_to} {trimmed_video_path}")
+            script_list.append("mv {trimmed_video_path} {final_video_path}")
+
+        script_list.append("rm {copied_video_path}")
+        script = '\n'.join(script_list)
+        script = script.format(**data)
         print script
 
         call(script, shell = True)
 
-        return 'Success!', data['relative_annotated_video_path']
+        return 'Success!', data['relative_annotated_video_path'], bug_time_position
     except Exception as e:
-        return unicode(e), None
+        return unicode(e), None, None
 
 def send_file_partial(path):
     #http://blog.asgaard.co.uk/2012/08/03/http-206-partial-content-for-flask-python

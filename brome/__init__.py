@@ -33,16 +33,13 @@ class Brome(object):
         self.config_path = kwargs.get('config_path')
         self.selector_dict = kwargs.get('selector_dict', {})
         self.test_dict = kwargs.get('test_dict', {})
-        self.browsers_config_path = kwargs.get('browsers_config_path')
+        self.browsers_config_path = kwargs.get('browsers_config_path', None)
         self.config = load_brome_config(self.config_path)
         self.config['project']['absolute_path'] = kwargs.get('absolute_path')
 
-        with open(self.browsers_config_path, 'r') as fd:
-            self.browsers_config = yaml.load(fd)
-
-        if not self.browsers_config:
-            print 'You must provide a browsers config dict to the brome instance'
-            exit(1)
+        if self.browsers_config_path:
+            with open(self.browsers_config_path, 'r') as fd:
+                self.browsers_config = yaml.load(fd)
 
     def print_usage(self):
         print '$ ./bro admin | run | webserver | list | find'

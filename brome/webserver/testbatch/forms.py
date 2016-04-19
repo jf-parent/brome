@@ -93,7 +93,11 @@ class ReportForm(object):
         except (ValueError, KeyError):
             self.data['javascript_error'] = ''
             
-        extra_data = json.loads(self.data_object.extra_data)
+        try:
+            extra_data = json.loads(self.data_object.extra_data)
+        except (ValueError, KeyError):
+            extra_data = {}
+
         #SCREENSHOT
         self.data['screenshot_path'] = self.data_object.screenshot_path
         self.data['extra_data'] = extra_data
@@ -109,14 +113,25 @@ class ReportForm(object):
 
         #VIDEO
         if self.data_object.videocapture_path != '0':
+            video_full_path = os.path.join(
+                self.app.brome.get_config_value("project:test_batch_result_path"),
+                self.data_object.videocapture_path
+            )
             self.data['video_path'] = self.data_object.videocapture_path
             self.data['video_title'] = self.data_object.title.replace('_', ' ')
 
             test_instance = data_controller.get_test_instance(self.data_object.test_instance_id)
-            video_time_position = (self.data_object.timestamp - test_instance.starting_timestamp).total_seconds()
+            video_time_position = int((self.data_object.timestamp - test_instance.starting_timestamp).total_seconds())
+            result = subprocess.Popen(["ffprobe", video_full_path, "-show_format"], stdout = subprocess.PIPE, stderr = subprocess.STDOUT)
+            video_length = int([x for x in result.stdout.readlines() if "duration" in x][0].split("=")[1].split(".")[0])
+
             m, s = divmod(video_time_position, 60)
-            self.data['video_time_position'] =  video_time_position
-            self.data['video_time_position_hr'] =  "%02d min %02d sec" % (m, s)
+            self.data['video_time_position'] =  int(video_time_position)
+            self.data['video_time_position_adjusted'] =  max(0, (video_time_position-5))
+            self.data['video_time_position_hr'] =  "%02d min %02d sec (%s sec)" % (m, s, video_time_position)
+            self.data['video_trim_from'] =  max(0, (video_time_position - 30))
+            self.data['video_trim_to'] =  min(video_length, (video_time_position + 30))
+            self.data['video_total_duration'] =  video_length
 
         #CUSTOM FIELDS
         report = self.app.brome.get_config_value("webserver:report")

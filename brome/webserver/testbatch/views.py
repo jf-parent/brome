@@ -80,11 +80,12 @@ def report(object_type, object_id):
 
         obj_response.script("$('#%s > p > textarea[name=\"network_analysis\"]').val('%s')"%(network_capture_name, analysis))
 
-    def annotate(obj_response, title):
-        response, annotated_video_path = annotate_video(blueprint, title, form.data)
+    def annotate(obj_response, title, trim):
+        response, annotated_video_path, video_time_position = annotate_video(blueprint, title, form.data, trim)
         if annotated_video_path:
             obj_response.script("$('#video').val('%s')"%annotated_video_path)
-            obj_response.script("$('#video_link').prop('href', '%s')"%url_for('testbatch.video_player', video_path = annotated_video_path))
+            obj_response.script("$('#video_time_position').val('%s')"%video_time_position)
+            obj_response.script("$('#video_link').prop('href', '%s')"%url_for('testbatch.video_player', video_path = annotated_video_path, time = video_time_position))
         obj_response.alert(response)
 
     if g.sijax.is_sijax_request:
@@ -95,7 +96,7 @@ def report(object_type, object_id):
     if request and request.method in ("PUT", "POST"):
         success, msg = form.report(request.form)
         if success:
-            flash("The issue has been report!", 'success')
+            flash("The issue has been report: %s"%msg, 'success')
             sleep(2)
             return redirect(url_for('testbatch.list'))
         else:

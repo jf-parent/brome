@@ -188,12 +188,14 @@ class ProxyElement(object):
         return True
 
     def highlight(self, **kwargs):
-        self.debug_log(u"Highlighting element")
         """
             kwargs:
                 style: css
                 highlight_time: int; default: .3
         """
+
+        self.debug_log(u"Highlighting element")
+
         style = kwargs.get('style')
         highlight_time = kwargs.get('highlight_time', .3)
 
@@ -203,15 +205,15 @@ class ProxyElement(object):
             original_style = self._element.get_attribute('style')
 
             driver.execute_script("arguments[0].setAttribute('style', arguments[1]);", self._element, style)
-        except StaleElementReferenceException:
-            return False
+        except Exception as e:
+            self.error_log(u"highlight exception: %s"%str(e))
 
         sleep(highlight_time)
 
         try:
             driver.execute_script("arguments[0].setAttribute('style', arguments[1]);", self._element, original_style)
-        except StaleElementReferenceException:
-            return False
+        except Exception as e:
+            self.error_log(u"highlight exception: %s"%str(e))
 
         return True
 

@@ -68,8 +68,8 @@ class EC2Instance(BaseInstance):
             ssh.connect(self.private_ip, username = self.browser_config.get('username'), pkey = k)
 
             sleep_time = 0.1
-            output = []
-            error_output = []
+            stdout = []
+            stderr = []
 
             ssh_transport = ssh.get_transport()
             channel = ssh_transport.open_session()
@@ -79,10 +79,10 @@ class EC2Instance(BaseInstance):
             while True:
 
                 while channel.recv_ready():
-                    output.append(channel.recv(1000))
+                    stdout.append(channel.recv(1000))
 
                 while channel.recv_stderr_ready():
-                    error_output.append(channel.recv_stderr(1000))
+                    stderr.append(channel.recv_stderr(1000))
 
                 if channel.exit_status_ready():
                     break
@@ -92,11 +92,9 @@ class EC2Instance(BaseInstance):
             ret = channel.recv_exit_status()
             ssh_transport.close()
 
-            output = 'stdout: %s ###stderr: %s'%(''.join(output), ''.join(error_output))
-
             ssh.close()
 
-            return output
+            return ''.join(stdout), ''.join(stderr)
 
         except Exception as e:
             msg = "Execute_command exception: %s"%str(e)

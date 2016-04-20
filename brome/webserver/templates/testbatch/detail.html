@@ -95,7 +95,7 @@
                 </a>
             </li>
             <li>
-                <a class="unlink" href="{{ url_for('testbatch.crash', testbatch_id = testbatch_id) }}"><i class="fa fa-exclamation-triangle"></i> Crash reports (<span id="total_crashes">{{ data['test_batch'].total_crashes}}</span>)</a>
+                <a class="unlink" href="{{ url_for('testbatch.crash', testbatch_id = testbatch_id) }}"><i class="fa fa-exclamation-triangle"></i> Crash reports (<span id="total_crashes" style="color:red;">{{ data['test_batch'].total_crashes}}</span>)</a>
             </li>
         </ul>
     </div>

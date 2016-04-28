@@ -261,6 +261,8 @@ class BaseTest(object):
 
                 if config.get('enable_proxy'):
                     chrome_options.add_argument('--proxy-server=%s'%mitm_proxy)
+                if config.get('mobile_emulation'):
+                    chrome_options.add_experimental_option("mobileEmulation", config.get('mobile_emulation'))
 
                 desired_cap=chrome_options.to_capabilities()
 

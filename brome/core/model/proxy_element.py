@@ -105,7 +105,8 @@ class ProxyElement(object):
             else:
                 self._element.click()
 
-        self.pdriver.bot_diary.add_auto_entry("I clicked on", selector = self.selector._selector)
+        if self.pdriver.bot_diary:
+            self.pdriver.bot_diary.add_auto_entry("I clicked on", selector = self.selector._selector)
 
         try:
             _click()
@@ -154,7 +155,8 @@ class ProxyElement(object):
         if clear:
             self.clear()
 
-        self.pdriver.bot_diary.add_auto_entry("I typed '%s' in"%value, selector = self.selector._selector)
+        if self.pdriver.bot_diary:
+            self.pdriver.bot_diary.add_auto_entry("I typed '%s' in"%value, selector = self.selector._selector)
         
         try:
             self._element.send_keys(value)

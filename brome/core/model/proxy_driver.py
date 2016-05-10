@@ -330,7 +330,8 @@ class ProxyDriver(object):
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
-                self.bot_diary.add_auto_entry("I waited for the clickability of", target = _selector.get_human_readable())
+                if self.bot_diary:
+                    self.bot_diary.add_auto_entry("I waited for the clickability of", target = _selector.get_human_readable())
                 raise TimeoutException(msg)
             else:
                 return False
@@ -381,7 +382,8 @@ class ProxyDriver(object):
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
-                self.bot_diary.add_auto_entry("I waited for the presence of", target = _selector.get_human_readable())
+                if self.bot_diary:
+                    self.bot_diary.add_auto_entry("I waited for the presence of", target = _selector.get_human_readable())
                 raise TimeoutException(msg)
             else:
                 return False
@@ -432,7 +434,8 @@ class ProxyDriver(object):
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
-                self.bot_diary.add_auto_entry("I waited for the absence of", target = _selector.get_human_readable())
+                if self.bot_diary:
+                    self.bot_diary.add_auto_entry("I waited for the absence of", target = _selector.get_human_readable())
                 raise TimeoutException(msg)
             else:
                 return False
@@ -483,7 +486,8 @@ class ProxyDriver(object):
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
-                self.bot_diary.add_auto_entry("I waited for the visibility of", target = _selector.get_human_readable())
+                if self.bot_diary:
+                    self.bot_diary.add_auto_entry("I waited for the visibility of", target = _selector.get_human_readable())
                 raise TimeoutException(msg)
             else:
                 return False
@@ -534,7 +538,8 @@ class ProxyDriver(object):
             self.debug_log(msg)
             self.print_javascript_error()
             if raise_exception:
-                self.bot_diary.add_auto_entry("I waited for the invisibility of", target = _selector.get_human_readable())
+                if self.bot_diary:
+                    self.bot_diary.add_auto_entry("I waited for the invisibility of", target = _selector.get_human_readable())
                 raise TimeoutException(msg)
             else:
                 return False
@@ -623,7 +628,8 @@ class ProxyDriver(object):
 
         self._driver.get(url)
 
-        self.bot_diary.add_auto_entry("I went on", target = url, take_screenshot = True)
+        if self.bot_diary:
+            self.bot_diary.add_auto_entry("I went on", target = url, take_screenshot = True)
 
         if self.get_config_value("proxy_driver:intercept_javascript_error"):
             self.init_javascript_error_interception()

@@ -520,8 +520,9 @@ class BaseTest(object):
 
             if not self.load_state():
                 if hasattr(self, 'create_state'):
-                    self.create_state()
-                    self.save_state()
+                    ret = self.create_state()
+                    if ret:
+                        self.save_state()
 
             self.run(**self._test_config)
 

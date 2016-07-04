@@ -15,15 +15,16 @@ help:
 	@echo "clean - remove all build, test, coverage and Python artifacts"
 	@echo "clean-build - remove build artifacts"
 	@echo "clean-pyc - remove Python file artifacts"
-	@echo "clean-test - remove test and coverage artifacts"
 	@echo "lint - check style with flake8"
-	@echo "test - run tests quickly with the default Python"
+	@echo "test-webserver - run webserver tests"
+	@echo "test-brome - run brome tests"
 	@echo "test-all - run tests on every Python version with tox"
 	@echo "coverage - check code coverage quickly with the default Python"
 	@echo "docs - generate Sphinx HTML documentation, including API docs"
 	@echo "release - package and upload a release"
 	@echo "dist - package"
 	@echo "install - install the package to the active Python's site-packages"
+	@echo "new-model - create a new model using a skeleton file"
 
 clean: clean-build clean-pyc clean-test
 
@@ -40,25 +41,16 @@ clean-pyc:
 	find . -name '*~' -exec rm -f {} +
 	find . -name '__pycache__' -exec rm -fr {} +
 
-clean-test:
-	rm -fr .tox/
-	rm -f .coverage
-	rm -fr htmlcov/
-
 lint:
 	flake8 brome tests
 
-test:
-	python setup.py test
+test-brome:
+	py.test tests/brome
 
-test-all:
-	tox
+test-webserver:
+	py.test tests/webserver --instafail
 
-coverage:
-	coverage run --source brome setup.py test
-	coverage report -m
-	coverage html
-	$(BROWSER) htmlcov/index.html
+test-all: test-webserver test-brome
 
 docs:
 	rm -f docs/brome.rst
@@ -79,3 +71,6 @@ dist: clean
 
 install: clean
 	python setup.py install
+
+new-model:
+	cookiecutter https://github.com/jf-parent/webbase-cookiecutter-create-model -o server/model/

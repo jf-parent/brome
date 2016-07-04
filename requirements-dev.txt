@@ -1,0 +1,13 @@
+ipdb
+flake8
+pip-save
+tmuxp
+webtest-aiohttp
+pytest
+pytest-xdist
+pytest-instafail
+pytest-html
+q
+freezegun
+cookiecutter
+xvfbwrapper

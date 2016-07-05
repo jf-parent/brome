@@ -4,6 +4,8 @@
 [![PyPI version](https://badge.fury.io/py/brome.svg)](https://badge.fury.io/py/brome)
 [![Build Status](https://travis-ci.org/jf-parent/brome.svg?branch=release)](https://travis-ci.org/jf-parent/brome)
 
+# BROME - Selenium Framework
+
 * Documentation: https://brome.readthedocs.org
 * Blog: http://brome-hq.logdown.com/
 
@@ -13,14 +15,14 @@
 * Focused on test stability and uniformity
 * Highly configurable
 * Runner for Amazon EC2, Saucelabs, Browserstack, Virtualbox and Appium
-* Javascript implementation of select, drag and drop, scroll into view
+* Javascript implementation of select, drag and drop, scroll into view, inject script
 * IPython embed on assertion for debugging
 * Session Video recording
 * Network capture with mitmproxy (firefox & chrome)
 * Persistent test report
-* Webserver
+* Webserver written in React & Redux (Webbase)[https://github.com/jf-parent/webbase]
 * Test state persistence system
-* Support mobile easier (e.g.: click use Touch)
+* Easier support for mobile testing (e.g.: click use Touch)
 
 # Quick-start
 
@@ -29,4 +31,5 @@ $ cookiecutter https://github.com/jf-parent/cookiecutter-brome -f
 $ chmod +x bro
 $ pip install brome
 $ vim config/brome.yml
+$ ./bro --help
 ```

@@ -1,19 +1,22 @@
 import glob
+from datetime import datetime
 import logging
 import os
-import copy
 import os.path
 
 import yaml
 import psutil
-from IPython import embed
 
-from brome.core.configurator import runner_args_to_dict, get_config_value, default_config
+from brome.core.configurator import runner_args_to_dict, get_config_value
 from brome.model.test import Test
 from brome.model.test_batch import TestBatch
 from brome.model.test_instance import TestInstance
 from brome.model.test_result import TestResult
-from brome.core.utils import *
+from brome.core.utils import (
+    DbSessionContext,
+    create_dir_if_doesnt_exist
+)
+
 
 class BaseRunner(object):
     """Base class for the brome runner
@@ -27,22 +30,36 @@ class BaseRunner(object):
     def __init__(self, brome):
         self.brome = brome
 
+        # TODO remove this line
         self.brome_config_path = self.brome.config_path
-        self.commandline_args = self.brome.parsed_args
+
         self.browsers_config = self.brome.browsers_config
 
-        #CONFIG
-        self.config = runner_args_to_dict(self.commandline_args)
+        # CONFIG
+        if hasattr(self.brome, 'parsed_args'):
+            self.commandline_args = self.brome.parsed_args
+            self.config = runner_args_to_dict(self.commandline_args)
+        else:
+            self.config = {}
+
         self.brome_config = self.brome.config
 
-        #Current pid of the runner
+        # Current pid of the runner
         current_pid = os.getpid()
 
-        #Get the activated tests list
-        self.tests = self.get_activated_tests()
+        # Get the activated tests list
+        if self.brome.tests:
+            if not type(self.brome.tests) == list:
+                tests = [self.brome.tests]
+            else:
+                tests = self.brome.tests
 
-        #Create test batch
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:
+            self.tests = tests
+        else:
+            self.tests = self.get_activated_tests()
+
+        # Create test batch
+        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
             self.starting_timestamp = datetime.now()
 
             test_batch = TestBatch()
@@ -54,25 +71,27 @@ class BaseRunner(object):
 
         self.test_batch_id = test_batch.get_uid()
 
-        #RUNNER LOG DIR
-        self.root_test_result_dir = self.get_config_value("project:test_batch_result_path")
+        # RUNNER LOG DIR
+        self.root_test_result_dir = self.get_config_value(
+            "project:test_batch_result_path"
+        )
 
         if self.root_test_result_dir:
             self.runner_dir = os.path.join(
                 self.root_test_result_dir,
-                "tb_%s"%self.test_batch_id
+                "tb_%s" % self.test_batch_id
             )
-            self.relative_runner_dir = "tb_%s"%self.test_batch_id
+            self.relative_runner_dir = "tb_%s" % self.test_batch_id
             create_dir_if_doesnt_exist(self.runner_dir)
         else:
             self.runner_dir = False
 
-        #LOGGING
+        # LOGGING
         self.configure_logger()
 
-        #SCREENSHOT CACHE
+        # SCREENSHOT CACHE
         if self.get_config_value('runner:cache_screenshot'):
-            #Dictionary that contains all the screenshot name
+            # Dictionary that contains all the screenshot name
             self.screenshot_cache = {}
 
     def kill_pid(self, pid):
@@ -87,9 +106,9 @@ class BaseRunner(object):
 
             p.terminate()
 
-            self.info_log('Killed [pid:%s][name:%s]'%(p.pid, p.name()))
+            self.info_log('Killed [pid:%s][name:%s]' % (p.pid, p.name()))
         except psutil.NoSuchProcess:
-            self.error_log('No such process: [pid:%s]'%pid)
+            self.error_log('No such process: [pid:%s]' % pid)
 
     def kill(self, procname):
         """Kill by process name
@@ -99,10 +118,13 @@ class BaseRunner(object):
         """
         for proc in psutil.process_iter():
             if proc.name() == procname:
-                self.info_log('[pid:%s][name:%s] killed'%(proc.pid, proc.name()))
+                self.info_log(
+                    '[pid:%s][name:%s] killed' %
+                    (proc.pid, proc.name())
+                )
                 proc.kill()
 
-    def get_available_tests(self, search_query = None, test_name = None):
+    def get_available_tests(self, search_query=None, test_name=None):
         """Return a list of all the available tests
 
         This function might call exit(1) if not test were found
@@ -119,43 +141,54 @@ class BaseRunner(object):
         if search_query:
 
             tests_path = os.path.join(
-                self.get_config_value('project:absolute_path'), 
+                self.get_config_value('project:absolute_path'),
                 script_folder_name,
-                '%s%s.py'%(script_test_prefix, search_query)
+                '%s%s.py' % (script_test_prefix, search_query)
             )
             tests = sorted(glob.glob(tests_path))
 
             for test in tests:
                 module_test = test.split(os.sep)[-1][:-3]
-                available_tests.append(__import__('%s.%s'%(script_folder_name, module_test), fromlist = ['']))
+                available_tests.append(
+                    __import__(
+                        '%s.%s' %
+                        (script_folder_name, module_test),
+                        fromlist=[''])
+                )
 
         elif test_name:
             if test_name.endswith('.py'):
                 test_name = test_name[:-3]
 
             try:
-                available_tests.append(__import__('%s.%s'%(script_folder_name, test_name), fromlist = ['']))
+                available_tests.append(
+                    __import__(
+                        '%s.%s' %
+                        (script_folder_name, test_name),
+                        fromlist=[''])
+                    )
             except ImportError:
                 pass
 
         if not len(available_tests):
             query = search_query if search_query else test_name
-            print("No script found with the provided query: %s"%query)
+            print("No script found with the provided query: %s" % query)
             exit(1)
-        
+
         return available_tests
 
     def get_activated_tests(self):
         """Return a list of all the activated tests
 
-        The behavior of this function is determined by the received CLI arguments
+        The behavior of this function is determined by
+        the received CLI arguments
 
         Returns:
             list
         """
         tests = []
 
-        #test file
+        # test file
         if self.get_config_value('runner:test_file'):
             test_file_path = self.get_config_value('runner:test_file')
             with open(test_file_path, 'r') as f:
@@ -165,15 +198,22 @@ class BaseRunner(object):
                 tests.append(self.get_available_tests(test)[0])
 
         elif self.get_config_value('runner:test_name'):
-            tests = self.get_available_tests(test_name = self.get_config_value('runner:test_name'))
+            tests = self.get_available_tests(
+                test_name=self.get_config_value('runner:test_name')
+            )
         else:
-            test_search_query = self.get_config_value('runner:test_search_query')
+            test_search_query = self.get_config_value(
+                'runner:test_search_query'
+            )
 
-            #by index or slice e.g.: [0:12], [:], [0], [-1]
+            # by index or slice e.g.: [0:12], [:], [0], [-1]
             if test_search_query.find('[') != -1:
-                exec('tests = self.get_available_tests("*")%s'%test_search_query)
+                exec(
+                    'tests = self.get_available_tests("*")%s' %
+                    test_search_query
+                )
 
-            #by name
+            # by name
             else:
                 tests = self.get_available_tests(test_search_query)
 
@@ -193,7 +233,7 @@ class BaseRunner(object):
             self.config,
             self.brome_config
         ]
-        value = get_config_value(config_list,config_name)
+        value = get_config_value(config_list, config_name)
 
         return value
 
@@ -207,21 +247,32 @@ class BaseRunner(object):
 
         format_ = self.get_config_value("logger_runner:format")
 
-        #Stream logger 
+        # Stream logger
         if self.get_config_value('logger_runner:streamlogger'):
             sh = logging.StreamHandler()
             stream_formatter = logging.Formatter(format_)
             sh.setFormatter(stream_formatter)
             self.logger.addHandler(sh)
 
-        #File logger
-        if self.get_config_value('logger_runner:filelogger'):
-            fh = logging.FileHandler(os.path.join(self.runner_dir, '%s.log'%logger_name))
+        # File logger
+        if self.get_config_value('logger_runner:filelogger') and \
+                self.runner_dir:
+            fh = logging.FileHandler(
+                os.path.join(
+                    self.runner_dir,
+                    '%s.log' % logger_name
+                )
+            )
             file_formatter = logging.Formatter(format_)
             fh.setFormatter(file_formatter)
             self.logger.addHandler(fh)
 
-        self.logger.setLevel(getattr(logging, self.get_config_value('logger_runner:level')))
+        self.logger.setLevel(
+            getattr(
+                logging,
+                self.get_config_value('logger_runner:level')
+                )
+            )
 
     def print_test_summary(self, executed_tests):
         """Print test summary
@@ -234,92 +285,131 @@ class BaseRunner(object):
 
         separator = '---------------------'
 
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:
-            test_batch = session.query(TestBatch).filter(TestBatch.mongo_id == self.test_batch_id).one()
+        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+            test_batch = session.query(TestBatch).filter(TestBatch.mongo_id == self.test_batch_id).one()  # noqa
 
-            #TITLE
+            # TITLE
             self.info_log('******* TEST BATCH SUMMARY ********')
 
-            #TOTAL NUMBER OF EXECUTED TESTS
-            base_query = session.query(TestResult).filter(TestResult.test_batch_id == self.test_batch_id)
+            # TOTAL NUMBER OF EXECUTED TESTS
+            base_query = session.query(TestResult).filter(TestResult.test_batch_id == self.test_batch_id)  # noqa
             total_test = base_query.count()
-            total_test_successful = base_query.filter(TestResult.result == True).count()
-            base_query = session.query(TestResult).filter(TestResult.test_batch_id == self.test_batch_id)
-            total_test_failed = base_query.filter(TestResult.result == False).count()
-            self.info_log('Total_test: %s; Total_test_successful: %s; Total_test_failed: %s'%(total_test, total_test_successful, total_test_failed))
+            total_test_successful = base_query.filter(TestResult.result == True).count()  # noqa
+            base_query = session.query(TestResult).filter(TestResult.test_batch_id == self.test_batch_id)  # noqa
+            total_test_failed = base_query.filter(TestResult.result == False).count()  # noqa
+            self.info_log(
+                'Total_test: %s; Total_test_successful: %s; Total_test_failed: %s' %  # noqa
+                (total_test, total_test_successful, total_test_failed)
+            )
 
-            #EXECUTION TIME
-            self.info_log("Total execution time: %s"%(test_batch.ending_timestamp - test_batch.starting_timestamp))
+            # EXECUTION TIME
+            self.info_log(
+                "Total execution time: %s" %
+                (test_batch.ending_timestamp - test_batch.starting_timestamp)
+            )
 
-            #SEPARATOR
+            # SEPARATOR
             self.info_log(separator)
 
             self.info_log('Failed tests')
 
-            #FAILED TESTS
+            # FAILED TESTS
             failed_test_list = []
-            test_results = session.query(TestResult).filter(TestResult.test_batch_id == self.test_batch_id).all()
+            test_results = session.query(TestResult)\
+                .filter(TestResult.test_batch_id == self.test_batch_id).all()
             for test_result in test_results:
-                if not test_result.result and not test_result.test in failed_test_list:
-                    query = session.query(Test).filter(Test.mongo_id == test_result.test_id)
+                if not test_result.result and \
+                        test_result.test not in failed_test_list:
+
+                    query = session.query(Test)\
+                        .filter(Test.mongo_id == test_result.test_id)
                     if query.count():
                         test = query.one()
                         failed_test_list.append(test.test_id)
-                        self.info_log("[%s] %s"%(test.test_id, test.name))
+                        self.info_log(
+                            "[%s] %s" %
+                            (test.test_id, test.name)
+                        )
                     else:
                         failed_test_list.append(test_result.title)
-                        self.info_log("[noid] %s"%(test_result.title))
+                        self.info_log(
+                            "[noid] %s" %
+                            (test_result.title)
+                        )
 
             if not failed_test_list:
                 self.info_log('No test failed!')
-            
-            #SEPARATOR
+
+            # SEPARATOR
             self.info_log(separator)
 
-            #TEST INSTANCE REPORT
+            # TEST INSTANCE REPORT
             for test in executed_tests:
-                #TITLE
-                self.info_log('%s %s'%(test._name, test.pdriver.get_id()))
+                # TITLE
+                self.info_log(
+                    '%s %s' %
+                    (test._name, test.pdriver.get_id())
+                )
 
-                test_instance = session.query(TestInstance).filter(TestInstance.mongo_id == test._test_instance_id).one()
+                test_instance = session.query(TestInstance)\
+                    .filter(TestInstance.mongo_id == test._test_instance_id)\
+                    .one()
 
-                #TEST EXECUTION TIME
+                # TEST EXECUTION TIME
                 try:
-                    self.info_log("Test execution time: %s"%(test_instance.ending_timestamp - test_instance.starting_timestamp))
+                    self.info_log(
+                        "Test execution time: %s" %
+                        (test_instance.ending_timestamp - test_instance.starting_timestamp)  # noqa
+                    )
                 except TypeError:
                     self.info_log("Test execution time exception")
 
-                #TEST INSTANCE SUMMARY
+                # TEST INSTANCE SUMMARY
                 results = test.get_test_result_summary()
                 for result in results:
                     self.info_log(result)
 
-                #CRASH REPORT
+                # CRASH REPORT
                 if test._crash_error:
                     self.info_log(test._crash_error)
                 else:
                     self.info_log('No crash!')
 
-                #SEPARATOR
+                # SEPARATOR
                 self.info_log(separator)
 
-            #END
+            # END
             self.info_log('Finished')
 
     def get_logger_dict(self):
         return {'batchid': self.test_batch_id}
 
     def debug_log(self, msg):
-        self.logger.debug("[debug]%s"%msg, extra=self.get_logger_dict())
+        self.logger.debug(
+            "[debug]%s" %
+            msg, extra=self.get_logger_dict()
+        )
 
     def info_log(self, msg):
-        self.logger.info("%s"%msg, extra=self.get_logger_dict())
+        self.logger.info(
+            "%s" %
+            msg, extra=self.get_logger_dict()
+        )
 
     def warning_log(self, msg):
-        self.logger.warning("[warning]%s"%msg, extra=self.get_logger_dict())
+        self.logger.warning(
+            "[warning]%s" %
+            msg, extra=self.get_logger_dict()
+        )
 
     def error_log(self, msg):
-        self.logger.error("[error]%s"%msg, extra=self.get_logger_dict())
+        self.logger.error(
+            "[error]%s" %
+            msg, extra=self.get_logger_dict()
+        )
 
     def critical_log(self, msg):
-        self.logger.critical("[critical]%s"%msg, extra=self.get_logger_dict())
+        self.logger.critical(
+            "[critical]%s" %
+            msg, extra=self.get_logger_dict()
+        )

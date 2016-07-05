@@ -1,6 +1,5 @@
-#! -*- coding: utf-8 -*-
+from brome.core.stateful import Stateful
 
-from brome.core.model.stateful import Stateful
 
 class User(Stateful):
 

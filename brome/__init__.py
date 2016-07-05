@@ -37,6 +37,7 @@ class Brome(object):
         self.selector_dict = kwargs.get('selector_dict', {})
         self.test_dict = kwargs.get('test_dict', {})
         self.browsers_config_path = kwargs.get('browsers_config_path', None)
+        self.tests = kwargs.get('tests', None)
 
         # CONFIG
         if self.config_path:
@@ -54,7 +55,7 @@ class Brome(object):
         if self.browsers_config_path:
             with open(self.browsers_config_path, 'r') as fd:
                 self.browsers_config = yaml.load(fd)
-        elif kwargs.get('browser_config'):
+        elif kwargs.get('browsers_config'):
             self.browsers_config = kwargs.get('browsers_config')
 
     def print_usage(self):

@@ -1,4 +1,5 @@
 import logging
+import traceback
 import os
 import pickle
 import urllib
@@ -326,20 +327,23 @@ class BaseTest(object):
         #Extract the server name
         server = urllib.parse.urlparse(self.pdriver.get_config_value("project:url")).netloc
 
-        states_dir = os.path.join(
-            self.get_config_value("project:absolute_path"),
-            self.get_config_value("project:script_folder_name"),
-            "states"
-        )
-        create_dir_if_doesnt_exist(states_dir)
+        if self.get_config_value("project:test_batch_result_path"):
+            states_dir = os.path.join(
+                self.get_config_value("project:absolute_path"),
+                self.get_config_value("project:script_folder_name"),
+                "states"
+            )
+            create_dir_if_doesnt_exist(states_dir)
 
-        #TODO should be configurable
-        state_pickle_path = os.path.join(
-            states_dir,
-            string_to_filename('%s_%s.pkl'%(self._name.replace(' ', '_'), server))
-        )
+            #TODO should be configurable
+            state_pickle_path = os.path.join(
+                states_dir,
+                string_to_filename('%s_%s.pkl'%(self._name.replace(' ', '_'), server))
+            )
 
-        return  state_pickle_path
+            return  state_pickle_path
+        else:
+            return False
 
     def save_state(self):
         """Save the state in a pickle
@@ -368,10 +372,11 @@ class BaseTest(object):
 
         #Save the state
         state_pickle_path = self.get_state_pickle_path()
-        with open(state_pickle_path, 'wb') as fd:
-            pickle.dump(effective_state, fd)
+        if state_pickle_path:
+            with open(state_pickle_path, 'wb') as fd:
+                pickle.dump(effective_state, fd)
 
-        self.info_log("State saved: %s"%state_pickle_path)
+            self.info_log("State saved: %s"%state_pickle_path)
 
     def load_state(self):
         """Load the state pickle into the instance object if a state is found
@@ -404,14 +409,18 @@ class BaseTest(object):
                 for k, v in value.iteritems():
                     set_pdriver(v)
 
-        #Load the state pickle
+        # Load the state pickle
         state_pickle_path = self.get_state_pickle_path()
-        if os.path.isfile(state_pickle_path):
-            with open(state_pickle_path, 'rb') as fd:
-                state = pickle.load(fd)
+        if state_pickle_path:
+            if os.path.isfile(state_pickle_path):
+                with open(state_pickle_path, 'rb') as fd:
+                    state = pickle.load(fd)
+            else:
+                self.info_log("No state found.")
+
+                return False
         else:
             self.info_log("No state found.")
-
             return False
 
         #Set the pdriver
@@ -508,7 +517,11 @@ class BaseTest(object):
             self.before_run()
 
             if self._test_config.get("delete_state"):
-                self.delete_state(self.get_state_pickle_path())
+                state_pickle_path = self.get_state_pickle_path()
+                if state_pickle_path:
+                    self.delete_state(state_pickle_path)
+                else:
+                    self.info_log('No state to delete!')
 
             if not self.load_state():
                 if hasattr(self, 'create_state'):
@@ -522,6 +535,7 @@ class BaseTest(object):
 
         except Exception as e:
             self.error_log('Test failed')
+            raise
 
             tb = traceback.format_exc()
 

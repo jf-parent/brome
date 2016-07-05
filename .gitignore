@@ -2,6 +2,7 @@
 *.pkl
 *.py[cod]
 #database
+*.rdb
 data
 *.db
 #yaml

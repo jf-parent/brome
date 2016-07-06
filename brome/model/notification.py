@@ -1,9 +1,14 @@
 from datetime import datetime
 
-from mongoalchemy.fields import *  # noqa
+from mongoalchemy.fields import (
+    ObjectIdField,
+    DateTimeField,
+    DictField,
+    BoolField
+)
 
 from brome.model.basemodel import BaseModel
-from brome.webserver.server.exceptions import *  # noqa
+from brome.webserver.server import exceptions
 from brome.webserver.server.utils import SafeStringField
 
 
@@ -17,11 +22,9 @@ class Notification(BaseModel):
 
     def __repr__(self):
         try:
-            _repr = "Notification <message:'{message}'><user_uid:'{user_uid}'><template_data:'{template_data}'>"  # noqa
+            _repr = "Notification <message:'{self.message}'><user_uid:'{self.user_uid}'><template_data:'{self.template_data}'>"  # noqa
             return _repr.format(
-                    message=self.message,
-                    template_data=self.template_data,
-                    user_uid=self.user_uid
+                    self
                 )
         except AttributeError:
             return "Notification uninitialized"
@@ -52,7 +55,7 @@ class Notification(BaseModel):
         # USER UID
         user_uid = data.get('user_uid')
         if is_new and not user_uid:
-            raise InvalidRequestException(
+            raise exceptions.InvalidRequestException(
                 'Missing user_uid; cannot save Notification'
             )
 
@@ -76,7 +79,7 @@ class Notification(BaseModel):
             self.message = message
         else:
             if is_new:
-                raise InvalidRequestException(
+                raise exceptions.InvalidRequestException(
                     'Missing message; cannot create Notification'
                 )
 

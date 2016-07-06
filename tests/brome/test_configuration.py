@@ -14,7 +14,19 @@ def test_default_config(brome):
             assert brome.get_config_value(_key) == sub_value
 
 
-def test_default_config_when_not_provided(brome):
+def test_default_config_when_config_not_provided(brome):
+    brome.configure()
+
+    for key, value in iter(brome_default_config.items()):
+        for sub_key, sub_value in iter(value.items()):
+            _key = "{key}:{sub_key}".format(
+                key=key,
+                sub_key=sub_key
+            )
+            assert brome.get_config_value(_key) == sub_value['default']
+
+
+def test_default_config_when_value_not_provided(brome):
     brome.configure(config={'test': True})
 
     for key, value in iter(brome_default_config.items()):
@@ -50,7 +62,6 @@ def test_project_config(brome):
 
 def test_project_absolute_path(brome):
     brome.configure(
-        config=default_config,
         absolute_path="/dev/null/"
     )
     assert brome.get_config_value("project:absolute_path") == "/dev/null/"

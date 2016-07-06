@@ -9,23 +9,22 @@ import argparse
 import re
 from glob import glob
 
-import yaml
-
 from brome.core.utils import (
     update_test,
     DbSessionContext,
     delete_database
 )
 from brome.core.grep import grep_files
+from brome.webserver.server.app import run_app
 from brome.runner.local_runner import LocalRunner
 from brome.runner.grid_runner import GridRunner
 from brome.core.configurator import (
-    load_brome_config,
+    save_brome_config,
     get_config_value,
     generate_brome_config
 )
 
-__version__ = "0.1.9"
+__version__ = "1.0.0"
 
 
 class Brome(object):
@@ -33,30 +32,17 @@ class Brome(object):
         self.configure(**kwargs)
 
     def configure(self, **kwargs):
-        self.config_path = kwargs.get('config_path')
+        self.config = kwargs.get('config', generate_brome_config())
         self.selector_dict = kwargs.get('selector_dict', {})
         self.test_dict = kwargs.get('test_dict', {})
-        self.browsers_config_path = kwargs.get('browsers_config_path', None)
-        self.tests = kwargs.get('tests', None)
+        self.browsers_config = kwargs.get('browsers_config', {})
+        self.tests = kwargs.get('tests', [])
 
-        # CONFIG
-        if self.config_path:
-            self.config = load_brome_config(self.config_path)
-        elif kwargs.get('config'):
-            self.config = kwargs.get('config')
-        else:
-            raise Exception('Missing "config_path" and "config"')
-
-        # ABSOLUTE PATH
         if 'project' in self.config:
-            self.config['project']['absolute_path'] = kwargs.get('absolute_path')  # noqa
-
-        # BROWSER CONFIG
-        if self.browsers_config_path:
-            with open(self.browsers_config_path, 'r') as fd:
-                self.browsers_config = yaml.load(fd)
-        elif kwargs.get('browsers_config'):
-            self.browsers_config = kwargs.get('browsers_config')
+            absolute_path = kwargs.get('absolute_path')
+            self.config['project']['absolute_path'] = absolute_path
+            if not absolute_path:
+                print('[Warning] absolute_path not provided in the brome.configure()')  # noqa
 
     def print_usage(self):
         print('$ ./bro admin | run | webserver | list | find')
@@ -282,7 +268,9 @@ class Brome(object):
             if self.test_dict:
                 self.update_test()
         elif parsed_args.generate_config:
-            generate_brome_config(self.config_path)
+            output_path = "./brome.yml"
+            config = generate_brome_config()
+            save_brome_config(output_path, config)
         elif parsed_args.delete_test_result:
             delete_test_batch_result()
         elif parsed_args.delete_test_states:
@@ -309,32 +297,9 @@ class Brome(object):
             )
 
     def webserver(self, args):
-        pass
-        """
-        parser = argparse.ArgumentParser(description='Brome webserver')
-
-        # TORNADO
-        parser.add_argument(
-                            '--tornado',
-                            '-t',
-                            dest='tornado',
-                            action='store_true',
-                            help='The brome webserver will run on Tornado. (http://www.tornadoweb.org/en/stable/index.html#)'  # noqa
-        )
-
-        parsed_args = parser.parse_args(args)
-
-        app = create_app(self)
-
-        Timer(2, self.open_browser).start()
-
-        if parsed_args.tornado:
-            http_server = HTTPServer(WSGIContainer(app))
-            http_server.listen(self.get_config_value("webserver:PORT"))
-            IOLoop.instance().start()
-        else:
-            app.run(host = self.get_config_value("webserver:HOST"), port = self.get_config_value("webserver:PORT"))
-        """
+        self.config['webserver']['MONGO_DATABASE_NAME'] = self.config['database']['mongo_database_name']  # noqa
+        self.config['webserver']['MONGO_HOST'] = self.config['database']['mongo_host']  # noqa
+        run_app(self.config['webserver'])
 
     def list_(self, args):
         query = os.path.join(

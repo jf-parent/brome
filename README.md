@@ -20,7 +20,7 @@
 * Session Video recording
 * Network capture with mitmproxy (firefox & chrome)
 * Persistent test report
-* Webserver written in React & Redux (Webbase)[https://github.com/jf-parent/webbase]
+* Webserver written in React & Redux [Webbase](https://github.com/jf-parent/webbase)
 * Test state persistence system
 * Easier support for mobile testing (e.g.: click use Touch)
 

@@ -33,3 +33,4 @@ node_modules
 
 dist-dev
 .cache
+brome/webserver/logs/

@@ -1,15 +1,13 @@
 #! /usr/bin/env python
 
+import sys
 from time import sleep
 import asyncio
 
-from mongoalchemy.session import Session
-
-from webbaseserver.utils import drop_database
-from webbaseserver.model.user import User
-from webbaseserver.settings import config
-from webbaseserver.model.notification import Notification  # noqa
-from webbaseserver.utils import DbSessionContext  # noqa
+from brome.core.utils import delete_database, DbSessionContext  # noqa
+from brome.model.user import User
+from brome.webserver.server.settings import config
+from brome.model.notification import Notification  # noqa
 
 config.configure()
 loop = asyncio.get_event_loop()
@@ -20,7 +18,7 @@ if config.get('ENV', 'production') != 'development':
     sys.exit(1)
 
 DB_NAME = config.get('MONGO_DATABASE_NAME')
-drop_database(DB_NAME)
+delete_database(DB_NAME)
 
 with DbSessionContext(DB_NAME) as session:
     # INSERT DUMMY DATA

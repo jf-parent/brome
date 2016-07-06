@@ -1,7 +1,10 @@
 # from abc import ABCMeta, abstractmethod
 
 from mongoalchemy.document import Document
-from mongoalchemy.fields import *  # noqa
+from mongoalchemy.fields import (
+    ModifiedField,
+    CreatedField
+)
 
 
 # TODO make it a meta class
@@ -13,19 +16,19 @@ class BaseModel(Document):
 
     # @abstractmethod
     async def sanitize_data(self, context):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     # @abstractmethod
     async def serialize(self, context):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     # @abstractmethod
     async def method_autorized(self, context):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     # @abstractmethod
     async def validate_and_save(self, context):
-        raise NotImplemented()
+        raise NotImplementedError()
 
     async def is_new(self):
         return not hasattr(self, 'mongo_id')

@@ -1,6 +1,5 @@
 import yaml
 
-from IPython import embed
 
 def save_brome_config(brome_config_path, config):
     """Save the brome config to a yaml file
@@ -11,29 +10,32 @@ def save_brome_config(brome_config_path, config):
     """
 
     with open(brome_config_path, 'w') as fd:
-        yaml.dump(config, fd, default_flow_style = False)
+        yaml.dump(config, fd, default_flow_style=False)
 
-def generate_brome_config(brome_config_path):
+
+def generate_brome_config():
     """Generate a brome config with default value
 
-    Args:
-        brome_config_path (str) the file path where the config will be save
+    Returns:
+        config (dict)
     """
 
     config = {}
-    for key in default_config.iterkeys():
+    for key in iter(default_config):
         for inner_key, value in iter(default_config[key].items()):
             if key not in config:
                 config[key] = {}
 
             config[key][inner_key] = value['default']
 
-    save_brome_config(brome_config_path, config)
+    return config
+
 
 def get_config_value(dict_list, config_name):
     """Return a config value
 
-    Basically it traverse the dictionary list until it find a match for the config_name
+    Basically it traverse the dictionary list until it
+    find a match for the config_name
 
     Args:
         dict_list (list of dict)
@@ -44,7 +46,7 @@ def get_config_value(dict_list, config_name):
         section, option = config_name.split(':')
     except ValueError:
         raise Exception("""
-            [get_config_value] config_name should contains the section 
+            [get_config_value] config_name should contains the section
             and the options separated by a colon (eg runner:tests_config)
         """)
 
@@ -66,11 +68,13 @@ def get_config_value(dict_list, config_name):
 
     return value
 
+
 def test_config_to_dict(test_config_string):
     """Parse the test config to a dictionary
 
     Args:
-        test_config_string (str) this string come from the --test-config flag of the bro executable run command
+        test_config_string (str) this string come from the --test-config
+        flag of the bro executable run command
     """
 
     test_config = {}
@@ -80,6 +84,7 @@ def test_config_to_dict(test_config_string):
             test_config[key] = value
 
     return test_config
+
 
 def load_brome_config(config_path):
     """Load the brome config from the yaml file
@@ -94,6 +99,7 @@ def load_brome_config(config_path):
         config = yaml.load(fd)
 
     return config
+
 
 def runner_args_to_dict(args):
     """Parse the runner arguments
@@ -112,8 +118,8 @@ def runner_args_to_dict(args):
                 config[section] = {}
 
             effective_value = value
-            #NOTE will only work with positive integer;
-            #not a problem for now since we only have positive integer
+            # NOTE will only work with positive integer;
+            # not a problem for now since we only have positive integer
             if value.isdigit():
                 effective_value = int(value)
             elif value.lower() in ['false', 'true']:
@@ -130,13 +136,14 @@ def runner_args_to_dict(args):
 
     return config
 
+
 def parse_brome_config_from_browser_config(browser_config):
     """Parse the browser config and look for brome specific config
 
     Args:
         browser_config (dict)
     """
-    
+
     config = {}
 
     brome_keys = [key for key in browser_config if key.find(':') != -1]
@@ -154,7 +161,7 @@ def parse_brome_config_from_browser_config(browser_config):
 
 default_config = {}
 
-###SECTIONS
+# ##SECTIONS
 default_config["brome"] = {}
 default_config["project"] = {}
 default_config["saucelabs"] = {}
@@ -172,7 +179,7 @@ default_config["ec2"] = {}
 default_config["grid_runner"] = {}
 default_config["webserver"] = {}
 
-#OPTIONS
+# BROME
 default_config["brome"]["script_folder_name"] = {
     'default': 'tests',
     'type': 'input',
@@ -194,6 +201,7 @@ default_config["brome"]["brome_executable_name"] = {
     'title': 'The brome executable name'
 }
 
+# PROXY ELEMENT
 default_config["proxy_element"]["use_touch_instead_of_click"] = {
     'default': False,
     'type': 'checkbox',
@@ -201,6 +209,7 @@ default_config["proxy_element"]["use_touch_instead_of_click"] = {
     'title': 'Use touch instead of click'
 }
 
+# BROWSERSTACK
 default_config["browserstack"]["username"] = {
     'default': '',
     'type': 'input',
@@ -215,6 +224,7 @@ default_config["browserstack"]["key"] = {
     'title': 'Browserstack key'
 }
 
+# SAUCELABS
 default_config["saucelabs"]["username"] = {
     'default': '',
     'type': 'input',
@@ -229,6 +239,7 @@ default_config["saucelabs"]["key"] = {
     'title': 'Saucelabs key'
 }
 
+# GRID RUNNER
 default_config["grid_runner"]["max_running_time"] = {
     'default': 7200,
     'type': 'number',
@@ -284,6 +295,7 @@ default_config["grid_runner"]["kill_selenium_server"] = {
     'title': 'Kill selenium server when the test batch finished'
 }
 
+# EC2
 default_config["ec2"]['wait_after_instance_launched'] = {
     'default': 30,
     'type': 'number',
@@ -298,6 +310,7 @@ default_config["ec2"]['wait_until_system_and_instance_check_performed'] = {
     'title': 'Wait until system and instance checks are performed'
 }
 
+# PROJECT
 default_config["project"]["script_folder_name"] = {
     'default': "tests",
     'type': 'input',
@@ -316,9 +329,10 @@ default_config["project"]["url"] = {
     'default': "",
     'type': 'input',
     'visible': True,
-    'title': 'The url of the server on which the test run (must include the protocol) e.g.:https://the-internet.herokuapp.com/'
+    'title': 'The url of the server on which the test run (must include the protocol) e.g.:https://the-internet.herokuapp.com/'  # noqa
 }
 
+# LOGGER RUNNER
 default_config["logger_runner"]["level"] = {
     'default': "INFO",
     'type': 'dropdown',
@@ -348,6 +362,7 @@ default_config["logger_runner"]["format"] = {
     'title': 'Logger format'
 }
 
+# LOGGER TEST
 default_config["logger_test"]["level"] = {
     'default': "INFO",
     'type': 'dropdown',
@@ -377,6 +392,7 @@ default_config["logger_test"]["format"] = {
     'title': 'Logger format'
 }
 
+# PROXY DRIVER
 default_config["proxy_driver"]["use_javascript_dnd"] = {
     'default': False,
     'type': 'checkbox',
@@ -433,14 +449,14 @@ default_config["proxy_driver"]["wait_until_present_before_assert_present"] = {
     'title': 'Wait until not present before assert present'
 }
 
-default_config["proxy_driver"]["wait_until_not_present_before_assert_not_present"] = {
+default_config["proxy_driver"]["wait_until_not_present_before_assert_not_present"] = {  # noqa
     'default': False,
     'type': 'checkbox',
     'visible': True,
     'title': 'Wait until not present  before assert not present'
 }
 
-default_config["proxy_driver"]["wait_until_not_visible_before_assert_not_visible"] = {
+default_config["proxy_driver"]["wait_until_not_visible_before_assert_not_visible"] = {  # noqa
     'default': False,
     'type': 'checkbox',
     'visible': True,
@@ -475,6 +491,7 @@ default_config["proxy_driver"]["take_screenshot_on_assertion_failure"] = {
     'title': 'Take screenshot on assertion failure'
 }
 
+# BROWSER
 default_config["browser"]["castroredux_framerate"] = {
     'default': 30,
     'type': 'number',
@@ -517,6 +534,7 @@ default_config["browser"]["maximize_window"] = {
     'title': 'Maximize window'
 }
 
+# HIGHLIGHT
 default_config["highlight"]["highlight_on_assertion_success"] = {
     'default': False,
     'type': 'checkbox',
@@ -594,6 +612,7 @@ default_config["highlight"]["use_highlight"] = {
     'title': 'Use highlight'
 }
 
+# RUNNER
 default_config["runner"]["embed_on_assertion_success"] = {
     'default': False,
     'type': 'checkbox',
@@ -706,6 +725,7 @@ default_config["runner"]["cache_screenshot"] = {
     'title': 'Use the cache screenshot'
 }
 
+# DATABASE
 default_config["database"]["mongo_database_name"] = {
     'default': '',
     'type': 'input',
@@ -713,6 +733,7 @@ default_config["database"]["mongo_database_name"] = {
     'title': 'Mongo database name'
 }
 
+# BOT DIARY
 default_config["bot_diary"]["enable_auto_bot_diary"] = {
     'default': False,
     'type': 'checkbox',
@@ -748,7 +769,8 @@ default_config["bot_diary"]["filelogger"] = {
     'title': 'Use file logger'
 }
 
-default_config["webserver"]["level"] = {
+# WEBSERVER
+default_config["webserver"]["LOG_LEVEL"] = {
     'default': 'INFO',
     'type': 'dropdown',
     'options': ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'],
@@ -756,60 +778,25 @@ default_config["webserver"]["level"] = {
     'title': 'Logger level'
 }
 
-default_config["webserver"]["streamlogger"] = {
+default_config["webserver"]["STREAMLOGGER"] = {
     'default': True,
     'type': 'checkbox',
     'visible': True,
     'title': 'Use stream logger'
 }
 
-default_config["webserver"]["filelogger"] = {
+default_config["webserver"]["FILELOGGER"] = {
     'default': True,
     'type': 'checkbox',
     'visible': True,
     'title': 'Use file logger'
 }
 
-default_config["webserver"]["CACHE_TYPE"] = {
-    'default': 'simple',
-    'type': 'input',
-    'visible': True,
-    'title': 'Cache type',
-}
-
-default_config["webserver"]["ASSETS_DEBUG"] = {
-    'default': True,
+default_config["webserver"]["ENV"] = {
+    'default': 'production',
     'type': 'checkbox',
     'visible': True,
-    'title': 'Assets debug',
-}
-
-default_config["webserver"]["DEBUG_TB_INTERCEPT_REDIRECTS"] = {
-    'default': False,
-    'type': 'checkbox',
-    'visible': True,
-    'title': 'Debug tb intercept redirects',
-}
-
-default_config["webserver"]["DEBUG_TB_ENABLED"] = {
-    'default': False,
-    'type': 'checkbox',
-    'visible': True,
-    'title': 'Debug toolbar enabled',
-}
-
-default_config["webserver"]["SECRET_KEY"] = {
-    'default': '',
-    'type': 'password',
-    'visible': True,
-    'title': 'Secret key',
-}
-
-default_config["webserver"]["DEBUG"] = {
-    'default': False,
-    'type': 'checkbox',
-    'visible': True,
-    'title': 'Flask debug',
+    'title': 'Environnemnt for the server: "production", "test", "development"',  # noqa
 }
 
 default_config["webserver"]["CLOSED_REGISTRATION"] = {
@@ -873,13 +860,6 @@ default_config["webserver"]["HOST"] = {
     'type': 'input',
     'visible': True,
     'title': 'webserver ip',
-}
-
-default_config["webserver"]["open_browser"] = {
-    'default': False,
-    'type': 'checkbox',
-    'visible': True,
-    'title': 'Open the webserver index in a new tab on start',
 }
 
 default_config["webserver"]["report"] = {

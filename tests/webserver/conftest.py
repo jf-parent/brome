@@ -1,14 +1,20 @@
 import asyncio
+from datetime import datetime
 import types
 
 import pytest
 from webtest_aiohttp import TestApp
 
-from brome.webserver.server.app import init  # noqa
-from brome.core.utils import DbSessionContext, delete_database  # noqa
+from brome.webserver.server.app import init
+from brome.core.utils import DbSessionContext, delete_database
 from brome.model.resetpasswordtoken import Resetpasswordtoken
-from brome.model.user import User  # noqa
-from brome.model.notification import Notification  # noqa
+from brome.model.user import User
+from brome.model.notification import Notification
+from brome.model.testbatch import Testbatch
+from brome.model.test import Test
+from brome.model.testcrash import Testcrash
+from brome.model.testresult import Testresult
+from brome.model.testinstance import Testinstance
 
 
 @pytest.fixture
@@ -32,6 +38,82 @@ def client():
     with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
 
         # INSERT DUMMY DATA
+        # TEST
+        for i in range(2):
+            test_context = {
+                'db_session': session,
+                'data': {
+                    'name': 'Test %s' % i,
+                    'test_id': str(i)
+                }
+            }
+            test = Test()
+            loop.run_until_complete(
+                test.validate_and_save(test_context)
+            )
+
+        # TEST BATCH
+        test_batch_context = {
+            'db_session': session,
+            'data': {
+                'pid': 1337,
+                'starting_timestamp': datetime.now(),
+                'total_tests': 1
+            }
+        }
+        for i in range(2):
+            test_batch = Testbatch()
+            loop.run_until_complete(
+                test_batch.validate_and_save(test_batch_context)
+            )
+
+            # TEST INSTANCE
+            test_instance_context = {
+                'db_session': session,
+                'data': {
+                    'starting_timestamp': datetime.now(),
+                    'name': 'Test Instance',
+                    'test_batch_id': test_batch.mongo_id
+                }
+            }
+            test_instance = Testinstance()
+            loop.run_until_complete(
+                test_instance.validate_and_save(test_instance_context)
+            )
+
+            # TEST RESULT
+            for j in range(5):
+                test_result_context = {
+                    'db_session': session,
+                    'data': {
+                        'result': bool(j),
+                        'browser_id': 'firefox',
+                        'title': 'Test result %s' % i,
+                        'test_id': test.mongo_id,
+                        'test_instance_id': test_instance.mongo_id,
+                        'test_batch_id': test_batch.mongo_id
+                    }
+                }
+                test_result = Testresult()
+                loop.run_until_complete(
+                    test_result.validate_and_save(test_result_context)
+                )
+
+            # TEST CRASH
+            test_crash_context = {
+                'db_session': session,
+                'data': {
+                    'browser_id': 'firefox',
+                    'title': 'Test Crash',
+                    'test_instance_id': test_instance.mongo_id,
+                    'test_batch_id': test_batch.mongo_id
+                }
+            }
+            test_crash = Testcrash()
+            loop.run_until_complete(
+                test_crash.validate_and_save(test_crash_context)
+            )
+
         users = [
             {
                 'name': 'test',

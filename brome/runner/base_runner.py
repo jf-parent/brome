@@ -9,9 +9,9 @@ import psutil
 
 from brome.core.configurator import runner_args_to_dict, get_config_value
 from brome.model.test import Test
-from brome.model.test_batch import TestBatch
-from brome.model.test_instance import TestInstance
-from brome.model.test_result import TestResult
+from brome.model.testbatch import Testbatch
+from brome.model.testinstance import Testinstance
+from brome.model.testresult import Testresult
 from brome.core.utils import (
     DbSessionContext,
     create_dir_if_doesnt_exist
@@ -29,9 +29,6 @@ class BaseRunner(object):
 
     def __init__(self, brome):
         self.brome = brome
-
-        # TODO remove this line
-        self.brome_config_path = self.brome.config_path
 
         self.browsers_config = self.brome.browsers_config
 
@@ -62,7 +59,7 @@ class BaseRunner(object):
         with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
             self.starting_timestamp = datetime.now()
 
-            test_batch = TestBatch()
+            test_batch = Testbatch()
             test_batch.starting_timestamp = self.starting_timestamp
             test_batch.pid = current_pid
             test_batch.total_tests = len(self.tests)
@@ -286,17 +283,17 @@ class BaseRunner(object):
         separator = '---------------------'
 
         with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
-            test_batch = session.query(TestBatch).filter(TestBatch.mongo_id == self.test_batch_id).one()  # noqa
+            test_batch = session.query(Testbatch).filter(Testbatch.mongo_id == self.test_batch_id).one()  # noqa
 
             # TITLE
             self.info_log('******* TEST BATCH SUMMARY ********')
 
             # TOTAL NUMBER OF EXECUTED TESTS
-            base_query = session.query(TestResult).filter(TestResult.test_batch_id == self.test_batch_id)  # noqa
+            base_query = session.query(Testresult).filter(Testresult.test_batch_id == self.test_batch_id)  # noqa
             total_test = base_query.count()
-            total_test_successful = base_query.filter(TestResult.result == True).count()  # noqa
-            base_query = session.query(TestResult).filter(TestResult.test_batch_id == self.test_batch_id)  # noqa
-            total_test_failed = base_query.filter(TestResult.result == False).count()  # noqa
+            total_test_successful = base_query.filter(Testresult.result == True).count()  # noqa
+            base_query = session.query(Testresult).filter(Testresult.test_batch_id == self.test_batch_id)  # noqa
+            total_test_failed = base_query.filter(Testresult.result == False).count()  # noqa
             self.info_log(
                 'Total_test: %s; Total_test_successful: %s; Total_test_failed: %s' %  # noqa
                 (total_test, total_test_successful, total_test_failed)
@@ -315,8 +312,8 @@ class BaseRunner(object):
 
             # FAILED TESTS
             failed_test_list = []
-            test_results = session.query(TestResult)\
-                .filter(TestResult.test_batch_id == self.test_batch_id).all()
+            test_results = session.query(Testresult)\
+                .filter(Testresult.test_batch_id == self.test_batch_id).all()
             for test_result in test_results:
                 if not test_result.result and \
                         test_result.test not in failed_test_list:
@@ -351,8 +348,8 @@ class BaseRunner(object):
                     (test._name, test.pdriver.get_id())
                 )
 
-                test_instance = session.query(TestInstance)\
-                    .filter(TestInstance.mongo_id == test._test_instance_id)\
+                test_instance = session.query(Testinstance)\
+                    .filter(Testinstance.mongo_id == test._test_instance_id)\
                     .one()
 
                 # TEST EXECUTION TIME

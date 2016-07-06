@@ -23,36 +23,35 @@ class Config(object):
             with open(config_path) as fd:
                 self.__config__ = json.load(fd)
 
-            logger.setLevel(getattr(logging, self.get('LOG_LEVEL', 'INFO')))
-
-            formatter = logging.Formatter(
-                '[L:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
-                datefmt='%d-%m-%Y %H:%M:%S'
-            )
-
-            # StreamHandler
-            sh = logging.StreamHandler()
-            sh.setFormatter(formatter)
-            logger.addHandler(sh)
-
-            logs_dir = os.path.join(ROOT, 'logs')
-            if not os.path.exists(logs_dir):
-                os.mkdir(logs_dir)
-
-            # FileHandler
-            fh = TimedRotatingFileHandler(
-                os.path.join(logs_dir, 'server.log'),
-                when="midnight"
-            )
-            fh.setFormatter(formatter)
-            logger.addHandler(fh)
-
         if isinstance(config, dict):
             self.__config__ = config
         elif isinstance(config, str):
             configure_from_relative_path(config)
         else:
             configure_from_relative_path('server.json')
+
+        # LOGGER
+        logger.setLevel(getattr(logging, self.get('LOG_LEVEL', 'INFO')))
+
+        formatter = logging.Formatter(
+            '[L:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
+            datefmt='%d-%m-%Y %H:%M:%S'
+        )
+
+        # StreamHandler
+        if self.get('STREAMLOGGER', True):
+            sh = logging.StreamHandler()
+            sh.setFormatter(formatter)
+            logger.addHandler(sh)
+
+        # FileHandler
+        if self.get('FILELOGGER', False):
+            fh = TimedRotatingFileHandler(
+                os.path.join(ROOT, 'logs', 'server.log'),
+                when="midnight"
+            )
+            fh.setFormatter(formatter)
+            logger.addHandler(fh)
 
     def __repr__(self):
         return self.__config__.__repr__()

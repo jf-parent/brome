@@ -1,8 +1,15 @@
-from mongoalchemy.fields import *  # noqa
+from mongoalchemy.fields import (
+    DateTimeField,
+    StringField,
+    BoolField,
+    ObjectIdField,
+    DictField
+)
 
 from brome.model.basemodel import BaseModel
 
-class TestQualityScreenshot(BaseModel):
+
+class Testqualityscreenshot(BaseModel):
     timestamp = DateTimeField()
     browser_id = StringField()
     screenshot_path = StringField()

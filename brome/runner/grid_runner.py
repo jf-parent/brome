@@ -1,4 +1,5 @@
 import socket
+from time import sleep
 import threading
 import traceback
 import os
@@ -8,17 +9,19 @@ import math
 
 import virtualbox
 
-from brome.core.utils import *
 from brome.runner.base_runner import BaseRunner
 from brome.runner.ec2_instance import EC2Instance
 from brome.runner.virtualbox_instance import VirtualboxInstance
+from brome.runner.browserstack_instance import BrowserstackInstance
 from brome.runner.localhost_instance import LocalhostInstance
 from brome.runner.saucelabs_instance import SauceLabsInstance
 from brome.runner.browser_config import BrowserConfig
-from brome.model.test_batch import TestBatch
+from brome.model.testbatch import Testbatch
+
 
 class GridRunner(BaseRunner):
-    """GridRunner run on Ec2, Virtualbox, Browserstack, saucelabs and also localhost
+    """ GridRunner run on Ec2, Virtualbox,
+        Browserstack, saucelabs and also localhost
     """
     def __init__(self, *args):
         super(GridRunner, self).__init__(*args)
@@ -34,44 +37,54 @@ class GridRunner(BaseRunner):
         """Execute the test batch
         """
 
-        #START SELENIUM GRID
+        # START SELENIUM GRID
         if self.get_config_value('grid_runner:start_selenium_server'):
             self.start_selenium_server()
 
-        #Get all the browsers id
-        self.browsers_id = self.get_config_value('runner:remote_runner').split(',')
+        # Get all the browsers id
+        self.browsers_id = self.get_config_value(
+            'runner:remote_runner'
+        ).split(',')
 
-        #Start all the instances
+        # Start all the instances
         instance_threads = []
         for i, browser_id in enumerate(self.browsers_id):
             browser_config = BrowserConfig(
-                runner = self,
-                browser_id = browser_id,
-                browsers_config = self.browsers_config
+                runner=self,
+                browser_id=browser_id,
+                browsers_config=self.browsers_config
             )
 
             self.browser_configs[browser_id] = browser_config
 
-            #EC2
+            # EC2
             if browser_config.location == 'ec2':
 
-                max_number_of_instance = browser_config.get('max_number_of_instance')
-                nb_browser_by_instance = browser_config.get('nb_browser_by_instance')
+                max_number_of_instance = browser_config.get(
+                    'max_number_of_instance'
+                )
+                nb_browser_by_instance = browser_config.get(
+                    'nb_browser_by_instance'
+                )
 
                 if len(self.tests) < \
-                    max_number_of_instance * \
-                    nb_browser_by_instance:
+                        max_number_of_instance * \
+                        nb_browser_by_instance:
 
-                    nb_instance_to_launch = int(math.ceil(float(len(self.tests))/nb_browser_by_instance))
+                    nb_instance_to_launch = int(
+                        math.ceil(
+                            float(len(self.tests))/nb_browser_by_instance
+                        )
+                    )
 
                 else:
                     nb_instance_to_launch = max_number_of_instance
 
                 for j in range(nb_instance_to_launch):
                     ec2_instance = EC2Instance(
-                        runner = self,
-                        browser_config = browser_config,
-                        index = j
+                        runner=self,
+                        browser_config=browser_config,
+                        index=j
                     )
 
                     ec2_instance_thread = InstanceThread(ec2_instance)
@@ -79,17 +92,17 @@ class GridRunner(BaseRunner):
 
                     instance_threads.append(ec2_instance_thread)
 
-            #VIRTUALBOX
+            # VIRTUALBOX
             elif browser_config.location == 'virtualbox':
-                #Instanciate only one vbox
+                # Instanciate only one vbox
                 if not hasattr(self, 'vbox'):
                     self.vbox = virtualbox.VirtualBox()
 
                 vbox_instance = VirtualboxInstance(
-                    runner = self,
-                    browser_config = browser_config,
-                    index = i,
-                    vbox = self.vbox
+                    runner=self,
+                    browser_config=browser_config,
+                    index=i,
+                    vbox=self.vbox
                 )
 
                 vbox_instance_thread = InstanceThread(vbox_instance)
@@ -97,7 +110,7 @@ class GridRunner(BaseRunner):
 
                 instance_threads.append(vbox_instance_thread)
 
-            #SAUCELABS
+            # SAUCELABS
             elif browser_config.location == 'saucelabs':
 
                 if not self.instances.get(browser_id):
@@ -105,7 +118,7 @@ class GridRunner(BaseRunner):
 
                 self.instances[browser_id].append(SauceLabsInstance())
 
-            #BROWSERSTACK
+            # BROWSERSTACK
             elif browser_config.location == 'browserstack':
 
                 if not self.instances.get(browser_id):
@@ -113,10 +126,12 @@ class GridRunner(BaseRunner):
 
                 self.instances[browser_id].append(BrowserstackInstance())
 
-            #LOCALHOST
+            # LOCALHOST
             elif browser_config.location == 'localhost':
 
-                max_number_of_instance = browser_config.get('max_number_of_instance', 1)
+                max_number_of_instance = browser_config.get(
+                    'max_number_of_instance', 1
+                )
 
                 if len(self.tests) < max_number_of_instance:
                     nb_instance_to_launch = len(self.tests)
@@ -127,7 +142,9 @@ class GridRunner(BaseRunner):
                     if not self.instances.get(browser_id):
                         self.instances[browser_id] = []
 
-                    self.instances[browser_id].append(LocalhostInstance(self, browser_config, test_name = i))
+                    self.instances[browser_id].append(
+                        LocalhostInstance(self, browser_config, test_name=i)
+                    )
 
         for t in instance_threads:
             t.join()
@@ -138,26 +155,26 @@ class GridRunner(BaseRunner):
             self.run()
         except:
             tb = traceback.format_exc()
-            self.error_log("Exception in run of the grid runner: %s"%str(tb))
+            self.error_log("Exception in run of the grid runner: %s" % str(tb))
             raise
 
         finally:
             try:
                 self.tear_down_instances()
 
-                #Kill selenium server
+                # Kill selenium server
                 if self.get_config_value('grid_runner:kill_selenium_server'):
                     if self.selenium_pid:
                         self.kill_pid(self.selenium_pid)
 
-                #Kill xvfb process
+                # Kill xvfb process
                 for xvfb_pid in self.xvfb_pids:
                     self.kill_pid(xvfb_pid)
 
             except:
                 tb = traceback.format_exc()
-                self.error_log("Exception in finally block of the grid runner: %s"%str(tb))
-                    
+                self.error_log("Exception in finally block of the grid runner: %s" % str(tb))  # noqa
+
         self.info_log("The test batch is finished.")
 
     def resolve_instance_by_ip(self, ip):
@@ -182,7 +199,7 @@ class GridRunner(BaseRunner):
                 test_index_by_browser_id[browser_id] = 0
 
             self.kill_test_batch_if_necessary()
-            
+
             while active_thread or start_thread:
                 start_thread = False
 
@@ -196,30 +213,30 @@ class GridRunner(BaseRunner):
                         current_active_thread = 0
                         for thread in threading.enumerate():
 
-                            #Make sure that the thread is TestThread
+                            # Make sure that the thread is TestThread
                             if hasattr(thread, 'test'):
-                                if thread.test._browser_config.browser_id == browser_id:
+                                if thread.test._browser_config.browser_id == browser_id:  # noqa
                                     current_active_thread += 1
 
-                        active_thread_by_browser_id[browser_id] = current_active_thread
+                        active_thread_by_browser_id[browser_id] = current_active_thread  # noqa
 
-                    for j in range(0, len(self.instances[browser_id]) - active_thread_by_browser_id[browser_id]):
+                    for j in range(0, len(self.instances[browser_id]) - active_thread_by_browser_id[browser_id]):  # noqa
 
                         self.kill_test_batch_if_necessary()
 
-                        if test_index_by_browser_id[browser_id] < len(self.tests):
+                        if test_index_by_browser_id[browser_id] < len(self.tests):  # noqa
                             current_index += 1
 
-                            test = self.tests[test_index_by_browser_id[browser_id]]
+                            test = self.tests[test_index_by_browser_id[browser_id]]  # noqa
 
                             test_index_by_browser_id[browser_id] += 1
 
                             test_ = test.Test(
-                                runner = self,
-                                test_batch_id = self.test_batch_id,
-                                browser_config = self.browser_configs[browser_id],
-                                name = test.Test.name,
-                                index = test_index_by_browser_id[browser_id]
+                                runner=self,
+                                test_batch_id=self.test_batch_id,
+                                browser_config=self.browser_configs[browser_id],  # noqa
+                                name=test.Test.name,
+                                index=test_index_by_browser_id[browser_id]
                             )
                             test_.pdriver.embed_disabled = True
 
@@ -231,21 +248,22 @@ class GridRunner(BaseRunner):
                 active_thread = threading.active_count() - 1
                 if active_thread:
                     try:
-                        active_thread_test_number = len([tn for tn in threading.enumerate() if type(tn) != threading._MainThread and hasattr(tn, 'test')])
-                        self.info_log("Active thread number: %s"%active_thread_test_number)
-                        self.info_log("Active thread name: %s"%(', '.join([
-                                "%s-%s"%(
+                        active_thread_test_number = len([tn for tn in threading.enumerate() if type(tn) != threading._MainThread and hasattr(tn, 'test')])  # noqa
+                        self.info_log("Active thread number: %s" % active_thread_test_number)  # noqa
+                        self.info_log("Active thread name: %s" % (', '.join([  # noqa
+                                "%s-%s" % (
                                     th.test._browser_config.browser_id,
                                     th.test._name
-                                ) for th in threading.enumerate() if type(th) != threading._MainThread and hasattr(th, 'test')
+                                ) for th in threading.enumerate() if type(th) != threading._MainThread and hasattr(th, 'test')  # noqa
                             ])
                         ))
                     except Exception as e:
-                        self.error_log("print active exception: %s"% str(e))
+                        self.error_log("print active exception: %s" % str(e))
 
-                #TIMEOUT
-                if (self.starting_timestamp - datetime.now()).total_seconds() >\
-                    self.get_config_value("grid_runner:max_running_time"):
+                # TIMEOUT
+                now = datetime.now()
+                if (self.starting_timestamp - now).total_seconds() >\
+                        self.get_config_value("grid_runner:max_running_time"):
 
                     self.error_log("max_running_time reached... terminating!")
                     raise TestRunnerKilledException()
@@ -259,9 +277,10 @@ class GridRunner(BaseRunner):
 
         except Exception:
             tb = traceback.format_exc()
-            self.error_log("Run exception: %s"%str(tb))
+            self.error_log("Run exception: %s" % str(tb))
 
-        test_batch = self.session.query(TestBatch).filter(TestBatch.mongo_id == self.test_batch_id).one()
+        test_batch = self.session.query(Testbatch)\
+            .filter(Testbatch.mongo_id == self.test_batch_id).one()
         test_batch.ending_timestamp = datetime.now()
         self.session.save(test_batch, safe=True)
 
@@ -270,15 +289,17 @@ class GridRunner(BaseRunner):
     def kill_test_batch_if_necessary(self):
         """Kill the test batch
 
-        If the test_batch.killed is set to true then the test batch will be kill
+            If the test_batch.killed is set to true
+            then the test batch will be kill
         """
-        test_batch = self.session.query(TestBatch).filter(TestBatch.id == self.test_batch_id).one()
+        test_batch = self.session.query(Testbatch)\
+            .filter(Testbatch.id == self.test_batch_id).one()
 
         if test_batch.killed:
             self.info_log("Killing itself")
-            for t in [t for t in threading.enumerate() if type(t) != threading._MainThread]:
+            for t in [t for t in threading.enumerate() if type(t) != threading._MainThread]:  # noqa
                 if not t.test.ending_timestamp:
-                    self.info_log("Killing: %s"%t.test._name)
+                    self.info_log("Killing: %s" % t.test._name)
                     t.test.end()
 
             raise TestRunnerKilledException("Killed")
@@ -310,12 +331,13 @@ class GridRunner(BaseRunner):
         if not is_selenium_server_is_running():
             self.info_log('Starting selenium server...')
 
-            command = self.get_config_value("grid_runner:selenium_server_command")\
+            command = self.get_config_value(
+                "grid_runner:selenium_server_command")\
                 .format(
                     **self.get_config_value("grid_runner:*")
                 )
 
-            self.info_log('Selenium hub command: %s'%command)
+            self.info_log('Selenium hub command: %s' % command)
 
             process = Popen(
                 command.split(' '),
@@ -325,7 +347,7 @@ class GridRunner(BaseRunner):
 
             self.selenium_pid = process.pid
 
-            self.info_log('Selenium server pid: %s'%self.selenium_pid)
+            self.info_log('Selenium server pid: %s' % self.selenium_pid)
         else:
             self.info_log('Selenium is already running.')
             return True
@@ -341,6 +363,7 @@ class GridRunner(BaseRunner):
 
         raise Exception("Selenium server did not start!")
 
+
 class InstanceThread(threading.Thread):
     """Theard that start the instance
     """
@@ -355,16 +378,19 @@ class InstanceThread(threading.Thread):
         try:
             success = self.instance.startup()
         except Exception as e:
-            self.runner.critical_log("Exception in InstanceThread instance startup: %s"%unicode(e))
+            self.runner.critical_log(
+                "Exception in InstanceThread instance startup: %s" % e
+            )
 
-        if not self.runner.instances.get(self.instance.browser_config.browser_id):
+        if not self.runner.instances.get(self.instance.browser_config.browser_id):  # noqa
             self.runner.instances[self.instance.browser_config.browser_id] = []
 
         if success:
-            self.runner.instances[self.instance.browser_config.browser_id].append(self.instance)
+            self.runner.instances[self.instance.browser_config.browser_id].append(self.instance)  # noqa
             self.runner.instances_ip[self.instance.get_ip()] = self.instance
 
         self.runner.alive_instances.append(self.instance)
+
 
 class TestThread(threading.Thread):
     """Thread that run the test
@@ -376,6 +402,7 @@ class TestThread(threading.Thread):
 
     def run(self):
         self.test.execute()
+
 
 class TestRunnerKilledException(Exception):
     """Exception that is raised when the test batch is killed

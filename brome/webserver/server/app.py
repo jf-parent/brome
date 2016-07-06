@@ -2,7 +2,6 @@
 
 import os
 import asyncio
-import sys
 
 from redis import Redis
 from rq import Queue
@@ -13,13 +12,10 @@ import aiohttp_jinja2
 from prometheus_client import start_http_server
 from aiohttp import web
 
-HERE = os.path.abspath(os.path.dirname(__file__))
-sys.path.append(os.path.join(HERE, '..'))
-
-from brome.webserver.server.prometheus_instruments import db_session_gauge  # noqa
-from brome.webserver.server.routes import routes  # noqa
-from brome.webserver.server.middlewares import db_handler  # noqa
-from brome.webserver.server.settings import config, logger, ROOT  # noqa
+from brome.webserver.server.prometheus_instruments import db_session_gauge
+from brome.webserver.server.routes import routes
+from brome.webserver.server.middlewares import db_handler
+from brome.webserver.server.settings import config, logger, ROOT
 
 
 async def on_shutdown(app):
@@ -112,8 +108,8 @@ async def init(loop, config_args=None):
 
     serv_generator = loop.create_server(
         handler,
-        config.get('SERVER_HOST'),
-        config.get('SERVER_PORT')
+        config.get('HOST'),
+        config.get('PORT')
     )
 
     # PROMETHEUS CLIENT
@@ -122,19 +118,15 @@ async def init(loop, config_args=None):
 
     return serv_generator, handler, app
 
-if __name__ == '__main__':
-    """
-    loop = uvloop.new_event_loop()
-    asyncio.set_event_loop(loop)
-    """
 
+def run_app(config=None):
     loop = asyncio.get_event_loop()
 
-    serv_generator, handler, app = loop.run_until_complete(init(loop))
+    serv_generator, handler, app = loop.run_until_complete(init(loop, config))
 
     serv = loop.run_until_complete(serv_generator)
 
-    logger.debug('Server listening at %s' % str(serv.sockets[0].getsockname()))
+    logger.info('Server listening at %s' % str(serv.sockets[0].getsockname()))
     try:
         loop.run_forever()
 
@@ -146,3 +138,6 @@ if __name__ == '__main__':
         loop.close()
 
     logger.debug('Server stopped')
+
+if __name__ == '__main__':
+    run_app()

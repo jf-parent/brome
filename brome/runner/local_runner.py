@@ -5,6 +5,9 @@ from brome.runner.localhost_instance import LocalhostInstance
 from brome.runner.base_runner import BaseRunner
 from brome.runner.browser_config import BrowserConfig
 from brome.model.testbatch import Testbatch
+from brome.core.utils import (
+    DbSessionContext
+)
 
 
 class LocalRunner(BaseRunner):

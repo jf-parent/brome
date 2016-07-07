@@ -11,7 +11,6 @@ import UnAuthenticatedNav from 'components/UnAuthenticatedNav'
 import Home from 'components/Home'
 import LocalesMenu from 'locales/LocalesMenu'
 import * as AuthActions from 'actions/AuthActions'
-import SocialMedia from 'components/SocialMedia'
 
 function mapStateToProps (state) {
   return {
@@ -37,7 +36,7 @@ class CoreLayout extends BaseComponent {
     this.debug('componentDidMount')
 
     this.props.actions.getSession()
-    window.setInterval(() => this.props.actions.getSession(false), __GET_SESSION_INTERVAL__)
+    // window.setInterval(() => this.props.actions.getSession(false), __GET_SESSION_INTERVAL__)
   }
 
   render () {
@@ -71,7 +70,6 @@ class CoreLayout extends BaseComponent {
           </footer>
           <div className='container'>
             <LocalesMenu />
-            <SocialMedia />
           </div>
         </div>
       )

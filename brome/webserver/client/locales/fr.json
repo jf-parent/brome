@@ -13,6 +13,7 @@
   "errorMsg.InvalidNameException": "nom invalide",
   "errorMsg.InvalidPasswordException": "mot de passe invalide",
   "errorMsg.InvalidEmailException": "courriel invalide",
+  "errorMsg.InvalidRegistrationTokenException": "Le jeton d'enregistrement est invalide",
   "errorMsg.WrongEmailOrPasswordException": "mot de passe ou courriel incorrect",
   "forgottenPassword.SendResetPasswordTokenSuccessful": "Courriel de réinitialisation de mot de passe envoyé avec succès!",
   "forgottenPassword.ResetPasswordHeader": "Veuillez saisir votre nouveau mot de passe",
@@ -43,6 +44,7 @@
   "profile.EmailNotVerified": "Courriel non vérifié",
   "register.AlreadyHaveAnAccount": "Vous avez déjà un compte? cliquer ici",
   "register.Registration": "Enregistrement",
+  "register.RegistrationToken": "Jeton d'enregistrement",
   "register.RegisterBtn": "Enregistrez-vous",
   "resetPassword.ResetPasswordSuccess": "Votre mot de passe a été réinitialiser avec succès!"
 }

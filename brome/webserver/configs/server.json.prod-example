@@ -4,6 +4,7 @@
     "LOG_LEVEL": "ERROR",
     "ENV": "production",
     "RELEASE": "latest",
+    "REGISTRATION_TOKEN": "123456",
     "MONGO_DATABASE_NAME": "webbase-prod",
     "MONGO_HOST": "127.0.0.1",
     "SERVER_PORT": 80,

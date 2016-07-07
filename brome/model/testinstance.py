@@ -21,7 +21,7 @@ class Testinstance(BaseModel):
 
     def __repr__(self):
         try:
-            return "Testinstance <uid: {self.uid}><test_batch_id: {self.test_batch_id}>".format(  # noqa
+            return "Testinstance <uid: {self.mongo_id}><test_batch_id: {self.test_batch_id}>".format(  # noqa
                 self=self
             )
         except AttributeError:

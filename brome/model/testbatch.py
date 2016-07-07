@@ -17,7 +17,7 @@ class Testbatch(BaseModel):
 
     def __repr__(self):
         try:
-            return "Testbatch <uid: {self.uid}>".format(
+            return "Testbatch <uid: {self.mongo_id}>".format(
                 self=self
             )
         except AttributeError:

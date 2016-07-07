@@ -1,13 +1,11 @@
 #! /usr/bin/env python
 
-import json
-
 from IPython import embed
 from mongoalchemy.session import Session
 
-from webbaseserver.model.user import User
-from webbaseserver.model.notification import Notification
-from webbaseserver.settings import config
+from brome.model.user import User
+from brome.model.notification import Notification
+from brome.webserver.server.settings import config
 
 config.configure()
 

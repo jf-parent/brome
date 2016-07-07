@@ -22,6 +22,10 @@ const registerMessages = defineMessages({
   passwordPlaceholder: {
     id: 'general.PasswordPlaceholder',
     defaultMessage: 'Password'
+  },
+  tokenPlaceholder: {
+    id: 'register.RegistrationToken',
+    defaultMessage: 'Token'
   }
 })
 
@@ -69,6 +73,7 @@ class Register extends BaseComponent {
     const emailPlaceholder = formatMessage(registerMessages.emailPlaceholder)
     const namePlaceholder = formatMessage(registerMessages.namePlaceholder)
     const passwordPlaceholder = formatMessage(registerMessages.passwordPlaceholder)
+    const RegistrationTokenPlaceholder = formatMessage(registerMessages.tokenPlaceholder)
 
     return (
       <center>
@@ -83,6 +88,7 @@ class Register extends BaseComponent {
           <ValidatedInput type='email' name='email' placeholder={emailPlaceholder} validations='isEmail' required autoFocus />
           <ValidatedInput type='text' name='name' placeholder={namePlaceholder} required validations='minLength:2' maxLength='60' />
           <PasswordInput type='password' name='password' placeholder={passwordPlaceholder} required />
+          <PasswordInput type='password' name='registration_token' placeholder={RegistrationTokenPlaceholder} required />
           <LaddaButton ref='button' isDisabled isLoading={this.props.state.register.loading} onSubmit={this.onSubmit}>
             <FormattedMessage
               id='register.RegisterBtn'

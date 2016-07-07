@@ -9,15 +9,7 @@ from contextlib import ContextDecorator
 from mongoalchemy.session import Session
 from pymongo import MongoClient
 
-from selenium.common.exceptions import *  # noqa
-from selenium.webdriver.common.by import By  # noqa
-from selenium.webdriver.support.ui import WebDriverWait  # noqa
-from selenium.webdriver.support import expected_conditions as EC  # noqa
-from IPython import embed  # noqa
-from pudb import set_trace  # noqa
 import psutil
-
-from brome.core.exceptions import *  # noqa
 
 
 class DbSessionContext(ContextDecorator):

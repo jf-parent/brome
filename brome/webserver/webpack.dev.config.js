@@ -13,9 +13,9 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BUILD_DIR = path.resolve(__dirname, 'dist-dev');
 const APP_DIR = path.resolve(__dirname, 'client');
-const serverAddr = serverConfig['SERVER_HOST'] + ':' + serverConfig['SERVER_PORT'];
+const serverAddr = serverConfig['HOST'] + ':' + serverConfig['PORT'];
 const clientPort = '8080';
-const clientAddr = serverConfig['SERVER_HOST'] + ':' + clientPort;
+const clientAddr = serverConfig['HOST'] + ':' + clientPort;
 
 console.log('[*] BUILD_DIR:', BUILD_DIR);
 console.log('[*] APP_DIR:', APP_DIR);

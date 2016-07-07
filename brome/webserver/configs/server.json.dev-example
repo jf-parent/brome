@@ -4,6 +4,7 @@
     "LOG_LEVEL": "DEBUG",
     "ENV": "development",
     "RELEASE": "latest",
+    "REGISTRATION_TOKEN": "123456",
     "MONGO_DATABASE_NAME": "webbase-dev",
     "MONGO_HOST": "127.0.0.1",
     "SERVER_PORT": 8000,

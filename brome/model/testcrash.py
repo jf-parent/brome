@@ -21,7 +21,7 @@ class Testcrash(BaseModel):
 
     def __repr__(self):
         try:
-            return "Testcrash <uid: {self.uid}><browser_id: {self.browser_id}><title: {self.title}>".format(  # noqa
+            return "Testcrash <uid: {self.mongo_id}><browser_id: {self.browser_id}><title: {self.title}>".format(  # noqa
                 self=self
             )
         except AttributeError:

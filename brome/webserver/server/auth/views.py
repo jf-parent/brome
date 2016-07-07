@@ -5,7 +5,7 @@ from brome.webserver.server import exceptions
 from brome.model.user import User
 from brome.model.emailconfirmationtoken import Emailconfirmationtoken
 from brome.model.resetpasswordtoken import Resetpasswordtoken
-from brome.webserver.server.settings import logger
+from brome.webserver.server.settings import logger, config
 from brome.webserver.server.server_decorator import (
     require,
     exception_handler,
@@ -72,6 +72,10 @@ class Register(web.View):
             'method': 'create',
             'queue': self.request.app.queue
         }
+
+        registration_token = data.get('registration_token')
+        if registration_token != config.get('REGISTRATION_TOKEN'):
+            raise exceptions.InvalidRegistrationTokenException()
 
         # INIT USER
         user = User()

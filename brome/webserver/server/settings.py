@@ -5,7 +5,7 @@ import json
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 ROOT = os.path.join(HERE, '..')
-logger = logging.getLogger('server')
+logger = logging.getLogger('bromewebserver')
 
 
 class Config(object):

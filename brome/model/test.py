@@ -12,7 +12,7 @@ class Test(BaseModel):
 
     def __repr__(self):
         try:
-            return "Test <uid: {self.uid}>".format(
+            return "Test <uid: {self.mongo_id}>".format(
                 self=self
             )
         except AttributeError:

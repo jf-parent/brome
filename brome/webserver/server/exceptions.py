@@ -65,3 +65,7 @@ class EmailNotFound(ServerBaseException):
 
 class ModelImportException(ServerBaseException):
     pass
+
+
+class InvalidRegistrationTokenException(ServerBaseException):
+    pass

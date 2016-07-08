@@ -15,16 +15,33 @@ export const TEST_BATCH_LIST_LOADING_ERROR = 'TEST_BATCH_LIST_LOADING_ERROR'
 const logger = require('loglevel').getLogger('TestBatchList')
 logger.setLevel(__LOGLEVEL__)
 
-export function loadTestBatch (data) {
+export function loadTestBatch (session, skip, limit) {
   return dispatch => {
     dispatch({type: TEST_BATCH_LIST_LOADING})
+
+    let data = {
+      'actions': {
+        'action': 'read',
+        'model': 'testbatch',
+        'descending': 'starting_timestamp',
+        'limit': limit,
+        'skip': skip
+      },
+      'token': session.token
+    }
 
     axios.post('/api/crud', data)
       .then((response) => {
         logger.debug('/api/crud (data) (response)', data, response)
 
         if (response.data.success) {
-          dispatch(testBatchListLoaded(response.data))
+          dispatch(
+            testBatchListLoaded(
+              response.data,
+              skip,
+              limit
+            )
+          )
         } else {
           dispatch(testBatchListLoadingError(response.error))
         }
@@ -32,7 +49,9 @@ export function loadTestBatch (data) {
   }
 }
 
-function testBatchListLoaded (data) {
+function testBatchListLoaded (data, skip, limit) {
+  data.skip = skip
+  data.limit = limit
   return {
     type: TEST_BATCH_LIST_LOADED,
     data
@@ -57,6 +76,7 @@ export const actions = {
 const initialState = {
   loading: false,
   testBatchList: [],
+  totalTestBatch: 0,
   error: null
 }
 
@@ -74,7 +94,10 @@ export default function testbatchlist (state = initialState, action) {
       return Object.assign({},
         initialState,
         {
-          testBatchList: action.data.results
+          testBatchList: action.data.results,
+          totalTestBatch: action.data.total,
+          limit: action.data.limit,
+          skip: action.data.skip
         }
       )
 
@@ -90,4 +113,3 @@ export default function testbatchlist (state = initialState, action) {
       return state
   }
 }
-

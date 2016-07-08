@@ -47,7 +47,7 @@ class NotificationPopup extends BaseComponent {
   onLastClick () {
     this.debug('onLastClick')
     let limit = this.props.state.notification.limit
-    let lastPage = this.props.state.notification.totalNotifications - limit
+    let lastPage = Math.floor(this.props.state.notification.totalNotifications - limit) * limit
     this.props.actions.getNotifications(
       this.props.state.session,
       lastPage
@@ -132,7 +132,7 @@ class NotificationPopup extends BaseComponent {
 
     let pager = null
     if (this.props.state.notification.totalNotifications > 10) {
-      let totalPage = this.props.state.notification.totalNotifications / this.props.state.notification.limit
+      let totalPage = parseInt(Math.ceil(this.props.state.notification.totalNotifications / this.props.state.notification.limit))
       let currentPage = this.getCurrentPage()
       pager = <Pager totalPage={totalPage} currentPage={currentPage} onFirstClick={this.onFirstClick} onLastClick={this.onLastClick} onNextClick={this.onNextClick} onPreviousClick={this.onPreviousClick} />
     }

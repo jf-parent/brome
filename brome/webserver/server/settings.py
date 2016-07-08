@@ -5,7 +5,6 @@ import json
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 ROOT = os.path.join(HERE, '..')
-logger = logging.getLogger('bromewebserver')
 
 
 class Config(object):
@@ -31,7 +30,10 @@ class Config(object):
             configure_from_relative_path('server.json')
 
         # LOGGER
-        logger.setLevel(getattr(logging, self.get('LOG_LEVEL', 'INFO')))
+        logger = logging.getLogger('bromewebserver')
+        logger.setLevel(
+            getattr(logging, self.get('LOG_LEVEL', 'INFO'))
+        )
 
         formatter = logging.Formatter(
             '[L:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',

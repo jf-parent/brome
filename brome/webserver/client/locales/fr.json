@@ -46,5 +46,10 @@
   "register.Registration": "Enregistrement",
   "register.RegistrationToken": "Jeton d'enregistrement",
   "register.RegisterBtn": "Enregistrez-vous",
-  "resetPassword.ResetPasswordSuccess": "Votre mot de passe a été réinitialiser avec succès!"
+  "resetPassword.ResetPasswordSuccess": "Votre mot de passe a été réinitialiser avec succès!",
+  "testBatchList.StartedTimestamp": "Débuta:",
+  "testBatchList.EndingTimtestamp": "Termina:",
+  "testBatchList.TotalDuration": "Durée totale:",
+  "testBatchList.TestBatchListHeader": "Ensemble de Test",
+  "testBatchList.IsRunning": "en cours..."
 }

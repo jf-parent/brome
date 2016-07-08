@@ -15,7 +15,6 @@ from brome.core.utils import (
     delete_database
 )
 from brome.core.grep import grep_files
-from brome.webserver.server.app import run_app
 from brome.runner.local_runner import LocalRunner
 from brome.runner.grid_runner import GridRunner
 from brome.core.configurator import (
@@ -297,6 +296,8 @@ class Brome(object):
             )
 
     def webserver(self, args):
+        # TODO find out why top-level importing run_app break the logger
+        from brome.webserver.server.app import run_app
         self.config['webserver']['MONGO_DATABASE_NAME'] = self.config['database']['mongo_database_name']  # noqa
         self.config['webserver']['MONGO_HOST'] = self.config['database']['mongo_host']  # noqa
         run_app(self.config['webserver'])

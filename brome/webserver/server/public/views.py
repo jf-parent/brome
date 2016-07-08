@@ -1,9 +1,11 @@
+import logging
+
 from aiohttp import web
 import aiohttp_jinja2
 from aiohttp_session import get_session
 
 from brome.webserver.server import exceptions
-from brome.webserver.server.settings import logger, config
+from brome.webserver.server.settings import config
 from brome.webserver.server.server_decorator import (
     exception_handler,
     csrf_protected
@@ -12,6 +14,8 @@ from brome.model.user import User
 from brome.model.resetpasswordtoken import Resetpasswordtoken
 from brome.webserver.server.auth import set_session, get_user_from_session
 from brome.webserver.server.utils import generate_token
+
+logger = logging.getLogger('bromewebserver')
 
 
 async def set_csrf_token_session(session):

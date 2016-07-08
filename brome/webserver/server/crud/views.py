@@ -1,11 +1,11 @@
 import importlib
 import traceback
+import logging
 
 from aiohttp_session import get_session
 from aiohttp import web
 
 from brome.webserver.server import exceptions
-from brome.webserver.server.settings import logger
 from brome.webserver.server.server_decorator import (
     require,
     exception_handler,
@@ -15,6 +15,8 @@ from brome.webserver.server.auth import get_user_from_session
 from brome.webserver.server.prometheus_instruments import (
     serverside_unhandled_exception_counter
 )
+
+logger = logging.getLogger('bromewebserver')
 
 
 class CRUD(web.View):

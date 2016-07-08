@@ -1,3 +1,5 @@
+import logging
+
 from aiohttp_session import get_session
 from aiohttp import web
 
@@ -5,13 +7,15 @@ from brome.webserver.server import exceptions
 from brome.model.user import User
 from brome.model.emailconfirmationtoken import Emailconfirmationtoken
 from brome.model.resetpasswordtoken import Resetpasswordtoken
-from brome.webserver.server.settings import logger, config
+from brome.webserver.server.settings import config
 from brome.webserver.server.server_decorator import (
     require,
     exception_handler,
     csrf_protected
 )
 from brome.webserver.server.auth import set_session, get_user_from_session
+
+logger = logging.getLogger('bromewebserver')
 
 
 class Login(web.View):

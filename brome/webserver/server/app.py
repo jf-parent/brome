@@ -2,6 +2,7 @@
 
 import os
 import asyncio
+import logging
 
 from redis import Redis
 from rq import Queue
@@ -15,7 +16,9 @@ from aiohttp import web
 from brome.webserver.server.prometheus_instruments import db_session_gauge
 from brome.webserver.server.routes import routes
 from brome.webserver.server.middlewares import db_handler
-from brome.webserver.server.settings import config, logger, ROOT
+from brome.webserver.server.settings import config, ROOT
+
+logger = logging.getLogger('bromewebserver')
 
 
 async def on_shutdown(app):

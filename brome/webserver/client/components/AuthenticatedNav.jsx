@@ -39,7 +39,7 @@ class AuthenticatedNav extends BaseComponent {
                 </NavItem>
                 <NavItem to='/testbatchlist'>
                   <FormattedMessage
-                    id='nav.TestBatchList'
+                    id='testBatchList.TestBatchListHeader'
                     defaultMessage='Test Batch List'
                   />
                 </NavItem>

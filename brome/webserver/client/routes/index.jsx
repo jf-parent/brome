@@ -9,6 +9,7 @@ import Confirmation from 'routes/Confirmation'
 import ResetPassword from 'routes/ResetPassword'
 import Dashboard from 'routes/Dashboard'
 import TestBatchList from 'routes/TestBatchList'
+import TestBatchDetail from 'routes/TestBatchDetail'
 
 export const createRoutes = (store) => ({
   path: '/',
@@ -16,6 +17,7 @@ export const createRoutes = (store) => ({
   childRoutes: [
     Dashboard(store),
     TestBatchList(store),
+    TestBatchDetail(store),
     ResetPassword(store),
     Login(store),
     Profile(store),

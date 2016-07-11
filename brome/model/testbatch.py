@@ -14,6 +14,10 @@ class Testbatch(BaseModel):
     total_tests = IntField()
     starting_timestamp = DateTimeField()
     ending_timestamp = DateTimeField(required=False)
+    feature_session_video_capture = BoolField(default=False)
+    feature_network_capture = BoolField(default=False)
+    feature_bot_diaries = BoolField(default=False)
+    feature_screenshots = BoolField(default=False)
 
     def __repr__(self):
         try:
@@ -30,12 +34,25 @@ class Testbatch(BaseModel):
         data = {}
         data['uid'] = self.get_uid()
         data['killed'] = self.killed
-        data['total_tests'] = self.total_tests
+        data['total_tests'] = 110  # TODO
+        data['total_executed_tests'] = 43  # TODO
+        data['total_executing_tests'] = 2  # TODO
         data['starting_timestamp'] = self.starting_timestamp.isoformat()
+        data['features'] = {
+            'session_video_capture': self.feature_session_video_capture,
+            'network_capture': self.feature_network_capture,
+            'bot_diaries': self.feature_bot_diaries,
+            'screenshots': self.feature_screenshots,
+        }
+        # Terminated test batch
         if hasattr(self, 'ending_timestamp'):
             data['ending_timestamp'] = self.ending_timestamp.isoformat()
+            data['terminated'] = True
+
+        # Running test batch
         else:
             data['ending_timestamp'] = False
+            data['terminated'] = False
         return data
 
     async def method_autorized(self, context):

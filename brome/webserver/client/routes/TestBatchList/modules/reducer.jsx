@@ -20,14 +20,14 @@ export function loadTestBatch (session, skip, limit) {
     dispatch({type: TEST_BATCH_LIST_LOADING})
 
     let data = {
-      'actions': {
-        'action': 'read',
-        'model': 'testbatch',
-        'descending': 'starting_timestamp',
-        'limit': limit,
-        'skip': skip
+      actions: {
+        action: 'read',
+        model: 'testbatch',
+        descending: 'starting_timestamp',
+        limit: limit,
+        skip: skip
       },
-      'token': session.token
+      token: session.token
     }
 
     axios.post('/api/crud', data)

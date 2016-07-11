@@ -5,6 +5,7 @@ import moment from 'moment'
 
 import Pager from 'components/ux/Pager'
 import ComponentStyle from './ComponentStyle.postcss'
+import CoreLayoutStyle from 'layouts/CoreLayout/CoreLayoutStyle.postcss'
 import BaseComponent from 'core/BaseComponent'
 
 const TEST_BATCH_LIMIT = 9
@@ -74,101 +75,99 @@ class TestBatchList extends BaseComponent {
     }
     let startingTimestamp = moment(testBatch.starting_timestamp)
     let endingTimestamp
-    let runningDuration
     if (testBatch.ending_timestamp) {
       endingTimestamp = moment(testBatch.ending_timestamp)
-      let duration = moment.duration(moment(endingTimestamp).diff(startingTimestamp))
-      let hours = parseInt(duration.asHours())
-      let minutes = parseInt(duration.asMinutes()) - hours * 60
-      let seconds = parseInt(duration.asSeconds()) - hours * 60 - minutes * 60
-      runningDuration = pad2(hours) + ':' + pad2(minutes) + ':' + pad2(seconds)
     } else {
       endingTimestamp = Date.now()
-      let duration = moment.duration(moment(endingTimestamp).diff(startingTimestamp))
-      let hours = parseInt(duration.asHours())
-      let minutes = parseInt(duration.asMinutes()) - hours * 60
-      let seconds = parseInt(duration.asSeconds()) - hours * 60 - minutes * 60
-      runningDuration = pad2(hours) + ':' + pad2(minutes) + ':' + pad2(seconds)
     }
+    let duration = moment.duration(moment(endingTimestamp).diff(startingTimestamp))
+    let hours = parseInt(duration.asHours())
+    let minutes = parseInt(duration.asMinutes()) - hours * 60
+    let seconds = parseInt(duration.asSeconds()) - hours * 60 - minutes * 60
+    let runningDuration = pad2(hours) + ':' + pad2(minutes) + ':' + pad2(seconds)
     return (
-      <div className={'col-md-4 ' + ComponentStyle['test-batch-container']}>
-        <p><Link to={'/testbatch/' + testBatch.uid}>{testBatch.uid}</Link></p>
-        <p>
-          <small>
-            <b>
-              <FormattedMessage
-                id='testBatchList.StartedTimestamp'
-                defaultMessage='Started:'
+      <div className='col-xs-12 col-sm-12 col-md-4 col-lg-4'>
+        <div className={ComponentStyle['test-batch-container']}>
+          <p className='text-center'>
+            <Link to={'/testbatchdetail?uid=' + testBatch.uid}>{testBatch.uid}</Link>
+          </p>
+          <p>
+            <small>
+              <b>
+                <FormattedMessage
+                  id='testBatchList.StartedTimestamp'
+                  defaultMessage='Started:'
+                />
+              </b>
+              {' '}
+              <FormattedDate
+                value={startingTimestamp}
+                year='numeric'
+                month='long'
+                day='2-digit'
               />
-            </b>
-            {' '}
-            <FormattedDate
-              value={startingTimestamp}
-              year='numeric'
-              month='long'
-              day='2-digit'
-            />
-            {' '}
-            <FormattedTime value={startingTimestamp} />
-          </small>
-        </p>
-        {testBatch.ending_timestamp
-            ? <div>
-              <p>
-                <small>
-                  <b>
-                    <FormattedMessage
-                      id='testBatchList.EndingTimtestamp'
-                      defaultMessage='Ended:'
+              {' '}
+              <FormattedTime value={startingTimestamp} />
+            </small>
+          </p>
+          {testBatch.ending_timestamp
+              ? <div>
+                <p>
+                  <small>
+                    <b>
+                      <FormattedMessage
+                        id='testBatchList.EndingTimtestamp'
+                        defaultMessage='Ended:'
+                      />
+                    </b>
+                    {' '}
+                    <FormattedDate
+                      value={endingTimestamp}
+                      year='numeric'
+                      month='long'
+                      day='2-digit'
                     />
-                  </b>
-                  {' '}
-                  <FormattedDate
-                    value={endingTimestamp}
-                    year='numeric'
-                    month='long'
-                    day='2-digit'
-                  />
-                  {' '}
-                  <FormattedTime value={endingTimestamp} />
-                </small>
-              </p>
-              <p>
-                <small>
-                  <b>
+                    {' '}
+                    <FormattedTime value={endingTimestamp} />
+                  </small>
+                </p>
+                <p>
+                  <small>
+                    <b>
+                      <FormattedMessage
+                        id='testBatchList.TotalDuration'
+                        defaultMessage='Total duration:'
+                      />
+                    </b>
+                    {' '}
+                    {runningDuration}
+                  </small>
+                </p>
+              </div>
+              : <div>
+                <p>
+                  <small><i>
                     <FormattedMessage
-                      id='testBatchList.TotalDuration'
-                      defaultMessage='Total duration:'
+                      id='testBatchList.IsRunning'
+                      defaultMessage='is running...'
                     />
-                  </b>
-                  {' '}
-                  {runningDuration}
-                </small>
-              </p>
-            </div>
-            : <div>
-              <p>
-                <small>
-                  <FormattedMessage
-                    id='testBatchList.IsRunning'
-                    defaultMessage='is running...'
-                  />
-                </small>
-              </p>
-              <p>
-                <small>
-                  <b>
-                    <FormattedMessage
-                      id='testBatchList.TotalDuration'
-                      defaultMessage='Total duration:'
-                    />
-                  </b>
-                  {' '}
-                  {runningDuration}
-                </small>
-              </p>
-            </div>
-        }
+                  </i></small>
+                </p>
+                <p>
+                  <small>
+                    <b>
+                      <FormattedMessage
+                        id='testBatchList.TotalDuration'
+                        defaultMessage='Total duration:'
+                      />
+                    </b>
+                    {' '}
+                    {runningDuration}
+                  </small>
+                </p>
+              </div>
+          }
+        </div>
       </div>
     )
   }
@@ -193,7 +192,7 @@ class TestBatchList extends BaseComponent {
           />
         </h1>
         {pager}
-        <div className='row'>
+        <div className={'row ' + CoreLayoutStyle['no-gutter']}>
           {testBatchList}
         </div>
         {pager}

@@ -21,6 +21,7 @@ var animationName = insertKeyframesRule(keyframes)
 var Loader = React.createClass({
   propTypes: {
     id: React.PropTypes.string,
+    style: React.PropTypes.object,
     className: React.PropTypes.string,
     verticalAlign: React.PropTypes.string,
     loading: React.PropTypes.bool,
@@ -76,7 +77,7 @@ var Loader = React.createClass({
   renderLoader: function (loading) {
     if (loading) {
       return (
-        <div id={this.props.id} className={this.props.className}>
+        <div style={this.props.style} id={this.props.id} className={this.props.className}>
           <div style={this.getStyle(1)}></div>
           <div style={this.getStyle(2)}></div>
           <div style={this.getStyle(3)}></div>
@@ -97,8 +98,19 @@ var Loader = React.createClass({
 class Loading extends Component {
   render () {
     return (
-      <Loader className={LoadingStyle.loader} color='#000' size='16px' margin='4px' />
+      <Loader style={this.props.style} className={LoadingStyle.loader} color='#000' size='16px' margin='4px' />
     )
+  }
+}
+
+Loading.propTypes = {
+  style: React.PropTypes.object
+}
+
+Loading.defaultProps = {
+  style: {
+    top: '50%',
+    left: '50%'
   }
 }
 

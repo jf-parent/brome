@@ -18,6 +18,7 @@ from brome.core.configurator import (
     test_config_to_dict
 )
 from brome.model.testinstance import Testinstance
+from brome.model.testbatch import Testbatch
 from brome.model.testresult import Testresult
 from brome.model.testcrash import Testcrash
 from brome.model.test import Test
@@ -110,6 +111,35 @@ class BaseTest(object):
             instance = self._runner.resolve_instance_by_ip(self._private_ip)
             if instance.browser_config.get('enable_proxy'):
                 instance.start_proxy()
+
+        # FEATURE DETECTION
+        self.detect_feature()
+
+    def detect_feature(self):
+        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+            test_batch = session.query(Testbatch)\
+                .filter(Testbatch.mongo_id == self._test_batch_id).one()
+
+            # SESSION VIDEO CAPTURE
+            if self._browser_config.get('record_session'):
+                test_batch.feature_session_video_capture = True
+
+            # NETWORK CAPTURE
+            if self._browser_config.get('enable_proxy'):
+                test_batch.feature_network_capture = True
+
+            # SCREENSHOT
+            if self._runner_dir:
+                test_batch.feature_style_quality = True
+                test_batch.feature_screenshots = True
+
+            # BOT DIARy
+            if self.get_config_value("bot_diary:enable_bot_diary"):
+                test_batch.feature_bot_diaries = False
+
+            # TODO VNC
+
+            session.save(test_batch, safe=True)
 
     def start_video_recording(self):
         self._video_capture_file_relative_path = ''
@@ -604,7 +634,6 @@ class BaseTest(object):
 
         except Exception as e:
             self.error_log('Test failed')
-            raise
 
             tb = traceback.format_exc()
 
@@ -683,7 +712,7 @@ class BaseTest(object):
     def create_crash_report(self, tb):
         self.info_log('Creating a crash report')
 
-        crash_name = "%s - %s" % (self.pdriver.get_id(join_char='_'), self._name)  # noqa
+        crash_name = "%s - %s" % (self.pdriver.get_id(join_char=' ', browser_version_join_char='.'), self._name)  # noqa
 
         extra_data = {}
 
@@ -719,13 +748,13 @@ class BaseTest(object):
         # CRASH OBJECT
         with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
             test_crash = Testcrash()
+            test_crash.title = crash_name
             test_crash.timestamp = datetime.now()
             test_crash.trace = str(tb)
             test_crash.browser_id = self.pdriver.get_id()
             test_crash.screenshot_path = crash_screenshot_relative_path
             test_crash.videocapture_path = self._video_capture_file_relative_path  # noqa
             test_crash.extra_data = extra_data
-            test_crash.title = crash_name
             test_crash.test_instance_id = self._test_instance_id
             test_crash.test_batch_id = self._test_batch_id
 
@@ -843,15 +872,18 @@ class BaseTest(object):
 
             results.append('Total_test: %s; Total_test_successful: %s; Total_test_failed: %s' % (total_test, total_test_successful, total_test_failed))  # noqa
 
+            failed_tests_title = []
             for failed_test in failed_tests:
-                query = session.query(Test)\
-                    .filter(Test.mongo_id == failed_test.test_id)
-                if query.count():
-                    test = query.one()
-                    test_id = test.test_id
-                else:
-                    test_id = 'n/a'
+                if failed_test.title not in failed_tests_title:
+                    failed_tests_title.append(failed_test.title)
+                    query = session.query(Test)\
+                        .filter(Test.mongo_id == failed_test.test_id)
+                    if query.count():
+                        test = query.one()
+                        test_id = test.test_id
+                    else:
+                        test_id = 'n/a'
 
-                results.append('[%s] %s' % (test_id, failed_test.title))
+                    results.append('[%s] %s' % (test_id, failed_test.title))
 
         return results

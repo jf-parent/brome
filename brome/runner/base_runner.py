@@ -308,27 +308,25 @@ class BaseRunner(object):
             # SEPARATOR
             self.info_log(separator)
 
-            self.info_log('Failed tests')
+            self.info_log('Failed tests:')
 
             # FAILED TESTS
             failed_test_list = []
             test_results = session.query(Testresult)\
-                .filter(Testresult.test_batch_id == self.test_batch_id).all()
+                .filter(Testresult.result == False)\
+                .filter(Testresult.test_batch_id == self.test_batch_id).all()  # noqa
             for test_result in test_results:
-                if not test_result.result and \
-                        test_result.test not in failed_test_list:
-
+                if test_result.title not in failed_test_list:
+                    failed_test_list.append(test_result.title)
                     query = session.query(Test)\
                         .filter(Test.mongo_id == test_result.test_id)
                     if query.count():
                         test = query.one()
-                        failed_test_list.append(test.test_id)
                         self.info_log(
                             "[%s] %s" %
                             (test.test_id, test.name)
                         )
                     else:
-                        failed_test_list.append(test_result.title)
                         self.info_log(
                             "[noid] %s" %
                             (test_result.title)

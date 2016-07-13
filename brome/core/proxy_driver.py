@@ -685,24 +685,31 @@ class ProxyDriver(object):
                 self.error_log(msg)
                 raise Exception(msg)
 
-    def get_id(self, join_char='-'):
+    def get_id(
+                self,
+                join_char='-',
+                browser_version_join_char='_',
+                platform_join_char='_'):
+
         return join_char.join([
                     self.get_browser_name(),
-                    self.get_browser_version(),
-                    self.get_platform()
+                    self.get_browser_version(
+                        join_char=browser_version_join_char
+                    ),
+                    self.get_platform(join_char=platform_join_char)
                 ])
 
     def get_browser_name(self):
         if self.browser_config.get('fakeIdentity'):
-            return self.browser_config.get('fakeIdentity')
+            return self.browser_config.get('fakeIdentity').title()
         else:
-            return self._driver.capabilities['browserName']
+            return self._driver.capabilities['browserName'].title()
 
-    def get_browser_version(self):
-        return self._driver.capabilities['version'].replace('.', '_')
+    def get_browser_version(self, join_char='_'):
+        return self._driver.capabilities['version'].replace('.', join_char)
 
-    def get_platform(self):
-        return self._driver.capabilities['platform'].replace('.', '_')
+    def get_platform(self, join_char='_'):
+        return self._driver.capabilities['platform'].replace('.', join_char)
 
     def get(self, url):
         """Navigate to a specific url

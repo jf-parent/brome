@@ -56,6 +56,12 @@ class LocalRunner(BaseRunner):
 
             localhost_instance.startup()
 
+            with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+                test_batch = session.query(Testbatch)\
+                    .filter(Testbatch.mongo_id == self.test_batch_id).one()
+                test_batch.total_executing_tests = 1
+                session.save(test_batch, safe=True)
+
             test_ = test.Test(
                 runner=self,
                 browser_config=self.browser_config,
@@ -69,6 +75,12 @@ class LocalRunner(BaseRunner):
             self.executed_tests.append(test_)
 
             localhost_instance.tear_down()
+
+            with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+                test_batch = session.query(Testbatch)\
+                    .filter(Testbatch.mongo_id == self.test_batch_id).one()
+                test_batch.total_executed_tests += 1
+                session.save(test_batch, safe=True)
 
     def terminate(self):
         """Terminate the test batch

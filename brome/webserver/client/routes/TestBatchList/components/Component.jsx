@@ -30,20 +30,28 @@ class TestBatchList extends BaseComponent {
     return this.props.state.testbatchlist.skip / this.props.state.testbatchlist.limit
   }
 
-  fetchTestBach (currentPage) {
+  fetchTestBach (currentPage, loadingContext = true) {
     this.props.actions.loadTestBatch(
       this.props.state.session,
       currentPage,
-      TEST_BATCH_LIMIT
+      TEST_BATCH_LIMIT,
+      loadingContext
     )
   }
 
   componentWillMount () {
     this.fetchTestBach(this.props.state.testbatchlist.skip)
+    this._interval = setInterval(
+      () => {
+        this.fetchTestBach(this.props.state.testbatchlist.skip, false)
+      },
+      2000
+    )
   }
 
   componentWillUnmount () {
     this.debug('componentWillUnmount')
+    clearInterval(this._interval)
   }
 
   onFirstClick () {

@@ -15,9 +15,11 @@ export const TEST_BATCH_LIST_LOADING_ERROR = 'TEST_BATCH_LIST_LOADING_ERROR'
 const logger = require('loglevel').getLogger('TestBatchList')
 logger.setLevel(__LOGLEVEL__)
 
-export function loadTestBatch (session, skip, limit) {
+export function loadTestBatch (session, skip, limit, loadingContext = true) {
   return dispatch => {
-    dispatch({type: TEST_BATCH_LIST_LOADING})
+    if (loadingContext) {
+      dispatch({type: TEST_BATCH_LIST_LOADING})
+    }
 
     let data = {
       actions: {

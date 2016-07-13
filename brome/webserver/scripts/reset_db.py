@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 
-from webbaseserver.settings import config
-from webbaseserver.utils import drop_database
+from brome.webserver.server.settings import config
+from brome.core.utils import delete_database
 
 config.configure()
 
@@ -11,6 +11,6 @@ else:
     answer = 'y'
 
 if answer == 'y':
-    drop_database(config.get('MONGO_DATABASE_NAME'))
+    delete_database(config.get('MONGO_DATABASE_NAME'))
 
 print('Done')

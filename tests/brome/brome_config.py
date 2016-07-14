@@ -24,7 +24,7 @@ default_config["grid_runner"] = {}
 default_config["grid_runner"]["kill_selenium_server"] = True
 default_config["grid_runner"]["max_running_time"] = 7200
 default_config["grid_runner"]["selenium_hub_default_config"] = ''
-default_config["grid_runner"]["selenium_server_command"] = 'java -jar {selenium_server_jar_path} -role hub -hubdefault_config {selenium_hub_default_config} -DPOOL_MAX 512 &'
+default_config["grid_runner"]["selenium_server_command"] = 'java -jar {selenium_server_jar_path} -role hub -hubdefault_config {selenium_hub_default_config} -DPOOL_MAX 512 &'  # noqa
 default_config["grid_runner"]["selenium_server_ip"] = 'localhost'
 default_config["grid_runner"]["selenium_server_jar_path"] = ''
 default_config["grid_runner"]["selenium_server_port"] = 4444
@@ -53,7 +53,7 @@ default_config["highlight"]["use_highlight"] = False
 default_config["logger_runner"] = {}
 default_config["logger_runner"]["filelogger"] = False
 default_config["logger_runner"]["format"] = \
-    "[%(batchid)s]\e[32m%(message)s\e[0m"
+    "[%(batchid)s]%(message)s"
 default_config["logger_runner"]["level"] = 'DEBUG'
 default_config["logger_runner"]["streamlogger"] = True
 
@@ -61,7 +61,7 @@ default_config["logger_runner"]["streamlogger"] = True
 default_config["logger_test"] = {}
 default_config["logger_test"]["filelogger"] = False
 default_config["logger_test"]["format"] = \
-    "[%(batchid)s]\e[34m(%(testname)s)\e[0m:\e[32m%(message)s\e\[0m"
+    "[%(batchid)s]%(testname)s):%(message)s"
 default_config["logger_test"]["level"] = 'DEBUG'
 default_config["logger_test"]["streamlogger"] = True
 

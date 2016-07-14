@@ -9,14 +9,17 @@ import math
 
 import virtualbox
 
+from brome.core.utils import (
+    DbSessionContext
+)
 from brome.runner.base_runner import BaseRunner
-from brome.runner.ec2_instance import EC2Instance
-from brome.runner.virtualbox_instance import VirtualboxInstance
-from brome.runner.browserstack_instance import BrowserstackInstance
-from brome.runner.localhost_instance import LocalhostInstance
-from brome.runner.saucelabs_instance import SauceLabsInstance
-from brome.runner.browser_config import BrowserConfig
 from brome.model.testbatch import Testbatch
+from brome.runner import ec2_instance
+from brome.runner import virtualbox_instance
+from brome.runner import browserstack_instance
+from brome.runner import localhost_instance
+from brome.runner import saucelabs_instance
+from brome.runner.browser_config import BrowserConfig
 
 
 class GridRunner(BaseRunner):
@@ -81,13 +84,13 @@ class GridRunner(BaseRunner):
                     nb_instance_to_launch = max_number_of_instance
 
                 for j in range(nb_instance_to_launch):
-                    ec2_instance = EC2Instance(
+                    _ec2_instance = ec2_instance.EC2Instance(
                         runner=self,
                         browser_config=browser_config,
                         index=j
                     )
 
-                    ec2_instance_thread = InstanceThread(ec2_instance)
+                    ec2_instance_thread = InstanceThread(_ec2_instance)
                     ec2_instance_thread.start()
 
                     instance_threads.append(ec2_instance_thread)
@@ -98,7 +101,7 @@ class GridRunner(BaseRunner):
                 if not hasattr(self, 'vbox'):
                     self.vbox = virtualbox.VirtualBox()
 
-                vbox_instance = VirtualboxInstance(
+                vbox_instance = virtualbox_instance.VirtualboxInstance(
                     runner=self,
                     browser_config=browser_config,
                     index=i,
@@ -116,7 +119,9 @@ class GridRunner(BaseRunner):
                 if not self.instances.get(browser_id):
                     self.instances[browser_id] = []
 
-                self.instances[browser_id].append(SauceLabsInstance())
+                self.instances[browser_id].append(
+                    saucelabs_instance.SauceLabsInstance()
+                )
 
             # BROWSERSTACK
             elif browser_config.location == 'browserstack':
@@ -124,7 +129,9 @@ class GridRunner(BaseRunner):
                 if not self.instances.get(browser_id):
                     self.instances[browser_id] = []
 
-                self.instances[browser_id].append(BrowserstackInstance())
+                self.instances[browser_id].append(
+                    browserstack_instance.BrowserstackInstance()
+                )
 
             # LOCALHOST
             elif browser_config.location == 'localhost':
@@ -143,13 +150,35 @@ class GridRunner(BaseRunner):
                         self.instances[browser_id] = []
 
                     self.instances[browser_id].append(
-                        LocalhostInstance(self, browser_config, test_name=i)
+                        localhost_instance.LocalhostInstance(
+                            self,
+                            browser_config,
+                            test_name=i
+                        )
                     )
+
+        # MILESTONE
+        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+            test_batch = session.query(Testbatch)\
+                .filter(Testbatch.mongo_id == self.test_batch_id).one()
+            runner_metadata = test_batch.runner_metadata
+            runner_metadata['nb_instance_to_setup'] = len(instance_threads)
+            test_batch.runner_metadata = runner_metadata
+            session.save(test_batch, safe=True)
 
         for t in instance_threads:
             t.join()
 
         self.info_log("The test batch is now ready!")
+
+        # MILESTONE
+        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+            test_batch = session.query(Testbatch)\
+                .filter(Testbatch.mongo_id == self.test_batch_id).one()
+            runner_metadata = test_batch.runner_metadata
+            runner_metadata['instance_setup_completed'] = True
+            test_batch.runner_metadata = runner_metadata
+            session.save(test_batch, safe=True)
 
         try:
             self.run()
@@ -162,10 +191,28 @@ class GridRunner(BaseRunner):
             try:
                 self.tear_down_instances()
 
+                # MILESTONE
+                with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+                    test_batch = session.query(Testbatch)\
+                        .filter(Testbatch.mongo_id == self.test_batch_id).one()
+                    runner_metadata = test_batch.runner_metadata
+                    runner_metadata['instance_teardown_completed'] = True
+                    test_batch.runner_metadata = runner_metadata
+                    session.save(test_batch, safe=True)
+
                 # Kill selenium server
                 if self.get_config_value('grid_runner:kill_selenium_server'):
                     if self.selenium_pid:
                         self.kill_pid(self.selenium_pid)
+
+                        # MILESTONE
+                        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+                            test_batch = session.query(Testbatch)\
+                                .filter(Testbatch.mongo_id == self.test_batch_id).one()  # noqa
+                            runner_metadata = test_batch.runner_metadata
+                            runner_metadata['selenium_server_killed'] = True
+                            test_batch.runner_metadata = runner_metadata
+                            session.save(test_batch, safe=True)
 
                 # Kill xvfb process
                 for xvfb_pid in self.xvfb_pids:
@@ -246,6 +293,7 @@ class GridRunner(BaseRunner):
                             executed_tests.append(test_)
 
                 active_thread = threading.active_count() - 1
+                self.info_log("active_thread=%s" % active_thread)
                 if active_thread:
                     try:
                         active_thread_test_number = len([tn for tn in threading.enumerate() if type(tn) != threading._MainThread and hasattr(tn, 'test')])  # noqa
@@ -257,6 +305,7 @@ class GridRunner(BaseRunner):
                                 ) for th in threading.enumerate() if type(th) != threading._MainThread and hasattr(th, 'test')  # noqa
                             ])
                         ))
+                        active_thread = active_thread_test_number
                     except Exception as e:
                         self.error_log("print active exception: %s" % str(e))
 
@@ -279,10 +328,11 @@ class GridRunner(BaseRunner):
             tb = traceback.format_exc()
             self.error_log("Run exception: %s" % str(tb))
 
-        test_batch = self.session.query(Testbatch)\
-            .filter(Testbatch.mongo_id == self.test_batch_id).one()
-        test_batch.ending_timestamp = datetime.now()
-        self.session.save(test_batch, safe=True)
+        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+            test_batch = session.query(Testbatch)\
+                .filter(Testbatch.mongo_id == self.test_batch_id).one()
+            test_batch.ending_timestamp = datetime.now()
+            session.save(test_batch, safe=True)
 
         self.print_test_summary(executed_tests)
 
@@ -292,8 +342,9 @@ class GridRunner(BaseRunner):
             If the test_batch.killed is set to true
             then the test batch will be kill
         """
-        test_batch = self.session.query(Testbatch)\
-            .filter(Testbatch.id == self.test_batch_id).one()
+        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+            test_batch = session.query(Testbatch)\
+                .filter(Testbatch.mongo_id == self.test_batch_id).one()
 
         if test_batch.killed:
             self.info_log("Killing itself")

@@ -197,6 +197,19 @@ class BaseTest(object):
             Exception InvalidBrowserName
 
         """
+
+        # TEST
+        """
+        if self._browser_config.get('browserName') == 'dummy':
+            driver = DummyDriver()
+            # Wrap the driver in the brome proxy driver and return it
+            return ProxyDriver(
+                driver=driver,
+                test_instance=self,
+                runner=self._runner
+            )
+        """
+
         # LOCAL
         if self._browser_config.location == 'localhost':
 

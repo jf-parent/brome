@@ -672,18 +672,21 @@ class ProxyDriver(object):
 
         # EC2
         elif self.browser_config.location == 'ec2':
-            exception_str = ''
-            try:
-                self._driver.execute_script("error")
-            except exceptions.WebDriverException as e:
-                exception_str = str(e)
+            if self.browser_config.get('browserName') == 'dummy':
+                return '127.0.0.1'
+            else:
+                exception_str = ''
+                try:
+                    self._driver.execute_script("error")
+                except exceptions.WebDriverException as e:
+                    exception_str = str(e)
 
-            try:
-                return re.search("ip: '([^']*)", exception_str).group(1)
-            except AttributeError:
-                msg = "The ip address of the node could not be determined"
-                self.error_log(msg)
-                raise Exception(msg)
+                try:
+                    return re.search("ip: '([^']*)", exception_str).group(1)
+                except AttributeError:
+                    msg = "The ip address of the node could not be determined"
+                    self.error_log(msg)
+                    raise Exception(msg)
 
     def get_id(
                 self,

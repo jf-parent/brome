@@ -1,4 +1,5 @@
 import asyncio
+import os
 from datetime import datetime
 import types
 
@@ -15,6 +16,8 @@ from brome.model.test import Test
 from brome.model.testcrash import Testcrash
 from brome.model.testresult import Testresult
 from brome.model.testinstance import Testinstance
+
+HERE = os.path.abspath(os.path.dirname(__file__))
 
 
 @pytest.fixture
@@ -67,19 +70,29 @@ def client():
                 test_batch.validate_and_save(test_batch_context)
             )
 
-            # TEST INSTANCE
-            test_instance_context = {
-                'db_session': session,
-                'data': {
-                    'starting_timestamp': datetime.now(),
-                    'name': 'Test Instance',
-                    'test_batch_id': test_batch.mongo_id
+            if i == 0:
+                dummy_log_file_path = os.path.join(
+                    HERE,
+                    'mock',
+                    'test_batch_dummy_log.log'
+                )
+                test_batch.log_file_path = dummy_log_file_path
+                session.save(test_batch, safe=True)
+
+            for index in range(2):
+                # TEST INSTANCE
+                test_instance_context = {
+                    'db_session': session,
+                    'data': {
+                        'starting_timestamp': datetime.now(),
+                        'name': 'Test Instance {index}'.format(index=index),
+                        'test_batch_id': test_batch.mongo_id
+                    }
                 }
-            }
-            test_instance = Testinstance()
-            loop.run_until_complete(
-                test_instance.validate_and_save(test_instance_context)
-            )
+                test_instance = Testinstance()
+                loop.run_until_complete(
+                    test_instance.validate_and_save(test_instance_context)
+                )
 
             # TEST RESULT
             for j in range(5):

@@ -16,6 +16,7 @@ class Testinstance(BaseModel):
     starting_timestamp = DateTimeField()
     ending_timestamp = DateTimeField(required=False)
     extra_data = DictField(StringField())
+    log_file_path = StringField(default='')
 
     test_batch_id = ObjectIdField()
 

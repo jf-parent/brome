@@ -10,6 +10,9 @@ import ResetPassword from 'routes/ResetPassword'
 import Dashboard from 'routes/Dashboard'
 import TestBatchList from 'routes/TestBatchList'
 import TestBatchDetail from 'routes/TestBatchDetail'
+import TestBatchRunnerLog from 'routes/TestBatchRunnerLog'
+import TestBatchTestInstanceLogList from 'routes/TestBatchTestInstanceLogList'
+import TestInstanceLog from 'routes/TestInstanceLog'
 
 export const createRoutes = (store) => ({
   path: '/',
@@ -18,6 +21,9 @@ export const createRoutes = (store) => ({
     Dashboard(store),
     TestBatchList(store),
     TestBatchDetail(store),
+    TestBatchRunnerLog(store),
+    TestInstanceLog(store),
+    TestBatchTestInstanceLogList(store),
     ResetPassword(store),
     Login(store),
     Profile(store),

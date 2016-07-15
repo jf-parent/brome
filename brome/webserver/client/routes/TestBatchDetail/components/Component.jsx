@@ -1,5 +1,5 @@
 import React from 'react'
-// import { FormattedMessage } from 'react-intl'
+import { FormattedMessage } from 'react-intl'
 import { Link } from 'react-router'
 import 'font-awesome-webpack'
 import { Line } from 'rc-progress'
@@ -24,6 +24,23 @@ class TestBatchDetail extends BaseComponent {
       'getCrashes',
       'getMilestone'
     )
+  }
+
+  componentWillMount () {
+    let testBatchUid = this.props.location.query['testbatchuid']
+
+    // TODO set interval only on not terminated test batch
+    this._interval = setInterval(
+      () => {
+        this.fetchTestBachDetail(testBatchUid)
+      },
+      2000
+    )
+  }
+
+  componentWillUnmount () {
+    this.debug('componentWillUnmount')
+    clearInterval(this._interval)
   }
 
   getActionToolbelt () {
@@ -161,7 +178,7 @@ class TestBatchDetail extends BaseComponent {
   }
 
   getMilestone () {
-    let runnerMetadata = this.props.state.testbatchdetail.runner_metadata
+    let runnerMetadata = this.props.state.testbatchdetail.testBatch.runner_metadata
     return (
       <div>
         <h3 className={ComponentStyle['section-header']}>
@@ -169,14 +186,19 @@ class TestBatchDetail extends BaseComponent {
         </h3>
         <ul>
           {(() => {
-            if (runnerMetadata) {
-              return (
-                <li>
-                  <small>
-                    No milestone
-                  </small>
-                </li>
-              )
+            if (Object.keys(runnerMetadata).length) {
+              return Object.keys(runnerMetadata).map((key, index) => {
+                return (
+                  <li>
+                    <small>
+                      <FormattedMessage
+                        id={'testBatchDetail.' + key}
+                        defaultMessage={key}
+                      />
+                    </small>
+                  </li>
+                )
+              })
             } else {
               return (
                 <li>
@@ -253,13 +275,13 @@ class TestBatchDetail extends BaseComponent {
       true
     )
     let testInstancesLogs = this.getTool(
-      'testinstanceslogs',
+      'testbatchtestinstanceloglist',
       'Instances Logs',
       'newspaper-o',
       true
     )
     let runnerLog = this.getTool(
-      'runnerlog',
+      'testbatchrunnerlog',
       'Runner log',
       'file-text-o',
       true
@@ -298,23 +320,6 @@ class TestBatchDetail extends BaseComponent {
       this.props.state.session,
       testBatchUid
     )
-  }
-
-  componentWillMount () {
-    let testBatchUid = this.props.location.query['uid']
-
-    // TODO set interval only on not terminated test batch
-    this._interval = setInterval(
-      () => {
-        this.fetchTestBachDetail(testBatchUid)
-      },
-      2000
-    )
-  }
-
-  componentWillUnmount () {
-    this.debug('componentWillUnmount')
-    clearInterval(this._interval)
   }
 
   render () {

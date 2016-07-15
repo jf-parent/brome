@@ -94,10 +94,10 @@ class TestBatchList extends BaseComponent {
     let seconds = parseInt(duration.asSeconds()) - hours * 60 - minutes * 60
     let runningDuration = pad2(hours) + ':' + pad2(minutes) + ':' + pad2(seconds)
     return (
-      <div className='col-xs-12 col-sm-12 col-md-4 col-lg-4'>
+      <div key={index} className='col-xs-12 col-sm-12 col-md-4 col-lg-4'>
         <div className={ComponentStyle['test-batch-container']}>
           <p className='text-center'>
-            <Link to={'/testbatchdetail?uid=' + testBatch.uid}>{testBatch.uid}</Link>
+            <Link to={'/testbatchdetail?testbatchuid=' + testBatch.uid}>{testBatch.uid}</Link>
           </p>
           <p>
             <small>

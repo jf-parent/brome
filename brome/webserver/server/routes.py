@@ -14,6 +14,7 @@ from brome.webserver.server.auth.views import (
 
 )
 from brome.webserver.server.crud.views import CRUD
+from brome.webserver.server.brome_api.views import LogStreamOut, TestBatch
 
 routes = [
     # CLIENT ROUTE => not /api/* and not /static/*
@@ -37,6 +38,8 @@ routes = [
         'api_send_reset_password_token'
     ),
     ('*', '/api/crud', CRUD, 'api_crud'),
+    ('*', '/api/logstreamout', LogStreamOut, 'api_log_stream_out'),
+    ('*', '/api/testbatch', TestBatch, 'api_test_batch'),
     ('*', '/api/login', Login, 'api_login'),
     ('*', '/api/register', Register, 'api_register'),
     ('*', '/api/logout', Logout, 'api_logout'),

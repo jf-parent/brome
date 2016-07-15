@@ -29,6 +29,7 @@ class BaseRunner(object):
 
     def __init__(self, brome):
         self.brome = brome
+        self.log_file_path = ''
 
         self.browsers_config = self.brome.browsers_config
 
@@ -90,6 +91,15 @@ class BaseRunner(object):
         if self.get_config_value('runner:cache_screenshot'):
             # Dictionary that contains all the screenshot name
             self.screenshot_cache = {}
+
+        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+            test_batch = session.query(Testbatch)\
+                .filter(Testbatch.mongo_id == self.test_batch_id)\
+                .one()
+
+            test_batch.log_file_path = self.log_file_path
+
+            session.save(test_batch, safe=True)
 
     def kill_pid(self, pid):
         """Kill process by pid
@@ -254,11 +264,13 @@ class BaseRunner(object):
         # File logger
         if self.get_config_value('logger_runner:filelogger') and \
                 self.runner_dir:
-            fh = logging.FileHandler(
-                os.path.join(
+
+            self.log_file_path = os.path.join(
                     self.runner_dir,
                     '%s.log' % logger_name
-                )
+            )
+            fh = logging.FileHandler(
+                self.log_file_path
             )
             file_formatter = logging.Formatter(format_)
             fh.setFormatter(file_formatter)

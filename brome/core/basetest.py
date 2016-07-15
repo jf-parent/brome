@@ -50,6 +50,7 @@ class BaseTest(object):
         self._browser_config = browser_config
         self._test_batch_id = test_batch_id
         self._localhost_instance = kwargs.get('localhost_instance')
+        self._log_file_path = ''
 
         self._crash_error = False
 
@@ -101,6 +102,7 @@ class BaseTest(object):
             test_instance.name = self._name
             test_instance.test_batch_id = self._test_batch_id
             test_instance.extra_data = extra_data
+            test_instance.log_file_path = self._log_file_path
 
             session.save(test_instance, safe=True)
 
@@ -196,18 +198,6 @@ class BaseTest(object):
             Exception InitDriverException
             Exception InvalidBrowserName
 
-        """
-
-        # TEST
-        """
-        if self._browser_config.get('browserName') == 'dummy':
-            driver = DummyDriver()
-            # Wrap the driver in the brome proxy driver and return it
-            return ProxyDriver(
-                driver=driver,
-                test_instance=self,
-                runner=self._runner
-            )
         """
 
         # LOCAL
@@ -584,10 +574,13 @@ class BaseTest(object):
         if self._runner_dir:
             if self.get_config_value('logger_test:filelogger'):
                 test_name = string_to_filename(self._name)
-                fh = logging.FileHandler(os.path.join(
+                self._log_file_path = os.path.join(
                     self._test_log_dir,
                     "%s_%s.log" % (test_name, self._browser_config.get_id())
-                ))
+                )
+                fh = logging.FileHandler(
+                    self._log_file_path
+                )
                 file_formatter = logging.Formatter(format_)
                 fh.setFormatter(file_formatter)
                 self._logger.addHandler(fh)

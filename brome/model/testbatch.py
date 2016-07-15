@@ -2,6 +2,7 @@ from mongoalchemy.fields import (
     DateTimeField,
     DictField,
     AnythingField,
+    StringField,
     IntField,
     BoolField
 )
@@ -27,6 +28,7 @@ class Testbatch(BaseModel):
     feature_instance_vnc = BoolField(default=False)
     feature_style_quality = BoolField(default=False)
     runner_metadata = DictField(AnythingField(), default=dict())
+    log_file_path = StringField(default='')
 
     def __repr__(self):
         try:

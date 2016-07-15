@@ -11,3 +11,4 @@ q
 freezegun
 cookiecutter
 xvfbwrapper
+pdbpp

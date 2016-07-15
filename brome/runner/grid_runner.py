@@ -40,187 +40,197 @@ class GridRunner(BaseRunner):
         """Execute the test batch
         """
 
-        # START SELENIUM GRID
-        if self.get_config_value('grid_runner:start_selenium_server'):
-            self.start_selenium_server()
+        try:
+            # START SELENIUM GRID
+            if self.get_config_value('grid_runner:start_selenium_server'):
+                self.start_selenium_server()
 
-        # Get all the browsers id
-        self.browsers_id = self.get_config_value(
-            'runner:remote_runner'
-        ).split(',')
+            # Get all the browsers id
+            self.browsers_id = self.get_config_value(
+                'runner:remote_runner'
+            ).split(',')
 
-        # Start all the instances
-        instance_threads = []
-        for i, browser_id in enumerate(self.browsers_id):
-            browser_config = BrowserConfig(
-                runner=self,
-                browser_id=browser_id,
-                browsers_config=self.browsers_config
-            )
-
-            self.browser_configs[browser_id] = browser_config
-
-            # EC2
-            if browser_config.location == 'ec2':
-
-                max_number_of_instance = browser_config.get(
-                    'max_number_of_instance'
-                )
-                nb_browser_by_instance = browser_config.get(
-                    'nb_browser_by_instance'
+            # Start all the instances
+            instance_threads = []
+            for i, browser_id in enumerate(self.browsers_id):
+                browser_config = BrowserConfig(
+                    runner=self,
+                    browser_id=browser_id,
+                    browsers_config=self.browsers_config
                 )
 
-                if len(self.tests) < \
-                        max_number_of_instance * \
-                        nb_browser_by_instance:
+                self.browser_configs[browser_id] = browser_config
 
-                    nb_instance_to_launch = int(
-                        math.ceil(
-                            float(len(self.tests))/nb_browser_by_instance
-                        )
+                # EC2
+                if browser_config.location == 'ec2':
+
+                    max_number_of_instance = browser_config.get(
+                        'max_number_of_instance'
+                    )
+                    nb_browser_by_instance = browser_config.get(
+                        'nb_browser_by_instance'
                     )
 
-                else:
-                    nb_instance_to_launch = max_number_of_instance
+                    if len(self.tests) < \
+                            max_number_of_instance * \
+                            nb_browser_by_instance:
 
-                for j in range(nb_instance_to_launch):
-                    _ec2_instance = ec2_instance.EC2Instance(
+                        nb_instance_to_launch = int(
+                            math.ceil(
+                                float(len(self.tests))/nb_browser_by_instance
+                            )
+                        )
+
+                    else:
+                        nb_instance_to_launch = max_number_of_instance
+
+                    for j in range(nb_instance_to_launch):
+                        _ec2_instance = ec2_instance.EC2Instance(
+                            runner=self,
+                            browser_config=browser_config,
+                            index=j
+                        )
+
+                        ec2_instance_thread = InstanceThread(_ec2_instance)
+                        ec2_instance_thread.start()
+
+                        instance_threads.append(ec2_instance_thread)
+
+                # VIRTUALBOX
+                elif browser_config.location == 'virtualbox':
+                    # Instanciate only one vbox
+                    if not hasattr(self, 'vbox'):
+                        self.vbox = virtualbox.VirtualBox()
+
+                    vbox_instance = virtualbox_instance.VirtualboxInstance(
                         runner=self,
                         browser_config=browser_config,
-                        index=j
+                        index=i,
+                        vbox=self.vbox
                     )
 
-                    ec2_instance_thread = InstanceThread(_ec2_instance)
-                    ec2_instance_thread.start()
+                    vbox_instance_thread = InstanceThread(vbox_instance)
+                    vbox_instance_thread.start()
 
-                    instance_threads.append(ec2_instance_thread)
+                    instance_threads.append(vbox_instance_thread)
 
-            # VIRTUALBOX
-            elif browser_config.location == 'virtualbox':
-                # Instanciate only one vbox
-                if not hasattr(self, 'vbox'):
-                    self.vbox = virtualbox.VirtualBox()
+                # SAUCELABS
+                elif browser_config.location == 'saucelabs':
 
-                vbox_instance = virtualbox_instance.VirtualboxInstance(
-                    runner=self,
-                    browser_config=browser_config,
-                    index=i,
-                    vbox=self.vbox
-                )
-
-                vbox_instance_thread = InstanceThread(vbox_instance)
-                vbox_instance_thread.start()
-
-                instance_threads.append(vbox_instance_thread)
-
-            # SAUCELABS
-            elif browser_config.location == 'saucelabs':
-
-                if not self.instances.get(browser_id):
-                    self.instances[browser_id] = []
-
-                self.instances[browser_id].append(
-                    saucelabs_instance.SauceLabsInstance()
-                )
-
-            # BROWSERSTACK
-            elif browser_config.location == 'browserstack':
-
-                if not self.instances.get(browser_id):
-                    self.instances[browser_id] = []
-
-                self.instances[browser_id].append(
-                    browserstack_instance.BrowserstackInstance()
-                )
-
-            # LOCALHOST
-            elif browser_config.location == 'localhost':
-
-                max_number_of_instance = browser_config.get(
-                    'max_number_of_instance', 1
-                )
-
-                if len(self.tests) < max_number_of_instance:
-                    nb_instance_to_launch = len(self.tests)
-                else:
-                    nb_instance_to_launch = max_number_of_instance
-
-                for i in range(0, nb_instance_to_launch):
                     if not self.instances.get(browser_id):
                         self.instances[browser_id] = []
 
                     self.instances[browser_id].append(
-                        localhost_instance.LocalhostInstance(
-                            self,
-                            browser_config,
-                            test_name=i
-                        )
+                        saucelabs_instance.SauceLabsInstance()
                     )
 
-        # MILESTONE
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
-            test_batch = session.query(Testbatch)\
-                .filter(Testbatch.mongo_id == self.test_batch_id).one()
-            runner_metadata = test_batch.runner_metadata
-            runner_metadata['nb_instance_to_setup'] = len(instance_threads)
-            test_batch.runner_metadata = runner_metadata
-            session.save(test_batch, safe=True)
+                # BROWSERSTACK
+                elif browser_config.location == 'browserstack':
 
-        for t in instance_threads:
-            t.join()
+                    if not self.instances.get(browser_id):
+                        self.instances[browser_id] = []
 
-        self.info_log("The test batch is now ready!")
+                    self.instances[browser_id].append(
+                        browserstack_instance.BrowserstackInstance()
+                    )
 
-        # MILESTONE
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
-            test_batch = session.query(Testbatch)\
-                .filter(Testbatch.mongo_id == self.test_batch_id).one()
-            runner_metadata = test_batch.runner_metadata
-            runner_metadata['instance_setup_completed'] = True
-            test_batch.runner_metadata = runner_metadata
-            session.save(test_batch, safe=True)
+                # LOCALHOST
+                elif browser_config.location == 'localhost':
 
-        try:
-            self.run()
-        except:
-            tb = traceback.format_exc()
-            self.error_log("Exception in run of the grid runner: %s" % str(tb))
-            raise
+                    max_number_of_instance = browser_config.get(
+                        'max_number_of_instance', 1
+                    )
 
-        finally:
+                    if len(self.tests) < max_number_of_instance:
+                        nb_instance_to_launch = len(self.tests)
+                    else:
+                        nb_instance_to_launch = max_number_of_instance
+
+                    for i in range(0, nb_instance_to_launch):
+                        if not self.instances.get(browser_id):
+                            self.instances[browser_id] = []
+
+                        self.instances[browser_id].append(
+                            localhost_instance.LocalhostInstance(
+                                self,
+                                browser_config,
+                                test_name=i
+                            )
+                        )
+
+            # MILESTONE
+            with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+                test_batch = session.query(Testbatch)\
+                    .filter(Testbatch.mongo_id == self.test_batch_id).one()
+                runner_metadata = test_batch.runner_metadata
+                runner_metadata['nb_instance_to_setup'] = len(instance_threads)
+                test_batch.runner_metadata = runner_metadata
+                session.save(test_batch, safe=True)
+
+            for t in instance_threads:
+                t.join()
+
+            self.info_log("The test batch is now ready!")
+
+            # MILESTONE
+            with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+                test_batch = session.query(Testbatch)\
+                    .filter(Testbatch.mongo_id == self.test_batch_id).one()
+                runner_metadata = test_batch.runner_metadata
+                runner_metadata['instance_setup_completed'] = True
+                test_batch.runner_metadata = runner_metadata
+                session.save(test_batch, safe=True)
+
             try:
-                self.tear_down_instances()
-
-                # MILESTONE
-                with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
-                    test_batch = session.query(Testbatch)\
-                        .filter(Testbatch.mongo_id == self.test_batch_id).one()
-                    runner_metadata = test_batch.runner_metadata
-                    runner_metadata['instance_teardown_completed'] = True
-                    test_batch.runner_metadata = runner_metadata
-                    session.save(test_batch, safe=True)
-
-                # Kill selenium server
-                if self.get_config_value('grid_runner:kill_selenium_server'):
-                    if self.selenium_pid:
-                        self.kill_pid(self.selenium_pid)
-
-                        # MILESTONE
-                        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
-                            test_batch = session.query(Testbatch)\
-                                .filter(Testbatch.mongo_id == self.test_batch_id).one()  # noqa
-                            runner_metadata = test_batch.runner_metadata
-                            runner_metadata['selenium_server_killed'] = True
-                            test_batch.runner_metadata = runner_metadata
-                            session.save(test_batch, safe=True)
-
-                # Kill xvfb process
-                for xvfb_pid in self.xvfb_pids:
-                    self.kill_pid(xvfb_pid)
-
+                self.run()
             except:
                 tb = traceback.format_exc()
-                self.error_log("Exception in finally block of the grid runner: %s" % str(tb))  # noqa
+                self.error_log(
+                    "Exception in run of the grid runner: %s"
+                    % str(tb)
+                )
+                raise
+
+            finally:
+                try:
+                    self.tear_down_instances()
+
+                    # MILESTONE
+                    with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+                        test_batch = session.query(Testbatch)\
+                            .filter(Testbatch.mongo_id == self.test_batch_id)\
+                            .one()
+                        runner_metadata = test_batch.runner_metadata
+                        runner_metadata['instance_teardown_completed'] = True
+                        test_batch.runner_metadata = runner_metadata
+                        session.save(test_batch, safe=True)
+
+                    # Kill selenium server
+                    if self.get_config_value('grid_runner:kill_selenium_server'):  # noqa
+                        if self.selenium_pid:
+                            self.kill_pid(self.selenium_pid)
+
+                            # MILESTONE
+                            with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+                                test_batch = session.query(Testbatch)\
+                                    .filter(Testbatch.mongo_id == self.test_batch_id).one()  # noqa
+                                runner_metadata = test_batch.runner_metadata
+                                runner_metadata['selenium_server_killed'] = True  # noqa
+                                test_batch.runner_metadata = runner_metadata
+                                session.save(test_batch, safe=True)
+
+                    # Kill xvfb process
+                    for xvfb_pid in self.xvfb_pids:
+                        self.kill_pid(xvfb_pid)
+
+                except:
+                    tb = traceback.format_exc()
+                    self.error_log("Exception in finally block of the grid runner: %s" % str(tb))  # noqa
+        except:
+            self.set_ending_timestamp()
+            tb = traceback.format_exc()
+            self.error_log("Exception in finally block of the grid runner: %s" % str(tb))  # noqa
+            raise
 
         self.info_log("The test batch is finished.")
 
@@ -328,13 +338,16 @@ class GridRunner(BaseRunner):
             tb = traceback.format_exc()
             self.error_log("Run exception: %s" % str(tb))
 
+        self.set_ending_timestamp()
+
+        self.print_test_summary(executed_tests)
+
+    def set_ending_timestamp(self):
         with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
             test_batch = session.query(Testbatch)\
                 .filter(Testbatch.mongo_id == self.test_batch_id).one()
             test_batch.ending_timestamp = datetime.now()
             session.save(test_batch, safe=True)
-
-        self.print_test_summary(executed_tests)
 
     def kill_test_batch_if_necessary(self):
         """Kill the test batch

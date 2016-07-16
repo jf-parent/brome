@@ -3,6 +3,10 @@ class ServerBaseException(Exception):
         return self.__repr__().split('(')[0]
 
 
+class MissingModelValueException(ServerBaseException):
+    pass
+
+
 class WrongEmailOrPasswordException(ServerBaseException):
     pass
 

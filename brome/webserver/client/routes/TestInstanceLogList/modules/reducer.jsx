@@ -12,7 +12,7 @@ export const LOADED_TEST_INSTANCE_LIST_ERROR = 'LOADED_TEST_INSTANCE_LIST_ERROR'
 // Actions
 // ====================================
 
-const logger = require('loglevel').getLogger('TestBatchTestInstanceLogList')
+const logger = require('loglevel').getLogger('TestInstanceLogList')
 logger.setLevel(__LOGLEVEL__)
 
 export function doFetchTestInstance (data) {

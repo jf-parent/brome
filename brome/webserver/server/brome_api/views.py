@@ -1,5 +1,6 @@
 import importlib
 import logging
+import os
 
 from aiohttp import web
 from aiohttp_session import get_session
@@ -90,10 +91,16 @@ class LogStreamOut(web.View):
             results = fd.readlines()
             total += len(results)
 
+        name = log_file_path\
+            .rsplit(os.sep)[-1]\
+            .rsplit('.')[0]\
+            .replace('_', ' ')
+
         # RESPONSE
         response_data = {
             'success': True,
             'total': total,
+            'name': name,
             'results': results
         }
         return web.json_response(response_data)

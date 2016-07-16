@@ -112,6 +112,7 @@
     "react-addons-test-utils": "^15.1.0",
     "react-bootstrap": "^0.29.5",
     "react-dom": "^15.0.2",
+    "react-image-gallery": "^0.6.5",
     "react-input-enhancements": "^0.4.12",
     "react-intl": "^2.1.2",
     "react-ladda": "^4.0.3",

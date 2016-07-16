@@ -22,6 +22,7 @@ def test_log_stream_out_success(client):
     assert response.status_code == 200
     assert response.json['success']
     assert response.json['total'] == 10
+    assert response.json['name'] == 'test batch dummy log'
     assert response.json['results'][0].strip() == 'line 1'
     assert response.json['results'][-1].strip() == 'line 10'
 
@@ -156,5 +157,6 @@ def test_log_stream_out_skip(client):
     assert response.status_code == 200
     assert response.json['success']
     assert response.json['total'] == 10
+    assert response.json['name'] == 'test batch dummy log'
     assert response.json['results'][0].strip() == 'line 3'
     assert response.json['results'][-1].strip() == 'line 10'

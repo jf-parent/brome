@@ -814,6 +814,12 @@ class BaseTest(object):
         create_dir_if_doesnt_exist(self._assertion_screenshot_dir)
 
         # SCREENSHOT DIRECTORY
+        self._screenshot_relative_dir = os.path.join(
+            self._runner.relative_runner_dir,
+            'screenshots',
+            self.pdriver.get_id(join_char='_')
+        )
+
         self._screenshot_dir = os.path.join(
             self._runner_dir,
             'screenshots',

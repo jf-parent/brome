@@ -29,13 +29,26 @@ class TestBatchDetail extends BaseComponent {
   componentWillMount () {
     let testBatchUid = this.props.location.query['testbatchuid']
 
-    // TODO set interval only on not terminated test batch
     this._interval = setInterval(
       () => {
         this.fetchTestBachDetail(testBatchUid)
       },
       2000
     )
+  }
+
+  componentWillReceiveProps () {
+    let testBatch = this.props.state.testbatchdetail.testBatch
+
+    // Clear interval on terminated testbatch
+    if (testBatch) {
+      if (testBatch.terminated) {
+        if (this._interval) {
+          clearInterval(this._interval)
+          this._interval = null
+        }
+      }
+    }
   }
 
   componentWillUnmount () {
@@ -48,11 +61,11 @@ class TestBatchDetail extends BaseComponent {
       return (
         <div className={'row ' + CoreLayoutStyle['no-gutter']}>
           <div className='pull-right'>
-            <a className='btn btn-default btn-link'>
+            <button className='btn btn-default'>
               <i className='fa fa-trash-o' aria-hidden='true'></i>
               {' '}
               Delete
-            </a>
+            </button>
           </div>
         </div>
       )
@@ -60,11 +73,11 @@ class TestBatchDetail extends BaseComponent {
       return (
         <div className={'row ' + CoreLayoutStyle['no-gutter']}>
           <div className='pull-right'>
-            <a className='btn btn-default btn-link'>
+            <button className='btn btn-default'>
               <i className='fa fa-plug' aria-hidden='true'></i>
               {' '}
               Terminate
-            </a>
+            </button>
           </div>
         </div>
       )
@@ -109,13 +122,11 @@ class TestBatchDetail extends BaseComponent {
     let testResults = this.props.state.testbatchdetail.testBatch.test_results
     let nbFailedTest = testResults['nb_failed_test']
     let nbSucceededTest = testResults['nb_succeeded_test']
-    let nbTestResult = testResults['nb_test_result']
     let failedTests = testResults['failed_tests']
     return (
       <div>
         <h3 className={ComponentStyle['section-header']}>
           Test Results
-          {' '}({nbTestResult})
           {' '}
           {(() => {
             if (nbFailedTest) {
@@ -126,7 +137,7 @@ class TestBatchDetail extends BaseComponent {
           })()}
           {' '}
           {(() => {
-            if (nbFailedTest) {
+            if (nbSucceededTest) {
               return (<span style={{color: 'green'}}>({nbSucceededTest})</span>)
             } else {
               return null
@@ -214,23 +225,25 @@ class TestBatchDetail extends BaseComponent {
     )
   }
 
-  getTool (path, label, icon, enabled) {
-    // TODO fix style issue
+  getTool (
+    path,
+    label,
+    icon,
+    enabled,
+    className = 'col-xs-12 col-sm-12 col-md-2 col-lg-2'
+  ) {
     return (
-      <div className='col-xs-12 col-sm-12 col-md-3 col-lg-3'>
-        <div className={ComponentStyle['feature-box']}>
-          <Link className='btn btn-default btn-link' to={path + '?testbatchuid=' + this.props.state.testbatchdetail.testBatch.uid} disabled={!enabled}>
-            <i className={'fa fa-' + icon} aria-hidden='true'></i>
-            {' '}
-            {label}
-          </Link>
-        </div>
+      <div className={className}>
+        <Link className='btn btn-default btn-link' to={path + '?testbatchuid=' + this.props.state.testbatchdetail.testBatch.uid} disabled={!enabled}>
+          <i className={'fa fa-' + icon} aria-hidden='true'></i>
+          {' '}
+          {label}
+        </Link>
       </div>
     )
   }
 
   getToolbelt () {
-    // TODO center last row
     let testBatchFeatures = this.props.state.testbatchdetail.testBatch.features
     let sessionVideoCapture = this.getTool(
       'sessionvideocapture',
@@ -244,15 +257,9 @@ class TestBatchDetail extends BaseComponent {
       'cubes',
       testBatchFeatures['network_capture']
     )
-    let botDiaries = this.getTool(
-      'botdiaries',
-      'Bot Diaries',
-      'pencil',
-      testBatchFeatures['bot_diaries']
-    )
     let testResults = this.getTool(
       'testresults',
-      'Test Results',
+      'Test Results (' + this.props.state.testbatchdetail.testBatch.test_results.nb_test_result + ')',
       'bar-chart',
       true
     )
@@ -263,8 +270,8 @@ class TestBatchDetail extends BaseComponent {
       true
     )
     let screenshots = this.getTool(
-      'screenshots',
-      'Screenshots',
+      'testbatchscreenshots',
+      'Screenshots (' + this.props.state.testbatchdetail.testBatch.nb_screenshot + ')',
       'file-image-o',
       testBatchFeatures['screenshots']
     )
@@ -275,7 +282,7 @@ class TestBatchDetail extends BaseComponent {
       true
     )
     let testInstancesLogs = this.getTool(
-      'testbatchtestinstanceloglist',
+      'testinstanceloglist',
       'Instances Logs',
       'newspaper-o',
       true
@@ -285,6 +292,12 @@ class TestBatchDetail extends BaseComponent {
       'Runner log',
       'file-text-o',
       true
+    )
+    let botDiaries = this.getTool(
+      'botdiaries',
+      'Bot Diaries',
+      'pencil',
+      testBatchFeatures['bot_diaries']
     )
     let instanceVnc = this.getTool(
       'instancevnc',

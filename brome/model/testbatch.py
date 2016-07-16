@@ -10,6 +10,7 @@ from mongoalchemy.fields import (
 from brome.model.basemodel import BaseModel
 from brome.model.testcrash import Testcrash
 from brome.model.testresult import Testresult
+from brome.model.testscreenshot import Testscreenshot
 
 
 class Testbatch(BaseModel):
@@ -84,6 +85,14 @@ class Testbatch(BaseModel):
 
         return data
 
+    async def get_nb_screenshot(self, context):
+        db_session = context.get('db_session')
+
+        query = db_session.query(Testscreenshot)\
+            .filter(Testscreenshot.test_batch_id == self.mongo_id)
+
+        return query.count()
+
     async def sanitize_data(self, context):
         return []
 
@@ -95,6 +104,7 @@ class Testbatch(BaseModel):
         data['total_executed_tests'] = self.total_executed_tests
         data['total_executing_tests'] = self.total_executing_tests
         data['starting_timestamp'] = self.starting_timestamp.isoformat()
+        data['nb_screenshot'] = await self.get_nb_screenshot(context)
         data['features'] = {
             'session_video_capture': self.feature_session_video_capture,
             'network_capture': self.feature_network_capture,

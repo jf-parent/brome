@@ -11,8 +11,9 @@ import Dashboard from 'routes/Dashboard'
 import TestBatchList from 'routes/TestBatchList'
 import TestBatchDetail from 'routes/TestBatchDetail'
 import TestBatchRunnerLog from 'routes/TestBatchRunnerLog'
-import TestBatchTestInstanceLogList from 'routes/TestBatchTestInstanceLogList'
+import TestInstanceLogList from 'routes/TestInstanceLogList'
 import TestInstanceLog from 'routes/TestInstanceLog'
+import TestBatchScreenshots from 'routes/TestBatchScreenshots'
 
 export const createRoutes = (store) => ({
   path: '/',
@@ -20,10 +21,11 @@ export const createRoutes = (store) => ({
   childRoutes: [
     Dashboard(store),
     TestBatchList(store),
+    TestBatchScreenshots(store),
     TestBatchDetail(store),
     TestBatchRunnerLog(store),
     TestInstanceLog(store),
-    TestBatchTestInstanceLogList(store),
+    TestInstanceLogList(store),
     ResetPassword(store),
     Login(store),
     Profile(store),

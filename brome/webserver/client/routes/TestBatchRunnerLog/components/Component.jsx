@@ -2,6 +2,8 @@ import React from 'react'
 import axios from 'axios'
 // import { FormattedMessage } from 'react-intl'
 
+import Loading from 'components/ux/Loading'
+import ErrorMsg from 'components/ux/ErrorMsg'
 // import ComponentStyle from './ComponentStyle.postcss'
 import BaseComponent from 'core/BaseComponent'
 
@@ -13,7 +15,10 @@ class TestBatchRunnerLog extends BaseComponent {
     this._bind('fetchTestBachRunnerLog')
 
     this.state = {
-      lines: []
+      lines: [],
+      loading: true,
+      error: null,
+      name: null
     }
   }
 
@@ -30,8 +35,11 @@ class TestBatchRunnerLog extends BaseComponent {
 
         if (response.data.success) {
           this.setState({
-            lines: this.state.lines.concat(response.data.results)
+            lines: this.state.lines.concat(response.data.results),
+            loading: false,
+            name: response.data.name
           })
+          // TODO don't setTimeout if the log is not alive
           this._interval = setTimeout(
             () => {
               this.fetchTestBachRunnerLog(testBatchUid, response.data.total)
@@ -39,7 +47,10 @@ class TestBatchRunnerLog extends BaseComponent {
             2000
           )
         } else {
-          // TODO
+          this.setState({
+            loading: false,
+            error: response.data.error
+          })
         }
       })
   }
@@ -47,7 +58,7 @@ class TestBatchRunnerLog extends BaseComponent {
   componentWillMount () {
     let testBatchUid = this.props.location.query['testbatchuid']
 
-    setTimeout(
+    this._interval = setTimeout(
       () => {
         this.fetchTestBachRunnerLog(testBatchUid, 0)
       }
@@ -60,23 +71,45 @@ class TestBatchRunnerLog extends BaseComponent {
   }
 
   render () {
-    let lines = this.state.lines
+    if (this.state.loading) {
+      return <Loading />
+    } else if (this.state.error) {
+      return <ErrorMsg msgId={this.state.error} name='error-runner-log' />
+    } else {
+      let lines = this.state.lines
+      let logStyle = {
+        border: '2px solid black',
+        padding: '4px',
+        margin: '4px',
+        overflow: 'scroll'
+      }
 
-    return (
-      <ol>
-        {(() => {
-          return lines.map((line, index) => {
-            return (
-              <li key={index}>
-                <small>
-                  {line}
-                </small>
-              </li>
-            )
-          })
-        })()}
-      </ol>
-    )
+      return (
+        <div>
+          <span>
+            Log:{' '}
+          </span>
+          <b>
+            {this.state.name}
+          </b>
+          <div style={logStyle}>
+            <ol>
+              {(() => {
+                return lines.map((line, index) => {
+                  return (
+                    <li key={index}>
+                      <small>
+                        {line}
+                      </small>
+                    </li>
+                  )
+                })
+              })()}
+            </ol>
+          </div>
+        </div>
+      )
+    }
   }
 }
 

@@ -9,7 +9,7 @@ import BaseComponent from 'core/BaseComponent'
 
 const TEST_INSTANCE_LIMIT = 10
 
-class TestBatchTestInstanceLogList extends BaseComponent {
+class TestInstanceLogList extends BaseComponent {
   constructor (props) {
     super(props)
 
@@ -30,7 +30,7 @@ class TestBatchTestInstanceLogList extends BaseComponent {
 
   onLastClick () {
     this.debug('onLastClick')
-    let skip = Math.floor(this.props.state.testbatchtestinstanceloglist.totalTestInstance / TEST_INSTANCE_LIMIT) * TEST_INSTANCE_LIMIT
+    let skip = Math.floor(this.props.state.testinstanceloglist.totalTestInstance / TEST_INSTANCE_LIMIT) * TEST_INSTANCE_LIMIT
     this.fetchTestInstance(skip)
   }
 
@@ -42,12 +42,12 @@ class TestBatchTestInstanceLogList extends BaseComponent {
 
   onPreviousClick () {
     this.debug('onPreviousClick')
-    let skip = this.props.state.testbatchtestinstanceloglist.skip - TEST_INSTANCE_LIMIT
+    let skip = this.props.state.testinstanceloglist.skip - TEST_INSTANCE_LIMIT
     this.fetchTestInstance(skip)
   }
 
   getCurrentPage () {
-    return this.props.state.testbatchtestinstanceloglist.skip / this.props.state.testbatchtestinstanceloglist.limit
+    return this.props.state.testinstanceloglist.skip / this.props.state.testinstanceloglist.limit
   }
 
   fetchTestInstance (pageg) {
@@ -72,13 +72,13 @@ class TestBatchTestInstanceLogList extends BaseComponent {
   }
 
   render () {
-    let loading = this.props.state.testbatchtestinstanceloglist.loading
+    let loading = this.props.state.testinstanceloglist.loading
 
     if (loading) {
       return <Loading />
     } else {
-      let testInstances = this.props.state.testbatchtestinstanceloglist.testInstanceList
-      let totalPage = parseInt(Math.ceil(this.props.state.testbatchtestinstanceloglist.totalTestInstance / TEST_INSTANCE_LIMIT))
+      let testInstances = this.props.state.testinstanceloglist.testInstanceList
+      let totalPage = parseInt(Math.ceil(this.props.state.testinstanceloglist.totalTestInstance / TEST_INSTANCE_LIMIT))
       let currentPage = this.getCurrentPage()
       return (
         <div>
@@ -114,4 +114,4 @@ class TestBatchTestInstanceLogList extends BaseComponent {
   }
 }
 
-module.exports = TestBatchTestInstanceLogList
+module.exports = TestInstanceLogList

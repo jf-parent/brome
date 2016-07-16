@@ -24,6 +24,7 @@ from brome.core.proxy_element_list import ProxyElementList
 from brome.model.test import Test
 from brome.model.testresult import Testresult
 from brome.model.testqualityscreenshot import Testqualityscreenshot
+from brome.model.testscreenshot import Testscreenshot
 
 
 class ProxyDriver(object):
@@ -975,6 +976,7 @@ class ProxyDriver(object):
         """
         self.info_log("Taking a screenshot...")
 
+        save_to_db = False
         if screenshot_path:
             self._driver.save_screenshot(screenshot_path)
             self.debug_log("Screenshot taken (%s)" % screenshot_path)
@@ -990,24 +992,58 @@ class ProxyDriver(object):
 
             if take_screenshot:
                 if self.test_instance._runner_dir:
-                    screenshot_path = os.path.join(
-                            self.test_instance._screenshot_dir,
-                            '%s.png' % string_to_filename(screenshot_name)
-                        )
-                    self._driver.save_screenshot(
-                        screenshot_path
+                    screenshot_name = '%s.png' % \
+                        string_to_filename(screenshot_name)
+
+                    relative_path = os.path.join(
+                            self.test_instance._screenshot_relative_dir,
+                            screenshot_name
                     )
-                    self.debug_log("Screenshot taken (%s)" % screenshot_path)
+
+                    full_path = os.path.join(
+                            self.test_instance._screenshot_dir,
+                            screenshot_name
+                    )
+
+                    self._driver.save_screenshot(
+                        full_path
+                    )
+                    self.debug_log("Screenshot taken (%s)" % full_path)
+                    save_to_db = True
         else:
             if self.test_instance._runner_dir:
-                screenshot_path = os.path.join(
-                        self.test_instance._screenshot_dir,
-                        '%s.png' % get_timestamp()
-                    )
-                self._driver.save_screenshot(
-                    screenshot_path
+                screenshot_name = '%s.png' % get_timestamp()
+
+                relative_path = os.path.join(
+                        self.test_instance._screenshot_relative_dir,
+                        screenshot_name
                 )
-                self.debug_log("Screenshot taken (%s)" % screenshot_path)
+
+                full_path = os.path.join(
+                        self.test_instance._screenshot_dir,
+                        screenshot_name
+                )
+
+                self._driver.save_screenshot(
+                    full_path
+                )
+                self.debug_log("Screenshot taken (%s)" % full_path)
+                save_to_db = True
+
+        if save_to_db:
+            with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+                screenshot = Testscreenshot()
+                screenshot.browser_id = self.get_id()
+                # TODO support s3
+                screenshot.location = 'local_file_system'
+                screenshot.relative_path = relative_path
+                screenshot.full_path = full_path
+                screenshot.extra_data = {}
+                screenshot.title = screenshot_name
+                screenshot.test_instance_id = self.test_instance._test_instance_id  # noqa
+                screenshot.test_batch_id = self.test_instance._test_batch_id  # noqa
+
+                session.save(screenshot, safe=True)
 
     def take_quality_screenshot(self, screenshot_name):
         """Take a quality screenshot
@@ -1021,24 +1057,28 @@ class ProxyDriver(object):
         self.info_log("Taking a quality screenshot...")
 
         if self.test_instance._runner_dir:
-            relative_screenshot_path = os.path.join(
+            screenshot_name = '%s.png' % string_to_filename(screenshot_name)
+            relative_path = os.path.join(
                     self.test_instance._quality_screenshot_relative_dir,
-                    '%s.png' % string_to_filename(screenshot_name)
+                    screenshot_name
                 )
 
-            screenshot_path = os.path.join(
+            full_path = os.path.join(
                     self.test_instance._quality_screenshot_dir,
-                    '%s.png' % string_to_filename(screenshot_name)
+                    screenshot_name
                 )
             self._driver.save_screenshot(
-                screenshot_path
+                full_path
             )
 
             with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
                 quality_screenshot = Testqualityscreenshot()
                 quality_screenshot.timestamp = datetime.now()
                 quality_screenshot.browser_id = self.get_id()
-                quality_screenshot.screenshot_path = relative_screenshot_path
+                quality_screenshot.relative_path = relative_path
+                # TODO support s3
+                quality_screenshot.location = 'local_file_system'
+                quality_screenshot.full_path = full_path
                 quality_screenshot.extra_data = {}
                 quality_screenshot.title = screenshot_name
                 quality_screenshot.test_instance_id = self.test_instance._test_instance_id  # noqa
@@ -1046,7 +1086,7 @@ class ProxyDriver(object):
 
                 session.save(quality_screenshot, safe=True)
 
-            self.debug_log("Quality screenshot taken (%s)" % screenshot_path)
+            self.debug_log("Quality screenshot taken (%s)" % full_path)
 
     # ASSERT
     def assert_present(self, selector, testid=None, **kwargs):

@@ -75,6 +75,11 @@ class LogStreamOut(web.View):
         instance = query.one()
 
         log_file_path = instance.log_file_path
+        alive = None
+        if instance.ending_timestamp:
+            alive = False
+        else:
+            alive = True
 
         if not log_file_path:
             raise exceptions.InvalidRequestException(
@@ -101,6 +106,7 @@ class LogStreamOut(web.View):
             'success': True,
             'total': total,
             'name': name,
+            'alive': alive,
             'results': results
         }
         return web.json_response(response_data)

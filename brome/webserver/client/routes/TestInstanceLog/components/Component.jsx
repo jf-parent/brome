@@ -39,13 +39,15 @@ class TestInstanceLog extends BaseComponent {
             loading: false,
             name: response.data.name
           })
-          // TODO don't setTimeout if the log is not alive
-          this._interval = setTimeout(
-            () => {
-              this.fetchTestInstanceLog(testInstanceUid, response.data.total)
-            },
-            2000
-          )
+
+          if (response.alive) {
+            this._interval = setTimeout(
+              () => {
+                this.fetchTestInstanceLog(testInstanceUid, response.data.total)
+              },
+              2000
+            )
+          }
         } else {
           this.setState({
             loading: false,

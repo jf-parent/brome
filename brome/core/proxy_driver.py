@@ -1033,6 +1033,7 @@ class ProxyDriver(object):
         if save_to_db:
             with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
                 screenshot = Testscreenshot()
+                screenshot.browser_capabilities = self.capabilities
                 screenshot.browser_id = self.get_id()
                 # TODO support s3
                 screenshot.location = 'local_file_system'
@@ -1074,6 +1075,7 @@ class ProxyDriver(object):
             with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
                 quality_screenshot = Testqualityscreenshot()
                 quality_screenshot.timestamp = datetime.now()
+                quality_screenshot.browser_capabilities = self.capabilities
                 quality_screenshot.browser_id = self.get_id()
                 quality_screenshot.relative_path = relative_path
                 # TODO support s3
@@ -1560,6 +1562,7 @@ class ProxyDriver(object):
             test_result = Testresult()
             test_result.result = result
             test_result.timestamp = datetime.now()
+            test_result.browser_capabilities = self.capabilities
             test_result.browser_id = self.get_id()
             test_result.screenshot_path = screenshot_relative_path
             test_result.videocapture_path = videocapture_path

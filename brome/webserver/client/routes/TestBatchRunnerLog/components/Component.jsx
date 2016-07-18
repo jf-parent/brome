@@ -17,6 +17,7 @@ class TestBatchRunnerLog extends BaseComponent {
     this.state = {
       lines: [],
       loading: true,
+      parent: null,
       error: null,
       name: null
     }
@@ -37,9 +38,10 @@ class TestBatchRunnerLog extends BaseComponent {
           this.setState({
             lines: this.state.lines.concat(response.data.results),
             loading: false,
+            parent: response.data.parent,
             name: response.data.name
           })
-          if (response.alive) {
+          if (!response.parent.terminated) {
             this._interval = setTimeout(
               () => {
                 this.fetchTestBachRunnerLog(testBatchUid, response.data.total)
@@ -73,7 +75,11 @@ class TestBatchRunnerLog extends BaseComponent {
 
   render () {
     if (this.state.loading) {
-      return <Loading />
+      return (
+        <div className='container-fluid'>
+          <Loading style={{left: '50%'}} />
+        </div>
+      )
     } else if (this.state.error) {
       return <ErrorMsg msgId={this.state.error} name='error-runner-log' />
     } else {
@@ -87,6 +93,7 @@ class TestBatchRunnerLog extends BaseComponent {
 
       return (
         <div>
+          <h2>Test Batch Log <small>({this.state.parent.friendly_name}) ({this.state.parent.uid})</small></h2>
           <span>
             Log:{' '}
           </span>
@@ -100,7 +107,7 @@ class TestBatchRunnerLog extends BaseComponent {
                   return (
                     <li key={index}>
                       <small>
-                        {line}
+                        <i>{line}</i>
                       </small>
                     </li>
                   )

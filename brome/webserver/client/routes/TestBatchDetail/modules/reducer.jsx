@@ -60,23 +60,25 @@ export const actions = {
 // ====================================
 
 const initialState = {
-  testBatch: null,
+  testBatch: {},
   error: null
 }
 
 export default function testbatchdetail (state = initialState, action) {
   switch (action.type) {
     case TEST_BATCH_DETAIL_LOADING_SUCCESS:
+      let testBatch = state.testBatch
+      testBatch[action.data.results[0].uid] = action.data.results[0]
       return Object.assign({},
-        initialState,
+        state,
         {
-          testBatch: action.data.results[0]
+          testBatch
         }
       )
 
     case TEST_BATCH_DETAIL_LOADING_ERROR:
       return Object.assign({},
-        initialState,
+        state,
         {
           error: action.data.error
         }

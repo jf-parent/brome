@@ -1,5 +1,6 @@
 from mongoalchemy.fields import (
     StringField,
+    AnythingField,
     ObjectIdField,
     EnumField,
     DictField
@@ -10,6 +11,7 @@ from brome.webserver.server import exceptions
 
 
 class Testscreenshot(BaseModel):
+    browser_capabilities = DictField(AnythingField())
     browser_id = StringField()
     relative_path = StringField()
     full_path = StringField()
@@ -37,7 +39,7 @@ class Testscreenshot(BaseModel):
         data['relative_path'] = self.relative_path
         data['full_path'] = self.full_path
         data['title'] = self.title
-        data['browser_id'] = self.browser_id
+        data['browser_capabilities'] = self.browser_capabilities
         return data
 
     async def method_autorized(self, context):
@@ -51,10 +53,15 @@ class Testscreenshot(BaseModel):
         data = context.get('data')
         db_session = context.get('db_session')
 
-        # BROWSER_ID
+        # BROWSER ID
         browser_id = data.get('browser_id')
         if browser_id:
             self.browser_id = browser_id
+
+        # BROWSER CAPABILITIES
+        browser_capabilities = data.get('browser_capabilities')
+        if browser_capabilities:
+            self.browser_capabilities = browser_capabilities
 
         # RELATIVE_PATH
         relative_path = data.get('relative_path')

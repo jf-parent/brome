@@ -57,6 +57,7 @@ export const actions = {
 // TODO support infinite loading
 const initialState = {
   screenshots: [],
+  testBatch: null,
   error: null,
   loading: true
 }
@@ -75,7 +76,8 @@ export default function testbatchscreenshots (state = initialState, action) {
       return Object.assign({},
         initialState,
         {
-          screenshots: action.data.results,
+          screenshots: action.data.results[0].results,
+          testBatch: action.data.results[1].results[0],
           loading: false
         }
       )

@@ -99,6 +99,8 @@ class BaseTest(object):
 
             test_instance = Testinstance()
             test_instance.starting_timestamp = starting_timestamp
+            test_instance.browser_capabilities = self.pdriver.capabilities
+            test_instance.browser_id = self.pdriver.get_id()
             test_instance.name = self._name
             test_instance.test_batch_id = self._test_batch_id
             test_instance.extra_data = extra_data
@@ -755,9 +757,10 @@ class BaseTest(object):
         with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
             test_crash = Testcrash()
             test_crash.title = crash_name
+            test_crash.browser_capabilities = self.pdriver.capabilities
+            test_crash.browser_id = self.pdriver.get_id()
             test_crash.timestamp = datetime.now()
             test_crash.trace = str(tb)
-            test_crash.browser_id = self.pdriver.get_id()
             test_crash.screenshot_path = crash_screenshot_relative_path
             test_crash.videocapture_path = self._video_capture_file_relative_path  # noqa
             test_crash.extra_data = extra_data

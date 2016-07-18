@@ -56,8 +56,9 @@ export const actions = {
 
 const initialState = {
   error: null,
-  loading: false,
+  loading: true,
   testInstanceList: [],
+  testBatch: null,
   totalTestInstance: 0,
   skip: 0,
   limit: 10
@@ -77,8 +78,10 @@ export default function testinstanceloglist (state = initialState, action) {
       return Object.assign({},
         initialState,
         {
+          loading: false,
           testInstanceList: action.data.results,
-          totalTestInstance: action.data.total
+          totalTestInstance: action.data.total,
+          testBatch: action.data.parent
         }
       )
 
@@ -86,6 +89,7 @@ export default function testinstanceloglist (state = initialState, action) {
       return Object.assign({},
         initialState,
         {
+          loading: false,
           error: action.error
         }
       )

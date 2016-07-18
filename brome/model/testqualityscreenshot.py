@@ -1,5 +1,6 @@
 from mongoalchemy.fields import (
     StringField,
+    AnythingField,
     BoolField,
     ObjectIdField,
     EnumField,
@@ -10,6 +11,7 @@ from brome.model.basemodel import BaseModel
 
 
 class Testqualityscreenshot(BaseModel):
+    browser_capabilities = DictField(AnythingField())
     browser_id = StringField()
     relative_path = StringField()
     full_path = StringField()

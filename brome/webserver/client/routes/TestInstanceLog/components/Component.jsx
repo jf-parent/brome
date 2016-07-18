@@ -18,6 +18,7 @@ class TestInstanceLog extends BaseComponent {
       lines: [],
       loading: true,
       error: null,
+      parent: null,
       name: null
     }
   }
@@ -37,10 +38,11 @@ class TestInstanceLog extends BaseComponent {
           this.setState({
             lines: this.state.lines.concat(response.data.results),
             loading: false,
+            parent: response.data.parent,
             name: response.data.name
           })
 
-          if (response.alive) {
+          if (!response.parent.terminated) {
             this._interval = setTimeout(
               () => {
                 this.fetchTestInstanceLog(testInstanceUid, response.data.total)
@@ -74,7 +76,11 @@ class TestInstanceLog extends BaseComponent {
 
   render () {
     if (this.state.loading) {
-      return <Loading />
+      return (
+        <div className='container-fluid'>
+          <Loading style={{left: '50%'}} />
+        </div>
+      )
     } else if (this.state.error) {
       return <ErrorMsg msgId={this.state.error} name='error-runner-log' />
     } else {
@@ -88,6 +94,7 @@ class TestInstanceLog extends BaseComponent {
 
       return (
         <div>
+          <h2>Test Batch Log <small>({this.state.parent.name} - {this.state.parent.browser_capabilities.browserName}) ({this.state.parent.test_batch_id})</small></h2>
           <span>
             Log:{' '}
           </span>
@@ -101,7 +108,7 @@ class TestInstanceLog extends BaseComponent {
                   return (
                     <li key={index}>
                       <small>
-                        {line}
+                        <i>{line}</i>
                       </small>
                     </li>
                   )

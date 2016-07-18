@@ -1,5 +1,6 @@
 from mongoalchemy.fields import (
     DateTimeField,
+    AnythingField,
     StringField,
     ObjectIdField,
     DictField
@@ -12,7 +13,8 @@ from brome.model.basemodel import BaseModel
 class Testinstance(BaseModel):
 
     name = StringField()
-
+    browser_capabilities = DictField(AnythingField())
+    browser_id = StringField()
     starting_timestamp = DateTimeField()
     ending_timestamp = DateTimeField(required=False)
     extra_data = DictField(StringField())
@@ -35,11 +37,14 @@ class Testinstance(BaseModel):
         data = {}
         data['uid'] = self.get_uid()
         data['name'] = self.name
+        data['browser_capabilities'] = self.browser_capabilities
         data['starting_timestamp'] = self.starting_timestamp.isoformat()
         if hasattr(self, 'ending_timestamp'):
             data['ending_timestamp'] = self.ending_timestamp.isoformat()
+            data['terminated'] = True
         else:
             data['ending_timestamp'] = False
+            data['terminated'] = False
         data['extra_data'] = self.extra_data
         data['test_batch_id'] = str(self.test_batch_id)
         return data
@@ -59,6 +64,16 @@ class Testinstance(BaseModel):
         name = data.get('name')
         if name:
             self.name = name
+
+        # BROWSER ID
+        browser_id = data.get('browser_id')
+        if browser_id:
+            self.browser_id = browser_id
+
+        # BROWSER CAPABILITIES
+        browser_capabilities = data.get('browser_capabilities')
+        if browser_capabilities:
+            self.browser_capabilities = browser_capabilities
 
         # STARTING TIMESTAMP
         starting_timestamp = data.get('starting_timestamp')

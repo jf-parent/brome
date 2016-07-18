@@ -4,6 +4,7 @@ import logging
 import os
 import os.path
 
+from haikunator import Haikunator
 import yaml
 import psutil
 
@@ -60,8 +61,14 @@ class BaseRunner(object):
         with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
             self.starting_timestamp = datetime.now()
 
+            haikunator = Haikunator()
+
             test_batch = Testbatch()
             test_batch.starting_timestamp = self.starting_timestamp
+            test_batch.friendly_name = haikunator.haikunate(
+                token_length=0,
+                delimiter='.'
+            )
             test_batch.pid = current_pid
             test_batch.total_tests = len(self.tests)
 

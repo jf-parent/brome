@@ -7,6 +7,7 @@ from aiohttp_session import get_session
 
 from brome.webserver.server.auth import get_user_from_session
 from brome.model.testcrash import Testcrash
+from brome.model.testbatch import Testbatch
 from brome.model.testresult import Testresult
 from brome.model.testinstance import Testinstance
 from brome.webserver.server import exceptions
@@ -72,15 +73,9 @@ class LogStreamOut(web.View):
                 )
             )
 
-        instance = query.one()
+        parent = query.one()
 
-        log_file_path = instance.log_file_path
-        alive = None
-        if instance.ending_timestamp:
-            alive = False
-        else:
-            alive = True
-
+        log_file_path = parent.log_file_path
         if not log_file_path:
             raise exceptions.InvalidRequestException(
                 "The instance 'log_file_path' is empty"
@@ -101,12 +96,17 @@ class LogStreamOut(web.View):
             .rsplit('.')[0]\
             .replace('_', ' ')
 
+        context = {
+            'db_session': self.request.db_session,
+            'method': 'read'
+        }
+
         # RESPONSE
         response_data = {
             'success': True,
             'total': total,
             'name': name,
-            'alive': alive,
+            'parent': await parent.serialize(context),
             'results': results
         }
         return web.json_response(response_data)
@@ -164,6 +164,10 @@ class TestBatch(web.View):
         }
         results = []
         total = 0
+
+        parent = db_session.query(Testbatch)\
+            .filter(Testbatch.mongo_id == uid)\
+            .one()
 
         # CRASHES LIST
         if method == 'list_crashes_reports':
@@ -226,6 +230,7 @@ class TestBatch(web.View):
         response_data = {
             'success': True,
             'total': total,
+            'parent': await parent.serialize(context),
             'results': results
         }
         return web.json_response(response_data)

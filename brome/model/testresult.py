@@ -1,6 +1,7 @@
 from mongoalchemy.fields import (
     StringField,
     BoolField,
+    AnythingField,
     ObjectIdField,
     DictField
 )
@@ -11,6 +12,7 @@ from brome.model.basemodel import BaseModel
 
 class Testresult(BaseModel):
     result = BoolField()
+    browser_capabilities = DictField(AnythingField())
     browser_id = StringField()
     screenshot_path = StringField()
     videocapture_path = StringField()
@@ -36,7 +38,7 @@ class Testresult(BaseModel):
         data = {}
         data['uid'] = self.get_uid()
         data['result'] = self.result
-        data['browser_id'] = self.browser_id
+        data['browser_capabilities'] = self.browser_capabilities
         data['screenshot_path'] = self.screenshot_path
         data['videocapture_path'] = self.videocapture_path
         data['extra_data'] = self.extra_data
@@ -66,6 +68,11 @@ class Testresult(BaseModel):
         browser_id = data.get('browser_id')
         if browser_id is not None:
             self.browser_id = browser_id
+
+        # BROWSER CAPABILITIES
+        browser_capabilities = data.get('browser_capabilities')
+        if browser_capabilities is not None:
+            self.browser_capabilities = browser_capabilities
 
         # SCREENSHOT PATH
         screenshot_path = data.get('screenshot_path')

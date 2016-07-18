@@ -1,5 +1,8 @@
+import os
+
 from mongoalchemy.fields import (
     StringField,
+    AnythingField,
     ObjectIdField,
     DictField
 )
@@ -9,6 +12,7 @@ from brome.model.basemodel import BaseModel
 
 
 class Testcrash(BaseModel):
+    browser_capabilities = DictField(AnythingField())
     browser_id = StringField()
     screenshot_path = StringField()
     videocapture_path = StringField()
@@ -21,7 +25,7 @@ class Testcrash(BaseModel):
 
     def __repr__(self):
         try:
-            return "Testcrash <uid: {self.mongo_id}><browser_id: {self.browser_id}><title: {self.title}>".format(  # noqa
+            return "Testcrash <uid: {self.mongo_id}><browser_capabilities: {self.browser_capabilities}><title: {self.title}>".format(  # noqa
                 self=self
             )
         except AttributeError:
@@ -33,12 +37,12 @@ class Testcrash(BaseModel):
     async def serialize(self, context):
         data = {}
         data['uid'] = self.get_uid()
-        data['browser_id'] = self.browser_id
+        data['browser_capabilities'] = self.browser_capabilities
         data['screenshot_path'] = self.screenshot_path
         data['videocapture_path'] = self.videocapture_path
         data['extra_data'] = self.extra_data
         data['title'] = self.title
-        data['trace'] = self.trace
+        data['trace'] = self.trace.split(os.linesep)[:-1]
         data['test_instance_id'] = str(self.test_instance_id)
         data['test_batch_id'] = str(self.test_batch_id)
         return data
@@ -65,6 +69,11 @@ class Testcrash(BaseModel):
         browser_id = data.get('browser_id')
         if browser_id is not None:
             self.browser_id = browser_id
+
+        # BROWSER CAPABILITIES
+        browser_capabilities = data.get('browser_capabilities')
+        if browser_capabilities is not None:
+            self.browser_capabilities = browser_capabilities
 
         # SCREENSHOT PATH
         screenshot_path = data.get('screenshot_path')

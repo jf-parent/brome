@@ -15,6 +15,7 @@ from brome.model.testscreenshot import Testscreenshot
 
 class Testbatch(BaseModel):
 
+    friendly_name = StringField()
     pid = IntField()
     killed = BoolField(default=False)
     total_tests = IntField()
@@ -99,6 +100,7 @@ class Testbatch(BaseModel):
     async def serialize(self, context):
         data = {}
         data['uid'] = self.get_uid()
+        data['friendly_name'] = self.friendly_name
         data['killed'] = self.killed
         data['total_tests'] = self.total_tests
         data['total_executed_tests'] = self.total_executed_tests
@@ -161,6 +163,11 @@ class Testbatch(BaseModel):
         total_tests = data.get('total_tests')
         if total_tests is not None:
             self.total_tests = total_tests
+
+        # FRIENDLY NAME
+        friendly_name = data.get('friendly_name')
+        if friendly_name:
+            self.friendly_name = friendly_name
 
         # STARTING TIMESTAMP
         starting_timestamp = data.get('starting_timestamp')

@@ -17,7 +17,7 @@ class TestBatchList extends BaseComponent {
     this._initLogger()
     this._bind(
       'getTestBatchDiv',
-      'fetchTestBach',
+      'fetchTestBatch',
       'onFirstClick',
       'onPreviousClick',
       'onNextClick',
@@ -30,7 +30,7 @@ class TestBatchList extends BaseComponent {
     return this.props.state.testbatchlist.skip / this.props.state.testbatchlist.limit
   }
 
-  fetchTestBach (currentPage, loadingContext = true) {
+  fetchTestBatch (currentPage, loadingContext = true) {
     this.props.actions.loadTestBatch(
       this.props.state.session,
       currentPage,
@@ -40,10 +40,10 @@ class TestBatchList extends BaseComponent {
   }
 
   componentWillMount () {
-    this.fetchTestBach(this.props.state.testbatchlist.skip)
+    this.fetchTestBatch(this.props.state.testbatchlist.skip)
     this._interval = setInterval(
       () => {
-        this.fetchTestBach(this.props.state.testbatchlist.skip, false)
+        this.fetchTestBatch(this.props.state.testbatchlist.skip, false)
       },
       2000
     )
@@ -56,25 +56,25 @@ class TestBatchList extends BaseComponent {
 
   onFirstClick () {
     this.debug('onFirstClick')
-    this.fetchTestBach(0)
+    this.fetchTestBatch(0)
   }
 
   onLastClick () {
     this.debug('onLastClick')
     let skip = Math.floor(this.props.state.testbatchlist.totalTestBatch / TEST_BATCH_LIMIT) * TEST_BATCH_LIMIT
-    this.fetchTestBach(skip)
+    this.fetchTestBatch(skip)
   }
 
   onNextClick () {
     this.debug('onNextClick')
     let nextPage = (this.getCurrentPage() + 1) * TEST_BATCH_LIMIT
-    this.fetchTestBach(nextPage)
+    this.fetchTestBatch(nextPage)
   }
 
   onPreviousClick () {
     this.debug('onPreviousClick')
     let previousPage = this.props.state.testbatchlist.skip - TEST_BATCH_LIMIT
-    this.fetchTestBach(previousPage)
+    this.fetchTestBatch(previousPage)
   }
 
   getTestBatchDiv (testBatch, index) {
@@ -96,6 +96,9 @@ class TestBatchList extends BaseComponent {
     return (
       <div key={index} className='col-xs-12 col-sm-12 col-md-4 col-lg-4'>
         <div className={ComponentStyle['test-batch-container']}>
+          <p className='text-center'>
+            <small>{testBatch.friendly_name}</small>
+          </p>
           <p className='text-center'>
             <Link to={'/testbatchdetail?testbatchuid=' + testBatch.uid}>{testBatch.uid}</Link>
           </p>

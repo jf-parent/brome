@@ -49,13 +49,19 @@ class TestBatchScreenshots extends BaseComponent {
   fetchScreenshots (testBatchUid) {
     let data = {
       token: this.props.state.session.token,
-      actions: {
-        action: 'read',
-        model: 'testscreenshot',
-        filters: {
-          test_batch_id: testBatchUid
+      actions: [
+        {
+          action: 'read',
+          model: 'testscreenshot',
+          filters: {
+            test_batch_id: testBatchUid
+          }
+        }, {
+          action: 'read',
+          model: 'testbatch',
+          uid: testBatchUid
         }
-      }
+      ]
     }
 
     this.props.actions.doFetchScreenshots(data)
@@ -107,7 +113,11 @@ class TestBatchScreenshots extends BaseComponent {
     let testBatchScreenshots = this.props.state.testbatchscreenshots
 
     if (testBatchScreenshots.loading) {
-      return <Loading />
+      return (
+        <div className='container-fluid'>
+          <Loading style={{left: '50%'}} />
+        </div>
+      )
     } else if (testBatchScreenshots.error) {
       return <ErrorMsg msgId={testBatchScreenshots.error} name='error-test-batch-screenshot-log' />
     } else {
@@ -122,6 +132,7 @@ class TestBatchScreenshots extends BaseComponent {
 
       return (
         <div className='container-fluid'>
+          <h2>Test Batch Screenshots <small>({testBatchScreenshots.testBatch.friendly_name}) ({testBatchScreenshots.testBatch.uid})</small></h2>
           <ImageGallery
             ref='imageGallery'
             items={items}

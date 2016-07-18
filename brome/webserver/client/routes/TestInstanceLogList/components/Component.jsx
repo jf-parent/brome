@@ -75,15 +75,21 @@ class TestInstanceLogList extends BaseComponent {
     let loading = this.props.state.testinstanceloglist.loading
 
     if (loading) {
-      return <Loading />
+      return (
+        <div className='container-fluid'>
+          <Loading style={{left: '50%'}} />
+        </div>
+      )
     } else {
       let testInstances = this.props.state.testinstanceloglist.testInstanceList
       let totalPage = parseInt(Math.ceil(this.props.state.testinstanceloglist.totalTestInstance / TEST_INSTANCE_LIMIT))
       let currentPage = this.getCurrentPage()
+      let testBatch = this.props.state.testinstanceloglist.testBatch
+
       return (
         <div>
-          <h2>
-            Test Instance Log
+          <h2 className='text-center'>
+            Test Instance List <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
           </h2>
           <ul>
           {(() => {

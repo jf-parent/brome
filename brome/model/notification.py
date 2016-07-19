@@ -8,7 +8,7 @@ from mongoalchemy.fields import (
 )
 
 from brome.model.basemodel import BaseModel
-from brome.webserver.server import exceptions
+from brome.core import exceptions
 from brome.webserver.server.utils import SafeStringField
 
 

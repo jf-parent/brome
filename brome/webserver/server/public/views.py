@@ -4,7 +4,7 @@ from aiohttp import web
 import aiohttp_jinja2
 from aiohttp_session import get_session
 
-from brome.webserver.server import exceptions
+from brome.core import exceptions
 from brome.webserver.server.settings import config
 from brome.webserver.server.server_decorator import (
     exception_handler,

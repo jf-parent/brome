@@ -4,9 +4,8 @@ import axios from 'axios'
 // Constants
 // ====================================
 
-export const TEST_BATCH_LIST_LOADING = 'TEST_BATCH_LIST_LOADING'
-export const TEST_BATCH_LIST_LOADED = 'TEST_BATCH_LIST_LOADED'
-export const TEST_BATCH_LIST_LOADING_ERROR = 'TEST_BATCH_LIST_LOADING_ERROR'
+export const LOADED_TEST_BATCH_LIST_SUCCESS = 'LOADED_TEST_BATCH_LIST_SUCCESS'
+export const LOADED_TEST_BATCH_LIST_ERROR = 'LOADED_TEST_BATCH_LIST_ERROR'
 
 // ====================================
 // Actions
@@ -15,12 +14,8 @@ export const TEST_BATCH_LIST_LOADING_ERROR = 'TEST_BATCH_LIST_LOADING_ERROR'
 const logger = require('loglevel').getLogger('TestBatchList')
 logger.setLevel(__LOGLEVEL__)
 
-export function loadTestBatch (session, skip, limit, loadingContext = true) {
+export function doLoadTestBatchList (session, skip, limit) {
   return dispatch => {
-    if (loadingContext) {
-      dispatch({type: TEST_BATCH_LIST_LOADING})
-    }
-
     let data = {
       actions: {
         action: 'read',
@@ -38,37 +33,37 @@ export function loadTestBatch (session, skip, limit, loadingContext = true) {
 
         if (response.data.success) {
           dispatch(
-            testBatchListLoaded(
+            loadedTestBatchListSuccess(
               response.data,
               skip,
               limit
             )
           )
         } else {
-          dispatch(testBatchListLoadingError(response.error))
+          dispatch(loadedTestBatchListError(response.data.error))
         }
       })
   }
 }
 
-function testBatchListLoaded (data, skip, limit) {
+function loadedTestBatchListSuccess (data, skip, limit) {
   data.skip = skip
   data.limit = limit
   return {
-    type: TEST_BATCH_LIST_LOADED,
+    type: LOADED_TEST_BATCH_LIST_SUCCESS,
     data
   }
 }
 
-function testBatchListLoadingError (error) {
+function loadedTestBatchListError (error) {
   return {
-    type: TEST_BATCH_LIST_LOADING_ERROR,
+    type: LOADED_TEST_BATCH_LIST_ERROR,
     error
   }
 }
 
 export const actions = {
-  loadTestBatch
+  doLoadTestBatchList
 }
 
 // ====================================
@@ -76,23 +71,14 @@ export const actions = {
 // ====================================
 
 const initialState = {
-  loading: false,
-  testBatchList: [],
+  testBatchList: null,
   totalTestBatch: 0,
   error: null
 }
 
 export default function testbatchlist (state = initialState, action) {
   switch (action.type) {
-    case TEST_BATCH_LIST_LOADING:
-      return Object.assign({},
-        initialState,
-        {
-          loading: true
-        }
-      )
-
-    case TEST_BATCH_LIST_LOADED:
+    case LOADED_TEST_BATCH_LIST_SUCCESS:
       return Object.assign({},
         initialState,
         {
@@ -103,7 +89,7 @@ export default function testbatchlist (state = initialState, action) {
         }
       )
 
-    case TEST_BATCH_LIST_LOADING_ERROR:
+    case LOADED_TEST_BATCH_LIST_ERROR:
       return Object.assign({},
         initialState,
         {

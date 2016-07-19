@@ -3,6 +3,7 @@ import axios from 'axios'
 // import { FormattedMessage } from 'react-intl'
 
 // import ComponentStyle from './ComponentStyle.postcss'
+import BrowserBadge from 'components/ux/BrowserBadge'
 import Loading from 'components/ux/Loading'
 import ErrorMsg from 'components/ux/ErrorMsg'
 import BaseComponent from 'core/BaseComponent'
@@ -82,7 +83,7 @@ class TestInstanceLog extends BaseComponent {
         </div>
       )
     } else if (this.state.error) {
-      return <ErrorMsg msgId={this.state.error} name='error-runner-log' />
+      return <ErrorMsg msgId={this.state.error} />
     } else {
       let lines = this.state.lines
       let logStyle = {
@@ -92,9 +93,15 @@ class TestInstanceLog extends BaseComponent {
         overflow: 'scroll'
       }
 
+      let browserBadge = <BrowserBadge
+        browserName={this.state.parent.browser_capabilities.browserName}
+        browserIcon={this.state.parent.browser_capabilities.browserName}
+        browserVersion={this.state.parent.browser_capabilities.version}
+        platform={this.state.parent.browser_capabilities.platform}
+      />
       return (
         <div>
-          <h2>Test Batch Log <small>({this.state.parent.name} - {this.state.parent.browser_capabilities.browserName}) ({this.state.parent.test_batch_id})</small></h2>
+          <h2>Test Batch Log <small>({this.state.parent.name} - {browserBadge}) ({this.state.parent.test_batch_id})</small></h2>
           <span>
             Log:{' '}
           </span>

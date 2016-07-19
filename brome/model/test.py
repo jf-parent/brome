@@ -3,6 +3,7 @@ from mongoalchemy.fields import (
 )
 
 from brome.model.basemodel import BaseModel
+from brome.core import exceptions
 
 
 class Test(BaseModel):
@@ -12,7 +13,7 @@ class Test(BaseModel):
 
     def __repr__(self):
         try:
-            return "Test <uid: {self.mongo_id}>".format(
+            return "Test <test_id: {self.test_id}><name: {self.name}>".format(
                 self=self
             )
         except AttributeError:
@@ -39,14 +40,22 @@ class Test(BaseModel):
         data = context.get('data')
         db_session = context.get('db_session')
 
-        # TEST_ID
+        is_new = self.is_new()
+
+        # TEST ID
         test_id = data.get('test_id')
         if test_id is not None:
             self.test_id = test_id
+        else:
+            if is_new:
+                raise exceptions.MissingModelValueException('test_id')
 
         # NAME
         name = data.get('name')
         if name:
             self.name = name
+        else:
+            if is_new:
+                raise exceptions.MissingModelValueException('name')
 
         db_session.save(self, safe=True)

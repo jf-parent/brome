@@ -3,6 +3,7 @@ import React from 'react'
 import Collapse, { Panel } from 'rc-collapse'
 import 'rc-collapse/assets/index.css'
 
+import BrowserBadge from 'components/ux/BrowserBadge'
 import Loading from 'components/ux/Loading'
 import ErrorMsg from 'components/ux/ErrorMsg'
 // import ComponentStyle from './ComponentStyle.postcss'
@@ -15,28 +16,29 @@ class TestBatchCrashes extends BaseComponent {
 
     this._initLogger()
     this._bind(
-      'fetchTestBatchCrashes'
+      'fetchTestBatchCrashes',
+      'getTestBatchUid',
+      'getTestBatch'
     )
   }
 
   componentWillMount () {
     this.debug('componentWillMount')
-    let testBatchUid = this.props.location.query['testbatchuid']
 
     this._interval = setInterval(
       () => {
-        this.fetchTestBatchCrashes(testBatchUid)
+        this.fetchTestBatchCrashes()
       },
       2000
     )
   }
 
   componentWillReceiveProps () {
-    let testbatchcrashes = this.props.state.testbatchcrashes
+    let testBatch = this.getTestBatch()
 
     // Clear interval on terminated testbatch
-    if (testbatchcrashes.testBatch) {
-      if (testbatchcrashes.testBatch.terminated) {
+    if (testBatch) {
+      if (testBatch.terminated) {
         if (this._interval) {
           clearInterval(this._interval)
           this._interval = null
@@ -50,24 +52,32 @@ class TestBatchCrashes extends BaseComponent {
     clearInterval(this._interval)
   }
 
-  fetchTestBatchCrashes (testBatchUid) {
+  fetchTestBatchCrashes () {
     this.props.actions.doLoadTestBatchCrashes(
       this.props.state.session,
-      testBatchUid
+      this.getTestBatchUid()
     )
+  }
+
+  getTestBatchUid () {
+    return this.props.location.query['testbatchuid']
+  }
+
+  getTestBatch () {
+    return this.props.state.testbatchcrashes.testBatch
   }
 
   render () {
     let testbatchcrashes = this.props.state.testbatchcrashes
 
-    if (!testbatchcrashes.crashes.length) {
+    if (testbatchcrashes.error) {
+      return <ErrorMsg msgId={testbatchcrashes.error} />
+    } else if (testbatchcrashes.crashes === null) {
       return (
         <div className='container-fluid'>
           <Loading style={{left: '50%'}} />
         </div>
       )
-    } else if (testbatchcrashes.error) {
-      return <ErrorMsg msgId={testbatchcrashes.error} name='error-test-batch-crashes' />
     } else {
       let testBatch = this.props.state.testbatchcrashes.testBatch
       return (
@@ -78,10 +88,20 @@ class TestBatchCrashes extends BaseComponent {
             let crashes = testbatchcrashes.crashes
 
             return crashes.map((crash, index) => {
+              let crashTitle = <span>
+                {crash.title}
+                <BrowserBadge
+                  browserName={crash.browser_capabilities.browserName}
+                  browserIcon={crash.browser_capabilities.browserName}
+                  browserVersion={crash.browser_capabilities.version}
+                  platform={crash.browser_capabilities.platform}
+                />
+              </span>
+
               return (
                 <div key={index}>
                   <Collapse accordion>
-                    <Panel header={crash.title} key={index}>
+                    <Panel header={crashTitle} key={index}>
                       <Collapse accordion>
                         <Panel header='Trace'>
                           <div style={{overflow: 'scroll'}}>

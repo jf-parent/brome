@@ -7,16 +7,16 @@ from mongoalchemy.fields import (
 )
 
 from brome.model.basemodel import BaseModel
-from brome.webserver.server import exceptions
+from brome.core import exceptions
 
 
 class Testscreenshot(BaseModel):
     browser_capabilities = DictField(AnythingField())
     browser_id = StringField()
-    relative_path = StringField()
-    full_path = StringField()
+    file_path = StringField()
+    root_path = StringField()
     location = EnumField(StringField(), 's3', 'local_file_system')
-    extra_data = DictField(StringField())
+    extra_data = DictField(StringField(), default=dict())
     title = StringField()
 
     test_instance_id = ObjectIdField()
@@ -36,8 +36,8 @@ class Testscreenshot(BaseModel):
     async def serialize(self, context):
         data = {}
         data['uid'] = self.get_uid()
-        data['relative_path'] = self.relative_path
-        data['full_path'] = self.full_path
+        data['root_path'] = self.root_path
+        data['file_path'] = self.file_path
         data['title'] = self.title
         data['browser_capabilities'] = self.browser_capabilities
         return data
@@ -53,63 +53,77 @@ class Testscreenshot(BaseModel):
         data = context.get('data')
         db_session = context.get('db_session')
 
+        is_new = await self.is_new()
+
         # BROWSER ID
         browser_id = data.get('browser_id')
         if browser_id:
             self.browser_id = browser_id
+        else:
+            if is_new:
+                raise exceptions.MissingModelValueException('browser_id')
 
         # BROWSER CAPABILITIES
         browser_capabilities = data.get('browser_capabilities')
         if browser_capabilities:
             self.browser_capabilities = browser_capabilities
-
-        # RELATIVE_PATH
-        relative_path = data.get('relative_path')
-        if relative_path:
-            self.relative_path = relative_path
         else:
-            raise exceptions.MissingModelValueException('relative_path')
+            if is_new:
+                raise exceptions.MissingModelValueException(
+                    'browser_capabilities'
+                )
 
-        # FULL_PATH
-        full_path = data.get('full_path')
-        if full_path:
-            self.full_path = full_path
+        # FILE PATH
+        file_path = data.get('file_path')
+        if file_path:
+            self.file_path = file_path
         else:
-            raise exceptions.MissingModelValueException('full_path')
+            if is_new:
+                raise exceptions.MissingModelValueException('file_path')
+
+        # ROOT PATH
+        root_path = data.get('root_path')
+        if root_path:
+            self.root_path = root_path
+        else:
+            if is_new:
+                raise exceptions.MissingModelValueException('root_path')
 
         # LOCATION
         location = data.get('location')
         if location:
             self.location = location
         else:
-            self.location = 'local_file_system'
+            if is_new:
+                self.location = 'local_file_system'
 
         # EXTRA_DATA
         extra_data = data.get('extra_data')
         if extra_data:
             self.extra_data = extra_data
-        else:
-            self.extra_data = {}
 
         # TITLE
         title = data.get('title')
         if title:
             self.title = title
         else:
-            self.title = 'N/A'
+            if is_new:
+                raise exceptions.MissingModelValueException('title')
 
         # TEST_INSTANCE_ID
         test_instance_id = data.get('test_instance_id')
         if test_instance_id:
             self.test_instance_id = test_instance_id
         else:
-            raise exceptions.MissingModelValueException('test_instance_id')
+            if is_new:
+                raise exceptions.MissingModelValueException('test_instance_id')
 
         # TEST_BATCH_ID
         test_batch_id = data.get('test_batch_id')
         if test_batch_id:
             self.test_batch_id = test_batch_id
         else:
-            raise exceptions.MissingModelValueException('test_batch_id')
+            if is_new:
+                raise exceptions.MissingModelValueException('test_batch_id')
 
         db_session.save(self, safe=True)

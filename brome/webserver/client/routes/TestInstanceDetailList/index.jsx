@@ -1,7 +1,7 @@
 import { injectReducer } from 'store/reducers'
 import { requireAuth } from '../../Auth'
 
-const routeName = 'testinstanceloglist'
+const routeName = 'testinstancedetaillist'
 
 export default (store) => ({
   path: routeName,

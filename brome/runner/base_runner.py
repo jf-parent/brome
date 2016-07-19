@@ -89,7 +89,7 @@ class BaseRunner(object):
             self.relative_runner_dir = "tb_%s" % self.test_batch_id
             create_dir_if_doesnt_exist(self.runner_dir)
         else:
-            self.runner_dir = False
+            self.runner_dir = ''
 
         # LOGGING
         self.configure_logger()
@@ -104,7 +104,8 @@ class BaseRunner(object):
                 .filter(Testbatch.mongo_id == self.test_batch_id)\
                 .one()
 
-            test_batch.log_file_path = self.log_file_path
+            test_batch.root_path = self.root_test_result_dir
+            test_batch.log_file_path = self.relative_log_file_path
 
             session.save(test_batch, safe=True)
 
@@ -276,6 +277,11 @@ class BaseRunner(object):
                     self.runner_dir,
                     '%s.log' % logger_name
             )
+            self.relative_log_file_path = os.path.join(
+                    self.relative_runner_dir,
+                    '%s.log' % logger_name
+            )
+
             fh = logging.FileHandler(
                 self.log_file_path
             )

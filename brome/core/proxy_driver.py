@@ -1037,8 +1037,8 @@ class ProxyDriver(object):
                 screenshot.browser_id = self.get_id()
                 # TODO support s3
                 screenshot.location = 'local_file_system'
-                screenshot.relative_path = relative_path
-                screenshot.full_path = full_path
+                screenshot.root_path = self.test_instance._runner.root_test_result_dir  # noqa
+                screenshot.file_path = relative_path
                 screenshot.extra_data = {}
                 screenshot.title = screenshot_name
                 screenshot.test_instance_id = self.test_instance._test_instance_id  # noqa
@@ -1077,10 +1077,10 @@ class ProxyDriver(object):
                 quality_screenshot.timestamp = datetime.now()
                 quality_screenshot.browser_capabilities = self.capabilities
                 quality_screenshot.browser_id = self.get_id()
-                quality_screenshot.relative_path = relative_path
+                quality_screenshot.file_path = relative_path
                 # TODO support s3
                 quality_screenshot.location = 'local_file_system'
-                quality_screenshot.full_path = full_path
+                quality_screenshot.root_path = self.test_instance._runner.root_test_result_dir  # noqa
                 quality_screenshot.extra_data = {}
                 quality_screenshot.title = screenshot_name
                 quality_screenshot.test_instance_id = self.test_instance._test_instance_id  # noqa
@@ -1474,13 +1474,6 @@ class ProxyDriver(object):
         if not result:
             extra_data['javascript_error'] = self.get_javascript_error()
 
-        # NETWORK CAPTURE
-        if self.browser_config.get('enable_proxy'):
-            extra_data['network_capture_path'] = os.path.join(
-                self.test_instance._network_capture_relative_dir,
-                string_to_filename('%s.data' % self.test_instance._name)
-            )
-
         with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
             if testid in self.brome.test_dict:
                 test = session.query(Test).filter(Test.test_id == testid).one()
@@ -1564,8 +1557,9 @@ class ProxyDriver(object):
             test_result.timestamp = datetime.now()
             test_result.browser_capabilities = self.capabilities
             test_result.browser_id = self.get_id()
+            test_result.root_path = self.test_instance._runner.root_test_result_dir  # noqa
             test_result.screenshot_path = screenshot_relative_path
-            test_result.videocapture_path = videocapture_path
+            test_result.video_capture_path = videocapture_path
             test_result.extra_data = extra_data
             test_result.title = test_name
             test_result.test_id = test.get_uid()

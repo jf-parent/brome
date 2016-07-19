@@ -11,7 +11,9 @@ import Dashboard from 'routes/Dashboard'
 import TestBatchList from 'routes/TestBatchList'
 import TestBatchDetail from 'routes/TestBatchDetail'
 import TestBatchRunnerLog from 'routes/TestBatchRunnerLog'
-import TestInstanceLogList from 'routes/TestInstanceLogList'
+import TestInstanceList from 'routes/TestInstanceList'
+import TestInstanceNetworkCapture from 'routes/TestInstanceNetworkCapture'
+import TestInstanceDetailList from 'routes/TestInstanceDetailList'
 import TestInstanceLog from 'routes/TestInstanceLog'
 import TestBatchScreenshots from 'routes/TestBatchScreenshots'
 import TestBatchCrashes from 'routes/TestBatchCrashes'
@@ -29,7 +31,9 @@ export const createRoutes = (store) => ({
     TestBatchDetail(store),
     TestBatchRunnerLog(store),
     TestInstanceLog(store),
-    TestInstanceLogList(store),
+    TestInstanceList(store),
+    TestInstanceNetworkCapture(store),
+    TestInstanceDetailList(store),
     ResetPassword(store),
     Login(store),
     Profile(store),

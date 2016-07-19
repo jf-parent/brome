@@ -3,7 +3,7 @@ import logging
 from aiohttp_session import get_session
 from aiohttp import web
 
-from brome.webserver.server import exceptions
+from brome.core import exceptions
 from brome.model.user import User
 from brome.model.emailconfirmationtoken import Emailconfirmationtoken
 from brome.model.resetpasswordtoken import Resetpasswordtoken

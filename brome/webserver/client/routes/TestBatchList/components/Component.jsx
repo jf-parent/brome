@@ -3,6 +3,8 @@ import { Link } from 'react-router'
 import { FormattedTime, FormattedDate, FormattedMessage } from 'react-intl'
 import moment from 'moment'
 
+import Loading from 'components/ux/Loading'
+import ErrorMsg from 'components/ux/ErrorMsg'
 import Pager from 'components/ux/Pager'
 import ComponentStyle from './ComponentStyle.postcss'
 import CoreLayoutStyle from 'layouts/CoreLayout/CoreLayoutStyle.postcss'
@@ -30,12 +32,11 @@ class TestBatchList extends BaseComponent {
     return this.props.state.testbatchlist.skip / this.props.state.testbatchlist.limit
   }
 
-  fetchTestBatch (currentPage, loadingContext = true) {
-    this.props.actions.loadTestBatch(
+  fetchTestBatch (currentPage) {
+    this.props.actions.doLoadTestBatchList(
       this.props.state.session,
       currentPage,
-      TEST_BATCH_LIMIT,
-      loadingContext
+      TEST_BATCH_LIMIT
     )
   }
 
@@ -184,31 +185,52 @@ class TestBatchList extends BaseComponent {
   }
 
   render () {
-    let pager = null
-    if (this.props.state.testbatchlist.totalTestBatch > TEST_BATCH_LIMIT) {
-      let totalPage = parseInt(Math.ceil(this.props.state.testbatchlist.totalTestBatch / TEST_BATCH_LIMIT))
-      let currentPage = this.getCurrentPage()
-      pager = <Pager totalPage={totalPage} currentPage={currentPage} onFirstClick={this.onFirstClick} onLastClick={this.onLastClick} onNextClick={this.onNextClick} onPreviousClick={this.onPreviousClick} />
-    }
-    let testBatchList = this.props.state.testbatchlist.testBatchList.map((testBatch, index) => {
-      return this.getTestBatchDiv(testBatch, index)
-    })
-    return (
-      <div className='container-fluid'>
-        <h1>
+    let testbatchlist = this.props.state.testbatchlist
 
-          <FormattedMessage
-            id='testBatchList.TestBatchListHeader'
-            defaultMessage='Test Batch List'
-          />
-        </h1>
-        {pager}
-        <div className={'row ' + CoreLayoutStyle['no-gutter']}>
-          {testBatchList}
+    if (testbatchlist.error) {
+      return <ErrorMsg msgId={testbatchlist.error} />
+    } else if (testbatchlist.testBatchList === null) {
+      return (
+        <div className='container-fluid'>
+          <Loading style={{left: '50%'}} />
         </div>
-        {pager}
-      </div>
-    )
+      )
+    } else {
+      return (
+        <div className='container-fluid'>
+          <h1>
+            <FormattedMessage
+              id='testBatchList.TestBatchListHeader'
+              defaultMessage='Test Batch List'
+            />
+          </h1>
+          <div className={'row ' + CoreLayoutStyle['no-gutter']}>
+            {(() => {
+              return testbatchlist.testBatchList.map((testBatch, index) => {
+                return this.getTestBatchDiv(testBatch, index)
+              })
+            })()}
+          </div>
+          {(() => {
+            if (testbatchlist.totalTestBatch > TEST_BATCH_LIMIT) {
+              let totalPage = parseInt(Math.ceil(testbatchlist.totalTestBatch / TEST_BATCH_LIMIT))
+              return (
+                <Pager
+                  totalPage={totalPage}
+                  currentPage={this.getCurrentPage()}
+                  onFirstClick={this.onFirstClick}
+                  onLastClick={this.onLastClick}
+                  onNextClick={this.onNextClick}
+                  onPreviousClick={this.onPreviousClick}
+                />
+              )
+            } else {
+              return null
+            }
+          })()}
+        </div>
+      )
+    }
   }
 }
 

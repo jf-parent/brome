@@ -58,7 +58,15 @@ class BaseTest(object):
         if self._runner.runner_dir:
             self._runner_dir = self._runner.runner_dir
         else:
-            self._runner_dir = False
+            self._runner_dir = ''
+
+        # NETWORK CAPTURE
+        if self._browser_config.get('enable_proxy'):
+            self._network_capture_file_relative_path = os.path.join(
+                self._runner.relative_runner_dir,
+                'network_capture',
+                string_to_filename('%s.data' % self._name)
+            )
 
         # LOGGING
         self.configure_logger()
@@ -98,13 +106,16 @@ class BaseTest(object):
                 extra_data['instance_private_dns'] = self._runner.instances_ip[self._private_ip].private_dns  # noqa
 
             test_instance = Testinstance()
+            test_instance.name = self._name
             test_instance.starting_timestamp = starting_timestamp
             test_instance.browser_capabilities = self.pdriver.capabilities
             test_instance.browser_id = self.pdriver.get_id()
-            test_instance.name = self._name
             test_instance.test_batch_id = self._test_batch_id
             test_instance.extra_data = extra_data
-            test_instance.log_file_path = self._log_file_path
+            test_instance.log_file_path = self._relative_log_file_path
+            test_instance.root_path = self._runner.root_test_result_dir
+            test_instance.network_capture_path = self._network_capture_file_relative_path  # noqa
+            test_instance.video_capture_path = self._video_capture_file_relative_path  # noqa
 
             session.save(test_instance, safe=True)
 
@@ -137,7 +148,7 @@ class BaseTest(object):
                 test_batch.feature_style_quality = True
                 test_batch.feature_screenshots = True
 
-            # BOT DIARy
+            # BOT DIARY
             if self.get_config_value("bot_diary:enable_bot_diary"):
                 test_batch.feature_bot_diaries = False
 
@@ -552,8 +563,13 @@ class BaseTest(object):
                 self._runner_dir,
                 "logs"
             )
+            self._relative_test_log_dir = os.path.join(
+                self._runner.relative_runner_dir,
+                "logs"
+            )
         else:
-            self._test_log_dir = False
+            self._test_log_dir = ''
+            self._relative_test_log_dir = ''
 
         # Logger
         self._logger = logging.getLogger(logger_name)
@@ -578,7 +594,13 @@ class BaseTest(object):
                 test_name = string_to_filename(self._name)
                 self._log_file_path = os.path.join(
                     self._test_log_dir,
-                    "%s_%s.log" % (test_name, self._browser_config.get_id())
+                    "%s_%s.log" %
+                    (test_name, self._browser_config.get('browserName'))
+                )
+                self._relative_log_file_path = os.path.join(
+                    self._relative_test_log_dir,
+                    "%s_%s.log" %
+                    (test_name, self._browser_config.get('browserName'))
                 )
                 fh = logging.FileHandler(
                     self._log_file_path
@@ -727,13 +749,6 @@ class BaseTest(object):
         # JAVASCRIPT ERROR
         extra_data['javascript_error'] = self.pdriver.get_javascript_error()
 
-        # NETWORK CAPTURE
-        if self._browser_config.get('enable_proxy'):
-            extra_data['network_capture_path'] = os.path.join(
-                self._network_capture_relative_dir,
-                string_to_filename('%s.data' % self._name)
-            )
-
         crash_screenshot_relative_path = ''
         if self._runner_dir:
             crash_screenshot_path = os.path.join(
@@ -756,13 +771,14 @@ class BaseTest(object):
         # CRASH OBJECT
         with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
             test_crash = Testcrash()
-            test_crash.title = crash_name
+            test_crash.title = self._name
             test_crash.browser_capabilities = self.pdriver.capabilities
             test_crash.browser_id = self.pdriver.get_id()
             test_crash.timestamp = datetime.now()
             test_crash.trace = str(tb)
+            test_crash.root_path = self._runner_dir
             test_crash.screenshot_path = crash_screenshot_relative_path
-            test_crash.videocapture_path = self._video_capture_file_relative_path  # noqa
+            test_crash.video_capture_path = self._video_capture_file_relative_path  # noqa
             test_crash.extra_data = extra_data
             test_crash.test_instance_id = self._test_instance_id
             test_crash.test_batch_id = self._test_batch_id
@@ -866,10 +882,6 @@ class BaseTest(object):
                 'network_capture'
             )
             create_dir_if_doesnt_exist(self._network_capture_dir)
-            self._network_capture_relative_dir = os.path.join(
-                self._runner.relative_runner_dir,
-                'network_capture'
-            )
 
     def get_test_result_summary(self):
         results = []

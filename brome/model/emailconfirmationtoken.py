@@ -1,5 +1,3 @@
-from mongoalchemy.fields import *  # noqa
-
 from brome.model.basetoken import BaseToken
 
 

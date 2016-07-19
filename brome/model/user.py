@@ -3,14 +3,18 @@ import hashlib
 
 import bcrypt
 from mongoalchemy.document import Index
-from mongoalchemy.fields import *  # noqa
+from mongoalchemy.fields import (
+    EnumField,
+    BoolField,
+    StringField
+)
 from validate_email import validate_email
 
 from brome.webserver.jobs.send_email import send_email
 from brome.webserver.server.utils import SafeStringField
 from brome.webserver.server.prometheus_instruments import active_user_gauge
 from brome.webserver.server.settings import config
-from brome.webserver.server.exceptions import *  # noqa
+from brome.core import exceptions
 from brome.model.emailconfirmationtoken import Emailconfirmationtoken
 from brome.model.basemodel import BaseModel
 from brome.model.notification import Notification
@@ -127,12 +131,12 @@ class User(BaseModel):
         name = data.get('name')
         if name:
             if len(name) < NAME_MIN_LEN or len(name) > NAME_MAX_LEN:
-                raise InvalidNameException(name)
+                raise exceptions.InvalidNameException(name)
 
             self.name = name
         else:
             if is_new:
-                raise InvalidNameException('empty name')
+                raise exceptions.InvalidNameException('empty name')
 
         # ROLE
         role = data.get('role')
@@ -150,7 +154,7 @@ class User(BaseModel):
             await self.set_password(password)
         else:
             if is_new:
-                raise InvalidPasswordException('empty password')
+                raise exceptions.InvalidPasswordException('empty password')
 
         # NEW PASSWORD
         new_password = data.get('new_password')
@@ -161,9 +165,11 @@ class User(BaseModel):
                 if is_password_valid:
                     await self.set_password(new_password)
                 else:
-                    raise WrongEmailOrPasswordException()
+                    raise exceptions.WrongEmailOrPasswordException()
             else:
-                raise InvalidRequestException('Missing old password')
+                raise exceptions.InvalidRequestException(
+                    'Missing old password'
+                )
 
         # EMAIL
         email = data.get('email')
@@ -171,7 +177,7 @@ class User(BaseModel):
             if is_new or self.email != email:
                 is_email_valid = validate_email(email)
                 if not is_email_valid:
-                    raise InvalidEmailException(email)
+                    raise exceptions.InvalidEmailException(email)
 
                 email_uniqueness_query = db_session.query(User)\
                     .filter(User.email == email)
@@ -180,7 +186,7 @@ class User(BaseModel):
                         .filter(User.mongo_id != self.get_uid())
 
                 if email_uniqueness_query.count():
-                    raise EmailAlreadyExistsException(email)
+                    raise exceptions.EmailAlreadyExistsException(email)
 
                 self.email = email
                 self.email_confirmed = False
@@ -207,7 +213,7 @@ class User(BaseModel):
 
         else:
             if is_new:
-                raise InvalidEmailException('empty email')
+                raise exceptions.InvalidEmailException('empty email')
 
         if save:
             db_session.save(self, safe=True)
@@ -228,7 +234,7 @@ class User(BaseModel):
             self.hashed_password = hashed_password
             self.salt = salt
         else:
-            raise InvalidPasswordException(password)
+            raise exceptions.InvalidPasswordException(password)
 
     async def is_password_valid(self, password):
         if len(password) < 6:

@@ -1,9 +1,16 @@
 import socket
+import os
+from subprocess import Popen
 
 import psutil
 
-from brome.core.utils import *
+from brome.core.utils import (
+    create_dir_if_doesnt_exist,
+    string_to_filename,
+    kill_by_pid
+)
 from brome.runner.base_instance import BaseInstance
+
 
 class LocalhostInstance(BaseInstance):
     """Localhost instance
@@ -27,7 +34,7 @@ class LocalhostInstance(BaseInstance):
 
         if self.browser_config.config.get('enable_proxy'):
             self.start_proxy()
-        
+
     def tear_down(self):
         """Tear down the instance
 
@@ -48,7 +55,7 @@ class LocalhostInstance(BaseInstance):
             process (object)
         """
 
-        self.runner.info_log("Executing command: %s"%command)
+        self.runner.info_log("Executing command: %s" % command)
 
         process = Popen(
                 command,
@@ -58,13 +65,13 @@ class LocalhostInstance(BaseInstance):
 
         return process
 
-    def start_proxy(self, port = None):
+    def start_proxy(self, port=None):
         """Start the mitmproxy
         """
-        
+
         self.runner.info_log("Starting proxy...")
-        
-        #Get a random port that is available
+
+        # Get a random port that is available
         if not port:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.bind(('0.0.0.0', 0))
@@ -80,16 +87,18 @@ class LocalhostInstance(BaseInstance):
 
         self.proxy_output_path = os.path.join(
             network_data_path,
-            string_to_filename('%s.data'%self.test_name)
+            string_to_filename('%s.data' % self.test_name)
         )
 
-        path_to_mitmproxy = self.runner.brome.get_config_value("mitmproxy:path")
+        path_to_mitmproxy = self.runner.brome.get_config_value(
+            "mitmproxy:path"
+        )
 
         filter_ = self.runner.brome.get_config_value("mitmproxy:filter")
         command = [
             path_to_mitmproxy,
             "-p",
-            "%s"%self.proxy_port,
+            "%s" % self.proxy_port,
             "-w",
             self.proxy_output_path
         ]
@@ -101,7 +110,7 @@ class LocalhostInstance(BaseInstance):
 
         self.proxy_pid = process.pid
 
-        self.runner.info_log("Proxy pid: %s"%self.proxy_pid)
+        self.runner.info_log("Proxy pid: %s" % self.proxy_pid)
 
     def stop_proxy(self):
         """Stop the mitmproxy

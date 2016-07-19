@@ -26,7 +26,7 @@ export function doFetchScreenshots (data) {
         if (response.data.success) {
           dispatch(loadedTestBatchScreenshotSuccess(response.data))
         } else {
-          dispatch(loadedTestBatchScreenshotError(response.error))
+          dispatch(loadedTestBatchScreenshotError(response.data.results[0].error))
         }
       })
   }

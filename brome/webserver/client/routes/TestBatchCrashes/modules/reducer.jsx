@@ -22,6 +22,7 @@ export function doLoadTestBatchCrashes (session, testBatchUid) {
         {
           action: 'read',
           model: 'testcrash',
+          ascending: 'title',
           filters: {
             'test_batch_id': testBatchUid
           }
@@ -40,7 +41,7 @@ export function doLoadTestBatchCrashes (session, testBatchUid) {
         if (response.data.success) {
           dispatch(loadedTestBatchCrashesSuccess(response.data))
         } else {
-          dispatch(loadedTestBatchCrashesError(response.error))
+          dispatch(loadedTestBatchCrashesError(response.data.results[0].error, response.data))
         }
       })
   }
@@ -53,10 +54,11 @@ function loadedTestBatchCrashesSuccess (data) {
   }
 }
 
-function loadedTestBatchCrashesError (error) {
+function loadedTestBatchCrashesError (error, data) {
   return {
     type: LOADED_TEST_BATCH_CRASHES_ERROR,
-    error
+    error,
+    data
   }
 }
 
@@ -71,7 +73,7 @@ export const actions = {
 const initialState = {
   error: null,
   testBatch: null,
-  crashes: []
+  crashes: null
 }
 
 export default function testbatchcrashes (state = initialState, action) {
@@ -81,8 +83,7 @@ export default function testbatchcrashes (state = initialState, action) {
         initialState,
         {
           crashes: action.data.results[0].results,
-          testBatch: action.data.results[1].results[0],
-          loading: false
+          testBatch: action.data.results[1].results[0]
         }
       )
 
@@ -90,8 +91,8 @@ export default function testbatchcrashes (state = initialState, action) {
       return Object.assign({},
         initialState,
         {
-          loading: false,
-          error: action.error
+          error: action.error,
+          testBatch: action.data.results[1].results[0]
         }
       )
 

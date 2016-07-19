@@ -4,6 +4,7 @@ import { Link } from 'react-router'
 import 'font-awesome-webpack'
 import { Line } from 'rc-progress'
 
+import ErrorMsg from 'components/ux/ErrorMsg'
 import Loading from 'components/ux/Loading'
 import ComponentStyle from './ComponentStyle.postcss'
 import CoreLayoutStyle from 'layouts/CoreLayout/CoreLayoutStyle.postcss'
@@ -16,6 +17,7 @@ class TestBatchDetail extends BaseComponent {
     this._initLogger()
     this._bind(
       'getTestBatchUid',
+      'getTestBatch',
       'fetchTestBatchDetail',
       'getToolbelt',
       'getTool',
@@ -28,11 +30,11 @@ class TestBatchDetail extends BaseComponent {
   }
 
   componentWillMount () {
-    this.fetchTestBatchDetail(this.getTestBatchUid())
+    this.fetchTestBatchDetail()
   }
 
   componentWillReceiveProps () {
-    let testBatch = this.props.state.testbatchdetail.testBatch[this.getTestBatchUid()]
+    let testBatch = this.getTestBatch()
 
     // Clear interval on terminated testbatch
     if (testBatch) {
@@ -79,10 +81,10 @@ class TestBatchDetail extends BaseComponent {
   }
 
   getProgress () {
-    if (this.props.state.testbatchdetail.testBatch[this.getTestBatchUid()].terminated) {
+    if (this.getTestBatch().terminated) {
       return null
     } else {
-      let testBatch = this.props.state.testbatchdetail.testBatch[this.getTestBatchUid()]
+      let testBatch = this.getTestBatch()
       let totalTests = testBatch.total_tests
       let totalExecutingTests = testBatch.total_executing_tests
       let totalExecutedTests = testBatch.total_executed_tests
@@ -113,7 +115,7 @@ class TestBatchDetail extends BaseComponent {
   }
 
   getTestResults () {
-    let testResults = this.props.state.testbatchdetail.testBatch[this.getTestBatchUid()].test_results
+    let testResults = this.getTestBatch().test_results
     let nbFailedTest = testResults['nb_failed_test']
     let nbSucceededTest = testResults['nb_succeeded_test']
     let failedTests = testResults['failed_tests']
@@ -156,7 +158,7 @@ class TestBatchDetail extends BaseComponent {
   }
 
   getCrashes () {
-    let testCrashes = this.props.state.testbatchdetail.testBatch[this.getTestBatchUid()].test_crashes
+    let testCrashes = this.getTestBatch().test_crashes
     let nbOfCrashes = testCrashes.length || 0
     let nbOfCrashesStyle = {color: 'green'}
     if (nbOfCrashes) {
@@ -183,7 +185,7 @@ class TestBatchDetail extends BaseComponent {
   }
 
   getMilestone () {
-    let runnerMetadata = this.props.state.testbatchdetail.testBatch[this.getTestBatchUid()].runner_metadata
+    let runnerMetadata = this.getTestBatch().runner_metadata
     return (
       <div>
         <h3 className={ComponentStyle['section-header']}>
@@ -224,14 +226,15 @@ class TestBatchDetail extends BaseComponent {
     label,
     icon,
     enabled,
-    className = 'col-xs-12 col-sm-12 col-md-2 col-lg-2'
+    extraUrlParam = ''
   ) {
+    let className = 'col-xs-12 col-sm-12 col-md-2 col-lg-2'
     return (
       <div className={className}>
         {(() => {
           if (enabled) {
             return (
-              <Link className='btn btn-default btn-link' to={path + '?testbatchuid=' + this.getTestBatchUid()}>
+              <Link className='btn btn-default btn-link' to={path + '?testbatchuid=' + this.getTestBatchUid() + extraUrlParam}>
                 <i className={'fa fa-' + icon} aria-hidden='true'></i>
                 {' '}
                 {label}
@@ -252,7 +255,7 @@ class TestBatchDetail extends BaseComponent {
   }
 
   getToolbelt () {
-    let testBatch = this.props.state.testbatchdetail.testBatch[this.getTestBatchUid()]
+    let testBatch = this.getTestBatch()
     let testBatchFeatures = testBatch.features
     let sessionVideoCapture = this.getTool(
       'sessionvideocapture',
@@ -261,7 +264,7 @@ class TestBatchDetail extends BaseComponent {
       testBatchFeatures['session_video_capture']
     )
     let networkCapture = this.getTool(
-      'networkcapture',
+      'testinstancenetworkcapture',
       'Network Capture',
       'cubes',
       testBatchFeatures['network_capture']
@@ -273,7 +276,7 @@ class TestBatchDetail extends BaseComponent {
       !!testBatch.test_results.nb_test_result
     )
     let testInstances = this.getTool(
-      'testinstances',
+      'testinstancedetaillist',
       'Test Instances',
       'list',
       true
@@ -291,10 +294,11 @@ class TestBatchDetail extends BaseComponent {
       !!testBatch.test_crashes.length
     )
     let testInstancesLogs = this.getTool(
-      'testinstanceloglist',
+      'testinstancelist',
       'Instances Logs',
       'newspaper-o',
-      true
+      true,
+      '&path=testinstancelog'
     )
     let runnerLog = this.getTool(
       'testbatchrunnerlog',
@@ -303,16 +307,18 @@ class TestBatchDetail extends BaseComponent {
       true
     )
     let botDiaries = this.getTool(
-      'botdiaries',
+      'testinstancelist',
       'Bot Diaries',
       'pencil',
-      testBatchFeatures['bot_diaries']
+      testBatchFeatures['bot_diaries'],
+      '&path=testinstancebotdiaries'
     )
     let instanceVnc = this.getTool(
-      'instancevnc',
+      'testinstancelist',
       'Instance VNC',
       'desktop',
-      testBatchFeatures['instance_vnc']
+      testBatchFeatures['instance_vnc'],
+      '&path=testinstancevnc'
     )
     let styleQuality = this.getTool(
       'stylequality',
@@ -337,21 +343,15 @@ class TestBatchDetail extends BaseComponent {
     )
   }
 
-  fetchTestBatchDetail (testBatchUid) {
-    /*
+  fetchTestBatchDetail () {
     this._interval = setInterval(
       () => {
-        this.props.actions.loadTestBatchDetail(
+        this.props.actions.doLoadTestBatchDetail(
           this.props.state.session,
-          testBatchUid
+          this.getTestBatchUid()
         )
       },
       2000
-    )
-    */
-    this.props.actions.loadTestBatchDetail(
-      this.props.state.session,
-      testBatchUid
     )
   }
 
@@ -359,10 +359,24 @@ class TestBatchDetail extends BaseComponent {
     return this.props.location.query['testbatchuid']
   }
 
-  render () {
-    let testBatch = this.props.state.testbatchdetail.testBatch[this.getTestBatchUid()]
+  getTestBatch () {
+    return this.props.state.testbatchdetail.testBatch[this.getTestBatchUid()]
+  }
 
-    if (testBatch) {
+  render () {
+    let testBatch = this.getTestBatch()
+
+    if (this.props.state.testbatchdetail.error) {
+      return (
+        <ErrorMsg msgId={this.props.state.testbatchdetail.error} />
+      )
+    } else if (testBatch === undefined) {
+      return (
+        <div className='container-fluid'>
+          <Loading style={{left: '50%'}} />
+        </div>
+      )
+    } else {
       return (
         <div className='container-fluid'>
           {this.getActionToolbelt()}
@@ -374,12 +388,6 @@ class TestBatchDetail extends BaseComponent {
           {this.getTestResults()}
           {this.getMilestone()}
           {this.getCrashes()}
-        </div>
-      )
-    } else {
-      return (
-        <div className='container-fluid'>
-          <Loading style={{left: '50%'}} />
         </div>
       )
     }

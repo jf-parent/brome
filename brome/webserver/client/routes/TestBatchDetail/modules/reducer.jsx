@@ -4,8 +4,8 @@ import axios from 'axios'
 // Constants
 // ====================================
 
-export const TEST_BATCH_DETAIL_LOADING_SUCCESS = 'TEST_BATCH_DETAIL_LOADING_SUCCESS'
-export const TEST_BATCH_DETAIL_LOADING_ERROR = 'TEST_BATCH_DETAIL_LOADING_ERROR'
+export const LOADED_TEST_BATCH_DETAIL_SUCCESS = 'LOADED_TEST_BATCH_DETAIL_SUCCESS'
+export const LOADED_TEST_BATCH_DETAIL_ERROR = 'LOADED_TEST_BATCH_DETAIL_ERROR'
 
 // ====================================
 // Actions
@@ -14,7 +14,7 @@ export const TEST_BATCH_DETAIL_LOADING_ERROR = 'TEST_BATCH_DETAIL_LOADING_ERROR'
 const logger = require('loglevel').getLogger('TestBatchDetail')
 logger.setLevel(__LOGLEVEL__)
 
-export function loadTestBatchDetail (session, testBatchUid) {
+export function doLoadTestBatchDetail (session, testBatchUid) {
   let data = {
     token: session.token,
     actions: {
@@ -29,30 +29,30 @@ export function loadTestBatchDetail (session, testBatchUid) {
         logger.debug('/api/crud (data) (response)', data, response)
 
         if (response.data.success) {
-          dispatch(testBatchDetailLoadingSuccess(response.data))
+          dispatch(loadedTestBatchDetailSuccess(response.data))
         } else {
-          dispatch(testBatchDetailLoadingError(response.error))
+          dispatch(loadedTestBatchDetailError(response.data.error))
         }
       })
   }
 }
 
-function testBatchDetailLoadingSuccess (data) {
+function loadedTestBatchDetailSuccess (data) {
   return {
-    type: TEST_BATCH_DETAIL_LOADING_SUCCESS,
+    type: LOADED_TEST_BATCH_DETAIL_SUCCESS,
     data
   }
 }
 
-function testBatchDetailLoadingError (error) {
+function loadedTestBatchDetailError (error) {
   return {
-    type: TEST_BATCH_DETAIL_LOADING_SUCCESS,
+    type: LOADED_TEST_BATCH_DETAIL_ERROR,
     error
   }
 }
 
 export const actions = {
-  loadTestBatchDetail
+  doLoadTestBatchDetail
 }
 
 // ====================================
@@ -66,7 +66,7 @@ const initialState = {
 
 export default function testbatchdetail (state = initialState, action) {
   switch (action.type) {
-    case TEST_BATCH_DETAIL_LOADING_SUCCESS:
+    case LOADED_TEST_BATCH_DETAIL_SUCCESS:
       let testBatch = state.testBatch
       testBatch[action.data.results[0].uid] = action.data.results[0]
       return Object.assign({},
@@ -76,11 +76,11 @@ export default function testbatchdetail (state = initialState, action) {
         }
       )
 
-    case TEST_BATCH_DETAIL_LOADING_ERROR:
+    case LOADED_TEST_BATCH_DETAIL_ERROR:
       return Object.assign({},
         state,
         {
-          error: action.data.error
+          error: action.error
         }
       )
 

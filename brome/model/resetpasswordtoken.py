@@ -2,7 +2,9 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 import dateutil.parser
-from mongoalchemy.fields import *  # noqa
+from mongoalchemy.fields import (
+    DateTimeField
+)
 
 from brome.model.basetoken import BaseToken
 from brome.webserver.server.settings import config

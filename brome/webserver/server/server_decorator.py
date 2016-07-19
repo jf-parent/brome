@@ -7,7 +7,7 @@ from aiohttp.abc import AbstractView
 from aiohttp_session import get_session
 
 from brome.webserver.server.auth import permits
-from brome.webserver.server import exceptions
+from brome.core import exceptions
 from brome.webserver.server.prometheus_instruments import (
     security_violation_attempt_counter,
     serverside_unhandled_exception_counter

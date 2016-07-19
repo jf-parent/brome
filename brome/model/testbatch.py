@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from mongoalchemy.fields import (
     DateTimeField,
     DictField,
@@ -11,6 +13,7 @@ from brome.model.basemodel import BaseModel
 from brome.model.testcrash import Testcrash
 from brome.model.testresult import Testresult
 from brome.model.testscreenshot import Testscreenshot
+from brome.core import exceptions
 
 
 class Testbatch(BaseModel):
@@ -30,11 +33,12 @@ class Testbatch(BaseModel):
     feature_instance_vnc = BoolField(default=False)
     feature_style_quality = BoolField(default=False)
     runner_metadata = DictField(AnythingField(), default=dict())
+    root_path = StringField(default='')
     log_file_path = StringField(default='')
 
     def __repr__(self):
         try:
-            return "Testbatch <uid: {self.mongo_id}>".format(
+            return "Testbatch <uid: {self.mongo_id}><friendly_name: {self.friendly_name}>".format(  # noqa
                 self=self
             )
         except AttributeError:
@@ -107,6 +111,8 @@ class Testbatch(BaseModel):
         data['total_executing_tests'] = self.total_executing_tests
         data['starting_timestamp'] = self.starting_timestamp.isoformat()
         data['nb_screenshot'] = await self.get_nb_screenshot(context)
+        data['root_path'] = self.root_path
+        data['log_file_path'] = self.log_file_path
         data['features'] = {
             'session_video_capture': self.feature_session_video_capture,
             'network_capture': self.feature_network_capture,
@@ -149,6 +155,8 @@ class Testbatch(BaseModel):
         data = context.get('data')
         db_session = context.get('db_session')
 
+        is_new = await self.is_new()
+
         # Killed
         killed = data.get('killed')
         if killed is not None:
@@ -163,16 +171,25 @@ class Testbatch(BaseModel):
         total_tests = data.get('total_tests')
         if total_tests is not None:
             self.total_tests = total_tests
+        else:
+            if is_new:
+                raise exceptions.MissingModelValueException('total_tests')
 
         # FRIENDLY NAME
         friendly_name = data.get('friendly_name')
         if friendly_name:
             self.friendly_name = friendly_name
+        else:
+            if is_new:
+                raise exceptions.MissingModelValueException('total_tests')
 
         # STARTING TIMESTAMP
         starting_timestamp = data.get('starting_timestamp')
         if starting_timestamp:
             self.starting_timestamp = starting_timestamp
+        else:
+            if is_new:
+                self.starting_timestamp = datetime.now()
 
         # ENDING TIMESTAMP
         ending_timestamp = data.get('ending_timestamp')
@@ -202,5 +219,15 @@ class Testbatch(BaseModel):
         runner_metadata = data.get('runner_metadata')
         if runner_metadata:
             self.runner_metadata = runner_metadata
+
+        # LOG FILE PATH
+        log_file_path = data.get('log_file_path')
+        if log_file_path:
+            self.log_file_path = log_file_path
+
+        # ROOT PATH
+        root_path = data.get('root_path')
+        if root_path:
+            self.root_path = root_path
 
         db_session.save(self, safe=True)

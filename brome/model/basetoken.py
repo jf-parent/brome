@@ -1,8 +1,12 @@
 from mongoalchemy.document import Index
-from mongoalchemy.fields import *  # noqa
+from mongoalchemy.fields import (
+    StringField,
+    BoolField,
+    ObjectIdField
+)
 
 from brome.webserver.server.utils import generate_token
-from brome.webserver.server.exceptions import *  # noqa
+from brome.core import exceptions
 from brome.model.basemodel import BaseModel
 
 
@@ -69,7 +73,7 @@ class BaseToken(BaseModel):
             self.user_uid = user_uid
         else:
             if is_new:
-                raise InvalidRequestException('Missing user_uid')
+                raise exceptions.InvalidRequestException('Missing user_uid')
 
         if save:
             db_session.save(self, safe=True)
@@ -80,11 +84,11 @@ class BaseToken(BaseModel):
         db_session = context.get('db_session')
 
         if self.used:
-            raise TokenAlreadyUsedException(self.token)
+            raise exceptions.TokenAlreadyUsedException(self.token)
 
         if target == self:
             if self.is_expire():
-                raise TokenExpiredException()
+                raise exceptions.TokenExpiredException()
 
             if self.is_belonging_to_user(user):
                 self.used = True
@@ -93,16 +97,19 @@ class BaseToken(BaseModel):
 
                 return True
             else:
-                raise TokenViolationException(
+                raise exceptions.TokenViolationException(
                     "{user} has not the right to the use the {token})".format(
                         user=user,
                         token=self.token
                     ))
         else:
-            raise TokenInvalidException("{token} != {user_token}".format(
-                        token=self.token,
-                        user_token=target
-                    ))
+            raise exceptions.TokenInvalidException(
+                "{token} != {user_token}"
+                .format(
+                    token=self.token,
+                    user_token=target
+                )
+            )
 
     def is_belonging_to_user(self, user):
         return True

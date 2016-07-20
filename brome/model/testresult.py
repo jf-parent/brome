@@ -46,6 +46,8 @@ class Testresult(BaseModel):
         data['root_path'] = self.root_path
         data['screenshot_path'] = self.screenshot_path
         data['video_capture_path'] = self.video_capture_path
+        # TODO video_capture_current_time
+        # data['video_capture_current_time'] = video_capture_current_time
         data['extra_data'] = self.extra_data
         data['title'] = self.title
         data['test_id'] = str(self.test_id)

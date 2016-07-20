@@ -17,7 +17,7 @@ from brome.core.utils import (
     DbSessionContext,
     get_timestamp
 )
-from brome.core.bot_diary import BotDiary
+# from brome.core.bot_diary import BotDiary
 from brome.core.selector import Selector
 from brome.core.proxy_element import ProxyElement
 from brome.core.proxy_element_list import ProxyElementList
@@ -53,7 +53,9 @@ class ProxyDriver(object):
         self.runner = runner
 
         if self.get_config_value("bot_diary:enable_bot_diary"):
-            self.bot_diary = BotDiary(self)
+            # TODO rewrite the whole thing
+            # self.bot_diary = BotDiary(self)
+            self.bot_diary = False
         else:
             self.bot_diary = False
 

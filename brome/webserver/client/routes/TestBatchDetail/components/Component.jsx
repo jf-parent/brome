@@ -60,7 +60,10 @@ class TestBatchDetail extends BaseComponent {
             <button className='btn btn-default'>
               <i className='fa fa-trash-o' aria-hidden='true'></i>
               {' '}
-              Delete
+              <FormattedMessage
+                id='testBatchDetail.Delete'
+                defaultMessage='Delete'
+              />
             </button>
           </div>
         </div>
@@ -72,7 +75,10 @@ class TestBatchDetail extends BaseComponent {
             <button className='btn btn-default'>
               <i className='fa fa-plug' aria-hidden='true'></i>
               {' '}
-              Terminate
+              <FormattedMessage
+                id='testBatchDetail.Terminated'
+                defaultMessage='Terminate'
+              />
             </button>
           </div>
         </div>
@@ -95,17 +101,32 @@ class TestBatchDetail extends BaseComponent {
         <center>
           <span>
             <small>
-              Total Tests: <b>{totalTests}</b> ~ {' '}
+              <FormattedMessage
+                id='testBatchDetail.TotalTests'
+                defaultMessage='Total Tests:'
+              />
+              {' '}
+              <b>{totalTests}</b> ~ {' '}
             </small>
           </span>
           <span>
             <small>
-              Total Executed Tests: <b>{totalExecutedTests}</b> ~ {' '}
+              <FormattedMessage
+                id='testBatchDetail.TotalExecutedTests'
+                defaultMessage='Total Executed Tests:'
+              />
+              {' '}
+              <b>{totalExecutedTests}</b> ~ {' '}
             </small>
           </span>
           <span>
             <small>
-              Total Executing Tests: <b>{totalExecutingTests}</b>
+              <FormattedMessage
+                id='testBatchDetail.TotalExecutingTests'
+                defaultMessage='Total Executing Tests:'
+              />
+              {' '}
+              <b>{totalExecutingTests}</b>
             </small>
           </span>
           <Line percent={percent} strokeWidth='2' strokeColor='#87D0E8' />
@@ -122,7 +143,10 @@ class TestBatchDetail extends BaseComponent {
     return (
       <div>
         <h3 className={ComponentStyle['section-header']}>
-          Test Results
+          <FormattedMessage
+            id='testBatchDetail.TestResults'
+            defaultMessage='Test Results'
+          />
           {' '}
           {(() => {
             if (nbFailedTest) {
@@ -167,7 +191,12 @@ class TestBatchDetail extends BaseComponent {
     return (
       <div>
         <h3 className={ComponentStyle['section-header']}>
-          Crashes (<span style={nbOfCrashesStyle}>{nbOfCrashes}</span>):
+          <FormattedMessage
+            id='testBatchDetail.Crashes'
+            defaultMessage='Crashes'
+          />
+          {' '}
+          (<span style={nbOfCrashesStyle}>{nbOfCrashes}</span>):
         </h3>
         <ul>
           {
@@ -189,7 +218,10 @@ class TestBatchDetail extends BaseComponent {
     return (
       <div>
         <h3 className={ComponentStyle['section-header']}>
-          Milestone:
+          <FormattedMessage
+            id='testBatchDetail.Milestone'
+            defaultMessage='Milestone:'
+          />
         </h3>
         <ul>
           {(() => {
@@ -210,7 +242,10 @@ class TestBatchDetail extends BaseComponent {
               return (
                 <li>
                   <small>
-                    No milestone
+                    <FormattedMessage
+                      id='testBatchDetail.NoMilestone'
+                      defaultMessage='No milestone'
+                    />
                   </small>
                 </li>
               )
@@ -223,7 +258,7 @@ class TestBatchDetail extends BaseComponent {
 
   getTool (
     path,
-    label,
+    labelConfig,
     icon,
     enabled,
     extraUrlParam = ''
@@ -237,7 +272,11 @@ class TestBatchDetail extends BaseComponent {
               <Link className='btn btn-default btn-link' to={path + '?testbatchuid=' + this.getTestBatchUid() + extraUrlParam}>
                 <i className={'fa fa-' + icon} aria-hidden='true'></i>
                 {' '}
-                {label}
+                <FormattedMessage
+                  id={labelConfig['id']}
+                  defaultMessage={labelConfig['defaultMessage']}
+                  values={labelConfig['values']}
+                />
               </Link>
             )
           } else {
@@ -245,7 +284,11 @@ class TestBatchDetail extends BaseComponent {
               <button className='btn btn-default btn-link' disabled>
                 <i className={'fa fa-' + icon} aria-hidden='true'></i>
                 {' '}
-                {label}
+                <FormattedMessage
+                  id={labelConfig['id']}
+                  defaultMessage={labelConfig['defaultMessage']}
+                  values={labelConfig['values']}
+                />
               </button>
             )
           }
@@ -259,70 +302,114 @@ class TestBatchDetail extends BaseComponent {
     let testBatchFeatures = testBatch.features
     let sessionVideoCapture = this.getTool(
       'sessionvideocapture',
-      'Video Capture',
+      {
+        id: 'testBatchDetail.VideoCaptureLabel',
+        defaultMessage: 'Video Capture'
+      },
       'video-camera',
       testBatchFeatures['session_video_capture']
     )
     let networkCapture = this.getTool(
       'testinstancenetworkcapture',
-      'Network Capture',
+      {
+        id: 'testBatchDetail.NetworkCaptureLabel',
+        defaultMessage: 'Network Capture'
+      },
       'cubes',
       testBatchFeatures['network_capture']
     )
     let testResults = this.getTool(
       'testbatchtestresults',
-      'Test Results (' + testBatch.test_results.nb_test_result + ')',
+      {
+        id: 'testBatchDetail.TestResultsLabel',
+        defaultMessage: 'Test Results ({nb_test_result})',
+        values: {
+          nb_test_result: testBatch.test_results.nb_test_result
+        }
+      },
       'bar-chart',
       !!testBatch.test_results.nb_test_result
     )
     let testInstances = this.getTool(
       'testinstancedetaillist',
-      'Test Instances',
+      {
+        id: 'testBatchDetail.TestInstanceDetailListLabel',
+        defaultMessage: 'Test Instances'
+      },
       'list',
       true
     )
     let screenshots = this.getTool(
       'testbatchscreenshots',
-      'Screenshots (' + testBatch.nb_screenshot + ')',
+      {
+        id: 'testBatchDetail.TestBatchScreenshots',
+        defaultMessage: 'Screenshots ({nb_screenshot})',
+        values: {
+          nb_screenshot: testBatch.nb_screenshot
+        }
+      },
       'file-image-o',
       testBatchFeatures['screenshots']
     )
     let crashReports = this.getTool(
       'testbatchcrashes',
-      'Crash reports (' + testBatch.test_crashes.length + ')',
+      {
+        id: 'testBatchDetail.TestInstanceCrashesLabel',
+        defaultMessage: 'Crash reports ({nb_crashes})',
+        values: {
+          nb_crashes: testBatch.test_crashes.length
+        }
+      },
       'exclamation-triangle',
       !!testBatch.test_crashes.length
     )
     let testInstancesLogs = this.getTool(
       'testinstancelist',
-      'Instances Logs',
+      {
+        id: 'testBatchDetail.TestInstanceLogListLabel',
+        defaultMessage: 'Instances Logs'
+      },
       'newspaper-o',
       true,
       '&path=testinstancelog'
     )
     let runnerLog = this.getTool(
       'testbatchrunnerlog',
-      'Runner log',
+      {
+        id: 'testBatchDetail.TestRunnerLogLabel',
+        defaultMessage: 'Runner log'
+      },
       'file-text-o',
       true
     )
+    /* TODO
     let botDiaries = this.getTool(
       'testinstancelist',
-      'Bot Diaries',
+      {
+        id: 'testBatchDetail.BotDiariesLabel',
+        defaultMessage: 'Bot Diaries'
+      },
       'pencil',
       testBatchFeatures['bot_diaries'],
       '&path=testinstancebotdiaries'
     )
+    */
     let instanceVnc = this.getTool(
       'testinstancelist',
-      'Instance VNC',
+      {
+        id: 'testBatchDetail.VncListLabel',
+        defaultMessage: 'Instance VNC'
+      },
       'desktop',
       testBatchFeatures['instance_vnc'],
       '&path=testinstancevnc'
     )
     let styleQuality = this.getTool(
       'stylequality',
-      'Style Quality',
+      {
+        id: 'testBatchDetail.StyleQualityLabel',
+        defaultMessage: 'Style Quality'
+      },
       'eye',
       testBatchFeatures['style_quality']
     )
@@ -336,7 +423,6 @@ class TestBatchDetail extends BaseComponent {
         {sessionVideoCapture}
         {screenshots}
         {networkCapture}
-        {botDiaries}
         {instanceVnc}
         {styleQuality}
       </div>
@@ -381,7 +467,11 @@ class TestBatchDetail extends BaseComponent {
         <div className='container-fluid'>
           {this.getActionToolbelt()}
           <h2 className='text-center'>
-            Test Batch Detail <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
+            <FormattedMessage
+              id='testBatchDetail.HeaderTitle'
+              defaultMessage='Test Batch Detail'
+            />
+            <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
           </h2>
           {this.getProgress()}
           {this.getToolbelt()}

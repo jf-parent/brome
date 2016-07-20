@@ -3,6 +3,7 @@ import React from 'react'
 import Collapse, { Panel } from 'rc-collapse'
 import 'rc-collapse/assets/index.css'
 
+import VideoPlayer from 'components/ux/VideoPlayer'
 import BrowserBadge from 'components/ux/BrowserBadge'
 import Loading from 'components/ux/Loading'
 import ErrorMsg from 'components/ux/ErrorMsg'
@@ -123,10 +124,9 @@ class TestBatchCrashes extends BaseComponent {
                         <Panel header='Screenshot'>
                           {(() => {
                             if (crash.screenshot_path !== '') {
-                              let path = '/test_results/' + crash.screenshot_path
                               return (
-                                <a href={path} target='_blank'>
-                                  <img className='img-responsive' src={path} />
+                                <a href={crash.screenshot_path} target='_blank'>
+                                  <img className='img-responsive' src={crash.screenshot_path} />
                                 </a>
                               )
                             } else {
@@ -138,9 +138,9 @@ class TestBatchCrashes extends BaseComponent {
                         </Panel>
                         <Panel header='Video Capture'>
                           {(() => {
-                            if (crash.videocapture_path !== '') {
+                            if (crash.video_capture_path !== '') {
                               return (
-                                <small>TODO</small>
+                                <VideoPlayer src={crash.video_capture_path} currentTime={crash.video_capture_current_time} />
                               )
                             } else {
                               return (

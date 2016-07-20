@@ -84,9 +84,13 @@ class BaseRunner(object):
         if self.root_test_result_dir:
             self.runner_dir = os.path.join(
                 self.root_test_result_dir,
+                "tb_results",
                 "tb_%s" % self.test_batch_id
             )
-            self.relative_runner_dir = "tb_%s" % self.test_batch_id
+            self.relative_runner_dir = os.path.join(
+                "tb_results",
+                "tb_%s" % self.test_batch_id
+            )
             create_dir_if_doesnt_exist(self.runner_dir)
         else:
             self.runner_dir = ''

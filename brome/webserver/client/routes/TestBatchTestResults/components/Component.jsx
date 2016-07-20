@@ -4,6 +4,7 @@ import Collapse, { Panel } from 'rc-collapse'
 import 'font-awesome-webpack'
 import 'rc-collapse/assets/index.css'
 
+import VideoPlayer from 'components/ux/VideoPlayer'
 import Loading from 'components/ux/Loading'
 import ErrorMsg from 'components/ux/ErrorMsg'
 // import ComponentStyle from './ComponentStyle.postcss'
@@ -153,9 +154,9 @@ class TestBatchTestResults extends BaseComponent {
                         </Panel>
                         <Panel header='Video Capture'>
                           {(() => {
-                            if (testResult.videocapture_path !== '') {
+                            if (testResult.video_capture_path !== '') {
                               return (
-                                <small>TODO</small>
+                                <VideoPlayer src={testResult.video_capture_path} currentTime={testResult.video_capture_current_time} />
                               )
                             } else {
                               return (

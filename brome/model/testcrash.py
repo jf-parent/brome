@@ -44,6 +44,9 @@ class Testcrash(BaseModel):
         data['browser_capabilities'] = self.browser_capabilities
         data['screenshot_path'] = self.screenshot_path
         data['video_capture_path'] = self.video_capture_path
+        # TODO calculate the total time of the video capture
+        # TODO video_capture_total_time - max(30 seconds)
+        # data['video_capture_current_time'] = video_capture_current_time
         data['root_path'] = self.root_path
         data['extra_data'] = self.extra_data
         data['title'] = self.title
@@ -87,7 +90,9 @@ class Testcrash(BaseModel):
             self.browser_capabilities = browser_capabilities
         else:
             if is_new:
-                raise exceptions.MissingModelValueException('browser_capabilities')
+                raise exceptions.MissingModelValueException(
+                    'browser_capabilities'
+                )
 
         # ROOT PATH
         root_path = data.get('root_path')

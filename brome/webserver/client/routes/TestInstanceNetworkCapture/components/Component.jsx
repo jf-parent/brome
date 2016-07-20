@@ -143,7 +143,7 @@ class TestInstanceNetworkCapture extends BaseComponent {
                 <div key={index}>
                   <Collapse accordion>
                     <Panel header={title} key={index}>
-                      <a href={'/test_results/' + testInstance.network_capture_path} className='btn btn-default'>
+                      <a href={testInstance.network_capture_path} className='btn btn-default'>
                         Download
                       </a>
                       <button className='btn btn-default'>

@@ -776,7 +776,7 @@ class BaseTest(object):
             test_crash.browser_id = self.pdriver.get_id()
             test_crash.timestamp = datetime.now()
             test_crash.trace = str(tb)
-            test_crash.root_path = self._runner_dir
+            test_crash.root_path = self._runner.root_test_result_dir
             test_crash.screenshot_path = crash_screenshot_relative_path
             test_crash.video_capture_path = self._video_capture_file_relative_path  # noqa
             test_crash.extra_data = extra_data

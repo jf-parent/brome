@@ -123,10 +123,9 @@ class TestBatchScreenshots extends BaseComponent {
     } else {
       let items = []
       testBatchScreenshots.screenshots.map((value, index) => {
-        let path = '/test_results/' + value.file_path
         items.push({
-          original: path,
-          thumbnail: path
+          original: value.file_path,
+          thumbnail: value.file_path
         })
       })
 

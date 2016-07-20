@@ -2,6 +2,7 @@ import CoreLayout from 'layouts/CoreLayout/CoreLayout'
 import Login from 'routes/Login'
 import Logout from 'routes/Logout'
 import Profile from 'routes/Profile'
+import Video from 'routes/Video'
 import ErrorPage from 'routes/ErrorPage'
 import ForgottenPassword from 'routes/ForgottenPassword'
 import Register from 'routes/Register'
@@ -41,6 +42,7 @@ export const createRoutes = (store) => ({
     Logout(store),
     Register(store),
     Confirmation(store),
+    Video(store),
     ErrorPage(store)
   ]
 })

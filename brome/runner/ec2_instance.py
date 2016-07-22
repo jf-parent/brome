@@ -11,6 +11,7 @@ from brome.core.utils import (
     create_dir_if_doesnt_exist
 )
 from brome.runner.base_instance import BaseInstance
+from brome.core.settings import BROME_CONFIG
 
 
 class EC2Instance(BaseInstance):
@@ -161,9 +162,7 @@ class EC2Instance(BaseInstance):
                     security_group_ids=security_group_ids
             )
 
-            wait_after_instance_launched = self.runner.get_config_value(
-                "ec2:wait_after_instance_launched"
-            )
+            wait_after_instance_launched = BROME_CONFIG['ec2']['wait_after_instance_launched']
             if wait_after_instance_launched:
                 self.info_log(
                     "Waiting after instance launched: %s seconds..." %
@@ -226,7 +225,7 @@ class EC2Instance(BaseInstance):
                 self.error_log(msg)
                 raise Exception(msg)
 
-            if self.runner.get_config_value("ec2:wait_until_system_and_instance_check_performed"):  # noqa
+            if BROME_CONFIG['ec2']['wait_until_system_and_instance_check_performed']:  # noqa
                 check_successful = False
 
                 for i in range(5*60):

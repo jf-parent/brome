@@ -1,18 +1,3 @@
-import yaml
-
-
-def save_brome_config(brome_config_path, config):
-    """Save the brome config to a yaml file
-
-    Args:
-        brome_config_path (str) the file path where the config will be save
-        config (dict) the brome config dict
-    """
-
-    with open(brome_config_path, 'w') as fd:
-        yaml.dump(config, fd, default_flow_style=False)
-
-
 def generate_brome_config():
     """Generate a brome config with default value
 
@@ -31,44 +16,6 @@ def generate_brome_config():
     return config
 
 
-def get_config_value(dict_list, config_name):
-    """Return a config value
-
-    Basically it traverse the dictionary list until it
-    find a match for the config_name
-
-    Args:
-        dict_list (list of dict)
-        config_name (str) the name of the config you are looking for
-    """
-
-    try:
-        section, option = config_name.split(':')
-    except ValueError:
-        raise Exception("""
-            [get_config_value] config_name should contains the section
-            and the options separated by a colon (eg runner:tests_config)
-        """)
-
-    value = None
-    for dict_ in dict_list:
-        if section in dict_:
-            if option == '*':
-                value = dict_[section]
-                break
-            if option in dict_[section]:
-                value = dict_[section][option]
-                break
-
-    if value is None:
-        try:
-            value = default_config[section][option].get('default')
-        except KeyError:
-            pass
-
-    return value
-
-
 def test_config_to_dict(test_config_string):
     """Parse the test config to a dictionary
 
@@ -84,57 +31,6 @@ def test_config_to_dict(test_config_string):
             test_config[key] = value
 
     return test_config
-
-
-def load_brome_config(config_path):
-    """Load the brome config from the yaml file
-
-    Args:
-        config_path (str)
-    """
-
-    config = {}
-
-    with open(config_path, 'r') as fd:
-        config = yaml.load(fd)
-
-    return config
-
-
-def runner_args_to_dict(args):
-    """Parse the runner arguments
-    """
-
-    config = {}
-
-    brome_config_string = args.brome_config
-    if brome_config_string:
-
-        for config_str in brome_config_string.split(','):
-            section, option = config_str.split(':')
-            option, value = option.split('=')
-
-            if section not in config:
-                config[section] = {}
-
-            effective_value = value
-            # NOTE will only work with positive integer;
-            # not a problem for now since we only have positive integer
-            if value.isdigit():
-                effective_value = int(value)
-            elif value.lower() in ['false', 'true']:
-                if value.lower() == 'false':
-                    effective_value = False
-                else:
-                    effective_value = True
-
-            config[section][option] = effective_value
-
-    config['runner'] = {}
-    for arg, value in iter(args.__dict__.items()):
-        config['runner'][arg] = value
-
-    return config
 
 
 def parse_brome_config_from_browser_config(browser_config):
@@ -162,6 +58,7 @@ def parse_brome_config_from_browser_config(browser_config):
 default_config = {}
 
 # ##SECTIONS
+default_config["mitmproxy"] = {}
 default_config["brome"] = {}
 default_config["project"] = {}
 default_config["saucelabs"] = {}
@@ -178,6 +75,21 @@ default_config["logger_test"] = {}
 default_config["ec2"] = {}
 default_config["grid_runner"] = {}
 default_config["webserver"] = {}
+
+# MITMPROXY
+default_config["mitmproxy"]["path"] = {
+    'default': '',
+    'type': 'input',
+    'visible': False,
+    'title': 'The path to the mitmproxy python bin'
+}
+
+default_config["mitmproxy"]["filter"] = {
+    'default': '',
+    'type': 'input',
+    'visible': False,
+    'title': 'The mitmproxy filter'
+}
 
 # BROME
 default_config["brome"]["script_folder_name"] = {
@@ -492,13 +404,6 @@ default_config["proxy_driver"]["take_screenshot_on_assertion_failure"] = {
 }
 
 # BROWSER
-default_config["browser"]["castroredux_framerate"] = {
-    'default': 30,
-    'type': 'number',
-    'visible': True,
-    'title': 'CastroRedux framerate'
-}
-
 default_config["browser"]["window_x_position"] = {
     'default': 0,
     'type': 'number',

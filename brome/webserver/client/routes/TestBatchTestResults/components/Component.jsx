@@ -1,5 +1,6 @@
 import React from 'react'
 // import { FormattedMessage } from 'react-intl'
+import BrowserBadge from 'components/ux/BrowserBadge'
 import Collapse, { Panel } from 'rc-collapse'
 import 'font-awesome-webpack'
 import 'rc-collapse/assets/index.css'
@@ -130,7 +131,15 @@ class TestBatchTestResults extends BaseComponent {
                 headerStyle['color'] = 'red'
                 headerIcon = 'fa-thumbs-down'
               }
-              let header = <span><i className={'fa ' + headerIcon} style={headerStyle} aria-hidden='true'></i>{' '}{testResult.title}</span>
+              let header = <span>
+                <i className={'fa ' + headerIcon} style={headerStyle} aria-hidden='true'></i>{' '}{testResult.title}
+                <BrowserBadge
+                  browserName={testResult.browser_capabilities.browserName}
+                  browserVersion={testResult.browser_capabilities.version}
+                  browserIcon={testResult.browser_capabilities.browserName}
+                  platform={testResult.browser_capabilities.platform}
+                />
+              </span>
               return (
                 <div key={index}>
                   <Collapse accordion>
@@ -139,10 +148,9 @@ class TestBatchTestResults extends BaseComponent {
                         <Panel header='Screenshot'>
                           {(() => {
                             if (testResult.screenshot_path !== '') {
-                              let path = '/test_results/' + testResult.screenshot_path
                               return (
-                                <a href={path} target='_blank'>
-                                  <img className='img-responsive' src={path} />
+                                <a href={testResult.screenshot_path} target='_blank'>
+                                  <img className='img-responsive' src={testResult.screenshot_path} />
                                 </a>
                               )
                             } else {

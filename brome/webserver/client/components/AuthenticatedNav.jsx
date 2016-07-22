@@ -31,10 +31,10 @@ class AuthenticatedNav extends BaseComponent {
             </div>
             <div id='navbar-collapse' className='navbar-collapse collapse'>
               <ul className='nav navbar-nav'>
-                <NavItem to='/dashboard'>
+                <NavItem to='/starttestbatch'>
                   <FormattedMessage
-                    id='nav.Dashboard'
-                    defaultMessage='Dashboard'
+                    id='nav.StartTestBatch'
+                    defaultMessage='Start Test Batch'
                   />
                 </NavItem>
                 <NavItem to='/testbatchlist'>

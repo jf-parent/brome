@@ -1,8 +1,15 @@
 import importlib
+from glob import glob
 import logging
 import os
+import sys
+import tempfile
+import subprocess
 
+import yaml
 from aiohttp import web
+
+from brome.core.settings import BROME_CONFIG
 from brome.core import exceptions
 from brome.webserver.server.server_decorator import (
     require,
@@ -10,6 +17,26 @@ from brome.webserver.server.server_decorator import (
 )
 
 logger = logging.getLogger('bromewebserver')
+
+
+def get_tests():
+    test_list = []
+    script_test_prefix = BROME_CONFIG['brome']['script_test_prefix']
+
+    tests_dir = os.path.join(
+        BROME_CONFIG['project']['absolute_path'],
+        BROME_CONFIG['brome']['script_folder_name']
+    )
+
+    if os.path.isdir(tests_dir):
+        tests = glob(
+            os.path.join(tests_dir, '%s*.py' % script_test_prefix)
+        )
+        for test in sorted(tests):
+            name = test.split(os.sep)[-1][len(script_test_prefix):-3]
+            test_list.append(name)
+
+    return test_list
 
 
 class LogStreamOut(web.View):
@@ -106,5 +133,63 @@ class LogStreamOut(web.View):
             'name': name,
             'parent': await parent.serialize(context),
             'results': results
+        }
+        return web.json_response(response_data)
+
+
+class GetBromeConfig(web.View):
+
+    @exception_handler()
+    @require('login')
+    async def get(self):
+        # RESPONSE
+        response_data = {
+            'success': True,
+            'config': BROME_CONFIG,
+            'tests': get_tests()
+        }
+        return web.json_response(response_data)
+
+
+class StartTestBatch(web.View):
+
+    @exception_handler()
+    @require('login')
+    async def post(self):
+        req_data = await self.request.json()
+
+        tests = req_data.get('tests', get_tests())
+        browsers = req_data['browsers']
+
+        runner_path = os.path.join(
+            BROME_CONFIG['project']['absolute_path'],
+            BROME_CONFIG["brome"]["brome_executable_name"]
+        )
+
+        test_file_path = os.path.join(
+            tempfile.gettempdir(),
+            'test_file.yaml'
+        )
+        with open(test_file_path, 'w') as f:
+            f.write(yaml.dump(tests, default_flow_style=False))
+
+        commands = [
+            sys.executable,
+            runner_path,
+            "run",
+            "-r",
+            ','.join(browsers),
+            "--test-file",
+            test_file_path
+        ]
+        subprocess.Popen(
+            commands,
+            stdout=open('runner.log', 'a'),
+            stderr=open('runner.log', 'a')
+        )
+        # TODO return test batch id
+        # RESPONSE
+        response_data = {
+            'success': True
         }
         return web.json_response(response_data)

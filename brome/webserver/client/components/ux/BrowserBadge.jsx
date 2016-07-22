@@ -17,6 +17,14 @@ class BrowserBadge extends Component {
   }
 
   render () {
+    let browserIcon = this.props.browserIcon
+    // PHANTOMJS
+    if (this.props.browserName.toLowerCase() === 'phantomjs') {
+      browserIcon = 'snapchat-ghost'
+    // IE
+    } else if (this.props.browserName.toLowerCase() === 'internet explorer') {
+      browserIcon = 'internet-explorer'
+    }
     return (
       <span>
         {' '}
@@ -24,7 +32,7 @@ class BrowserBadge extends Component {
           // Browser Icon
           if (this.props.browserIcon) {
             return (
-              <i className={'fa fa-' + this.props.browserIcon} aria-hidden='true'></i>
+              <i className={'fa fa-' + browserIcon} aria-hidden='true'></i>
             )
           } else {
             return null

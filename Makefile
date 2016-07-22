@@ -25,6 +25,7 @@ help:
 	@echo "dist - package"
 	@echo "install - install the package to the active Python's site-packages"
 	@echo "new-model - create a new model using a skeleton file"
+	@echo "new-route - create a new route using a skeleton file"
 
 clean: clean-build clean-pyc clean-test
 
@@ -74,3 +75,6 @@ install: clean
 
 new-model:
 	cookiecutter https://github.com/jf-parent/webbase-cookiecutter-create-model -o server/model/
+
+new-route:
+	cookiecutter https://github.com/jf-parent/webbase-cookiecutter-create-route -o brome/webserver/client/routes/

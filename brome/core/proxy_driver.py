@@ -18,6 +18,7 @@ from brome.core.utils import (
     get_timestamp
 )
 # from brome.core.bot_diary import BotDiary
+from brome.core.settings import BROME_CONFIG
 from brome.core.selector import Selector
 from brome.core.proxy_element import ProxyElement
 from brome.core.proxy_element_list import ProxyElementList
@@ -52,7 +53,7 @@ class ProxyDriver(object):
         self.test_instance = test_instance
         self.runner = runner
 
-        if self.get_config_value("bot_diary:enable_bot_diary"):
+        if BROME_CONFIG['bot_diary']['enable_bot_diary']:
             # TODO rewrite the whole thing
             # self.bot_diary = BotDiary(self)
             self.bot_diary = False
@@ -60,8 +61,6 @@ class ProxyDriver(object):
             self.bot_diary = False
 
         self.browser_config = self.test_instance._browser_config
-        self.brome = self.runner.brome
-        self.selector_dict = self.brome.selector_dict
 
         # Use when we run with the remote runner
         # We don't want to embed in this case
@@ -130,9 +129,7 @@ class ProxyDriver(object):
             if element.is_displayed(raise_exception=False):
 
                 element.highlight(
-                    style=self.get_config_value(
-                                'highlight:element_is_visible'
-                            )
+                    style=BROME_CONFIG['highlight']['element_is_visible']
                 )
 
                 self.debug_log("is visible (%s): True" % selector)
@@ -236,18 +233,14 @@ class ProxyDriver(object):
         self.debug_log("Finding elements with selector: %s" % selector)
 
         raise_exception = kwargs.get(
-                                    'raise_exception',
-                                    self.get_config_value(
-                                        'proxy_driver:raise_exception'
-                                    )
-                                )
+            'raise_exception',
+            BROME_CONFIG['proxy_driver']['raise_exception']
+        )
         self.debug_log("effective raise_exception: %s" % raise_exception)
 
         wait_until_present = kwargs.get(
             'wait_until_present',
-            self.get_config_value(
-                'proxy_driver:wait_until_present_before_find'
-            )
+            BROME_CONFIG['proxy_driver']['wait_until_present_before_find']
         )
 
         self.debug_log(
@@ -256,9 +249,7 @@ class ProxyDriver(object):
 
         wait_until_visible = kwargs.get(
             'wait_until_visible',
-            self.get_config_value(
-                'proxy_driver:wait_until_visible_before_find'
-            )
+            BROME_CONFIG['proxy_driver']['wait_until_visible_before_find']
         )
         self.debug_log(
             "effective wait_until_visible: %s" % wait_until_visible
@@ -335,19 +326,15 @@ class ProxyDriver(object):
         self.info_log("Waiting until clickable (%s)" % selector)
 
         timeout = kwargs.get(
-                            'timeout',
-                            self.get_config_value(
-                                'proxy_driver:default_timeout'
-                            )
-                        )
+            'timeout',
+            BROME_CONFIG['proxy_driver']['default_timeout']
+        )
         self.debug_log("effective timeout: %s" % timeout)
 
         raise_exception = kwargs.get(
-                                    'raise_exception',
-                                    self.get_config_value(
-                                        'proxy_driver:raise_exception'
-                                    )
-                                )
+            'raise_exception',
+            BROME_CONFIG['proxy_driver']['raise_exception']
+        )
         self.debug_log("effective raise_exception: %s" % raise_exception)
 
         _selector = Selector(self, selector)
@@ -403,17 +390,13 @@ class ProxyDriver(object):
 
         timeout = kwargs.get(
             'timeout',
-            self.get_config_value(
-                'proxy_driver:default_timeout'
-            )
+            BROME_CONFIG['proxy_driver']['default_timeout']
         )
         self.debug_log("effective timeout: %s" % timeout)
 
         raise_exception = kwargs.get(
             'raise_exception',
-            self.get_config_value(
-                'proxy_driver:raise_exception'
-            )
+            BROME_CONFIG['proxy_driver']['raise_exception']
         )
         self.debug_log("effective raise_exception: %s" % raise_exception)
 
@@ -468,17 +451,13 @@ class ProxyDriver(object):
 
         timeout = kwargs.get(
             'timeout',
-            self.get_config_value(
-                'proxy_driver:default_timeout'
-            )
+            BROME_CONFIG['proxy_driver']['default_timeout']
         )
         self.debug_log("effective timeout: %s" % timeout)
 
         raise_exception = kwargs.get(
             'raise_exception',
-            self.get_config_value(
-                'proxy_driver:raise_exception'
-            )
+            BROME_CONFIG['proxy_driver']['raise_exception']
         )
         self.debug_log("effective raise_exception: %s" % raise_exception)
 
@@ -534,17 +513,13 @@ class ProxyDriver(object):
 
         timeout = kwargs.get(
             'timeout',
-            self.get_config_value(
-                'proxy_driver:default_timeout'
-            )
+            BROME_CONFIG['proxy_driver']['default_timeout']
         )
         self.debug_log("effective timeout: %s" % timeout)
 
         raise_exception = kwargs.get(
             'raise_exception',
-            self.get_config_value(
-                'proxy_driver:raise_exception'
-            )
+            BROME_CONFIG['proxy_driver']['raise_exception']
         )
         self.debug_log("effective raise_exception: %s" % raise_exception)
 
@@ -598,17 +573,13 @@ class ProxyDriver(object):
 
         timeout = kwargs.get(
             'timeout',
-            self.get_config_value(
-                'proxy_driver:default_timeout'
-            )
+            BROME_CONFIG['proxy_driver']['default_timeout']
         )
         self.debug_log("effective timeout: %s" % timeout)
 
         raise_exception = kwargs.get(
             'raise_exception',
-            self.get_config_value(
-                'proxy_driver:raise_exception'
-            )
+            BROME_CONFIG['proxy_driver']['raise_exception']
         )
         self.debug_log("effective raise_exception: %s" % raise_exception)
 
@@ -646,25 +617,22 @@ class ProxyDriver(object):
             return
 
         # Maximaze window
-        if self.get_config_value('browser:maximize_window'):
+        if BROME_CONFIG['browser']['maximize_window']:
             self._driver.maximize_window()
-        elif self.get_config_value('browser:dont_resize'):
+        elif BROME_CONFIG['browser'].get('dont_resize', False):
             return
         else:
             # Window position
             self._driver.set_window_position(
-                self.get_config_value('browser:window_x_position'),
-                self.get_config_value('browser:window_y_position')
+                BROME_CONFIG['browser']['window_x_position'],
+                BROME_CONFIG['browser']['window_y_position']
             )
 
             # Window size
             self._driver.set_window_size(
-                self.get_config_value('browser:window_width'),
-                self.get_config_value('browser:window_height')
+                BROME_CONFIG['browser']['window_width'],
+                BROME_CONFIG['browser']['window_height']
             )
-
-    def get_config_value(self, value):
-        return self.test_instance.get_config_value(value)
 
     def get_ip_of_node(self, **kwargs):
         if self.browser_config.location in ['localhost', 'appium']:
@@ -741,7 +709,7 @@ class ProxyDriver(object):
                 take_screenshot=True
             )
 
-        if self.get_config_value("proxy_driver:intercept_javascript_error"):
+        if BROME_CONFIG['proxy_driver']['intercept_javascript_error']:
             self.init_javascript_error_interception()
 
         return True
@@ -796,7 +764,7 @@ class ProxyDriver(object):
             return_type: 'string' | 'list'; default: 'string'
         """
 
-        if self.get_config_value("proxy_driver:intercept_javascript_error"):
+        if BROME_CONFIG['proxy_driver']['intercept_javascript_error']:
             js_errors = self._driver.execute_script(
                 'return window.jsErrors; window.jsErrors = [];'
             )
@@ -826,8 +794,8 @@ class ProxyDriver(object):
             self.warning_log("Pdb is disabled when runned from the grid runner because of the multithreading")  # noqa
             return False
 
-        if self.get_config_value("runner:play_sound_on_pdb"):
-            say(self.get_config_value("runner:sound_on_pdb"))
+        if BROME_CONFIG['runner']['play_sound_on_pdb']:
+            say(BROME_CONFIG['runner']['sound_on_pdb'])
 
         set_trace()
 
@@ -896,8 +864,8 @@ class ProxyDriver(object):
 
         from IPython.terminal.embed import InteractiveShellEmbed
 
-        if self.get_config_value("runner:play_sound_on_ipython_embed"):
-            say(self.get_config_value("runner:sound_on_ipython_embed"))
+        if BROME_CONFIG['runner']['play_sound_on_ipython_embed']:
+            say(BROME_CONFIG['runner']['sound_on_ipython_embed'])
 
         ipshell = InteractiveShellEmbed(banner1=title)
 
@@ -1033,7 +1001,7 @@ class ProxyDriver(object):
                 save_to_db = True
 
         if save_to_db:
-            with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+            with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
                 screenshot = Testscreenshot()
                 screenshot.browser_capabilities = self.capabilities
                 screenshot.browser_id = self.get_id()
@@ -1074,7 +1042,7 @@ class ProxyDriver(object):
                 full_path
             )
 
-            with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+            with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
                 quality_screenshot = Testqualityscreenshot()
                 quality_screenshot.timestamp = datetime.now()
                 quality_screenshot.browser_capabilities = self.capabilities
@@ -1112,9 +1080,7 @@ class ProxyDriver(object):
 
         wait_until_present = kwargs.get(
             'wait_until_present',
-            self.get_config_value(
-                'proxy_driver:wait_until_present_before_assert_present'
-            )
+            BROME_CONFIG['proxy_driver']['wait_until_present_before_assert_present']  # noqa
         )
         self.debug_log(
             "effective wait_until_present: %s" % wait_until_present
@@ -1156,9 +1122,7 @@ class ProxyDriver(object):
 
         wait_until_not_present = kwargs.get(
             'wait_until_not_present',
-            self.get_config_value(
-                'proxy_driver:wait_until_not_present_before_assert_not_present'
-            )
+            BROME_CONFIG['proxy_driver']['wait_until_not_present_before_assert_not_present']  # noqa
         )
         self.debug_log(
             "effective wait_until_not_present: %s" % wait_until_not_present
@@ -1200,17 +1164,13 @@ class ProxyDriver(object):
 
         highlight = kwargs.get(
             'highlight',
-            self.get_config_value(
-                'highlight:highlight_on_assertion_success'
-            )
+            BROME_CONFIG['highlight']['highlight_on_assertion_success']
         )
         self.debug_log("effective highlight: %s" % highlight)
 
         wait_until_visible = kwargs.get(
             'wait_until_visible',
-            self.get_config_value(
-                'proxy_driver:wait_until_visible_before_assert_visible'
-            )
+            BROME_CONFIG['proxy_driver']['wait_until_visible_before_assert_visible']  # noqa
         )
         self.debug_log("effective wait_until_visible: %s" % wait_until_visible)
 
@@ -1226,9 +1186,7 @@ class ProxyDriver(object):
         if element and element.is_displayed(raise_exception=False):
             if highlight:
                 element.highlight(
-                    style=self.get_config_value(
-                        'highlight:style_on_assertion_success'
-                    )
+                    style=BROME_CONFIG['highlight']['style_on_assertion_success']  # noqa
                 )
             if testid is not None:
                 self.create_test_result(testid, True)
@@ -1260,17 +1218,13 @@ class ProxyDriver(object):
 
         highlight = kwargs.get(
             'highlight',
-            self.get_config_value(
-                'highlight:highlight_on_assertion_failure'
-            )
+            BROME_CONFIG['highlight']['highlight_on_assertion_failure']
         )
         self.debug_log("effective highlight: %s" % highlight)
 
         wait_until_not_visible = kwargs.get(
             'wait_until_not_visible',
-            self.get_config_value(
-                'proxy_driver:wait_until_not_visible_before_assert_not_visible'
-            )
+            BROME_CONFIG['proxy_driver']['wait_until_not_visible_before_assert_not_visible']  # noqa
         )
         self.debug_log(
             "effective wait_until_not_visible: %s" % wait_until_not_visible
@@ -1293,9 +1247,7 @@ class ProxyDriver(object):
 
             if highlight:
                 element.highlight(
-                    style=self.get_config_value(
-                        'highlight:style_on_assertion_failure'
-                    )
+                    style=BROME_CONFIG['highlight']['style_on_assertion_failure']  # noqa
                 )
             if testid is not None:
                 self.create_test_result(testid, False, extra_data={
@@ -1333,17 +1285,13 @@ class ProxyDriver(object):
 
         highlight = kwargs.get(
             'highlight',
-            self.get_config_value(
-                'highlight:highlight_on_assertion_success'
-            )
+            BROME_CONFIG['highlight']['highlight_on_assertion_success']
         )
         self.debug_log("effective highlight: %s" % highlight)
 
         wait_until_visible = kwargs.get(
             'wait_until_visible',
-            self.get_config_value(
-                'proxy_driver:wait_until_visible_before_assert_visible'
-            )
+            BROME_CONFIG['proxy_driver:wait_until_visible_before_assert_visible']  # noqa
         )
         self.debug_log("effective wait_until_visible: %s" % wait_until_visible)
 
@@ -1356,9 +1304,7 @@ class ProxyDriver(object):
             if element.text == value:
                 if highlight:
                     element.highlight(
-                        style=self.get_config_value(
-                            'highlight:style_on_assertion_success'
-                        )
+                        BROME_CONFIG['highlight']['style_on_assertion_success']
                     )
                 if testid is not None:
                     self.create_test_result(testid, True)
@@ -1367,9 +1313,7 @@ class ProxyDriver(object):
             else:
                 if highlight:
                     element.highlight(
-                        style=self.get_config_value(
-                            'highlight:style_on_assertion_failure'
-                        )
+                        style=BROME_CONFIG['highlight']['style_on_assertion_failure']  # noqa
                     )
                 if testid is not None:
                     self.create_test_result(testid, False)
@@ -1404,17 +1348,13 @@ class ProxyDriver(object):
 
         highlight = kwargs.get(
             'highlight',
-            self.get_config_value(
-                'highlight:highlight_on_assertion_success'
-            )
+            BROME_CONFIG['highlight']['highlight_on_assertion_success']
         )
         self.debug_log("effective highlight: %s" % highlight)
 
         wait_until_visible = kwargs.get(
             'wait_until_visible',
-            self.get_config_value(
-                'proxy_driver:wait_until_visible_before_assert_visible'
-            )
+            BROME_CONFIG['proxy_driver']['wait_until_visible_before_assert_visible']  # noqa
         )
         self.debug_log("effective wait_until_visible: %s" % wait_until_visible)
 
@@ -1427,9 +1367,7 @@ class ProxyDriver(object):
             if element.text != value:
                 if highlight:
                     element.highlight(
-                        style=self.get_config_value(
-                            'highlight:style_on_assertion_success'
-                        )
+                        style=BROME_CONFIG['highlight']['style_on_assertion_success']  # noqa
                     )
                 if testid is not None:
                     self.create_test_result(testid, True)
@@ -1438,9 +1376,7 @@ class ProxyDriver(object):
             else:
                 if highlight:
                     element.highlight(
-                        style=self.get_config_value(
-                            'highlight:style_on_assertion_failure'
-                        )
+                        BROME_CONFIG['highlight']['style_on_assertion_failure']  # noqa
                     )
                 if testid is not None:
                     self.create_test_result(testid, False)
@@ -1476,10 +1412,10 @@ class ProxyDriver(object):
         if not result:
             extra_data['javascript_error'] = self.get_javascript_error()
 
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
-            if testid in self.brome.test_dict:
+        with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
+            if testid in BROME_CONFIG['test_dict']:
                 test = session.query(Test).filter(Test.test_id == testid).one()
-                test_config = self.brome.test_dict[testid]
+                test_config = BROME_CONFIG['test_dict'][testid]
                 if type(test_config) == dict:
                     if 'embed' in test_config:
                         embed = test_config['embed']
@@ -1495,7 +1431,7 @@ class ProxyDriver(object):
 
             if result:
                 # SCREENSHOT
-                if self.get_config_value("proxy_driver:take_screenshot_on_assertion_success"):  # noqa
+                if BROME_CONFIG['proxy_driver']['take_screenshot_on_assertion_success']:  # noqa
                     if self.test_instance._runner_dir:
                         screenshot_name = 'succeed_%s_%s_%s.png' % (
                             string_to_filename(testid),
@@ -1513,19 +1449,18 @@ class ProxyDriver(object):
                         self.take_screenshot(screenshot_path=screenshot_path)
 
                 # SOUND NOTIFICATION
-                if self.get_config_value("runner:play_sound_on_assertion_success"):  # noqa
+                if BROME_CONFIG['runner']['play_sound_on_assertion_success']:  # noqa
                     say(
-                        self.get_config_value(
-                            "runner:sound_on_assertion_success"
-                        ).format(testid=testid)
+                        BROME_CONFIG['runner']['sound_on_assertion_success']
+                        .format(testid=testid)
                     )
 
                 # EMBED
-                if self.get_config_value("runner:embed_on_assertion_success") and embed:  # noqa
+                if BROME_CONFIG['runner']['embed_on_assertion_success'] and embed:  # noqa
                     self.embed(title=embed_title)
             else:
                 # SCREENSHOT
-                if self.get_config_value("proxy_driver:take_screenshot_on_assertion_failure"):  # noqa
+                if BROME_CONFIG['proxy_driver']['take_screenshot_on_assertion_failure']:  # noqa
                     if self.test_instance._runner_dir:
                         screenshot_name = 'failed_%s_%s_%s.png' % (
                             string_to_filename(testid),
@@ -1543,15 +1478,14 @@ class ProxyDriver(object):
                         self.take_screenshot(screenshot_path=screenshot_path)
 
                 # SOUND NOTIFICATION
-                if self.get_config_value("runner:play_sound_on_assertion_failure"):  # noqa
+                if BROME_CONFIG['runner']['play_sound_on_assertion_failure']:  # noqa
                     say(
-                        self.get_config_value(
-                            "runner:sound_on_assertion_failure"
-                        ).format(testid=testid)
+                        BROME_CONFIG['runner']['sound_on_assertion_failure']
+                        .format(testid=testid)
                     )
 
                 # EMBED
-                if self.get_config_value("runner:embed_on_assertion_failure") and embed:  # noqa
+                if BROME_CONFIG['runner']['embed_on_assertion_failure'] and embed:  # noqa
                     self.embed(title=embed_title)
 
             test_result = Testresult()

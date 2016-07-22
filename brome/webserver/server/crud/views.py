@@ -12,9 +12,6 @@ from brome.webserver.server.server_decorator import (
     csrf_protected
 )
 from brome.webserver.server.auth import get_user_from_session
-from brome.webserver.server.prometheus_instruments import (
-    serverside_unhandled_exception_counter
-)
 
 logger = logging.getLogger('bromewebserver')
 
@@ -245,7 +242,6 @@ class CRUD(web.View):
                         'error': e.get_name()
                     }
                 else:
-                    serverside_unhandled_exception_counter.inc()
                     response_data[index] = {
                         'success': False,
                         'error': 'ServerSideError'

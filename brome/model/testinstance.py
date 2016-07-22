@@ -2,6 +2,7 @@ from datetime import datetime
 
 from mongoalchemy.fields import (
     DateTimeField,
+    BoolField,
     AnythingField,
     StringField,
     ObjectIdField,
@@ -20,6 +21,7 @@ class Testinstance(BaseModel):
     browser_id = StringField()
     starting_timestamp = DateTimeField()
     ending_timestamp = DateTimeField(required=False)
+    terminated = BoolField(default=False)
     extra_data = DictField(StringField(), default=dict())
 
     root_path = StringField(default='')
@@ -51,12 +53,11 @@ class Testinstance(BaseModel):
         data['video_capture_path'] = self.video_capture_path
         data['browser_capabilities'] = self.browser_capabilities
         data['starting_timestamp'] = self.starting_timestamp.isoformat()
-        if hasattr(self, 'ending_timestamp'):
+        data['terminated'] = self.terminated
+        if self.terminated:
             data['ending_timestamp'] = self.ending_timestamp.isoformat()
-            data['terminated'] = True
         else:
             data['ending_timestamp'] = False
-            data['terminated'] = False
         data['extra_data'] = self.extra_data
         data['test_batch_id'] = str(self.test_batch_id)
         return data
@@ -96,7 +97,9 @@ class Testinstance(BaseModel):
             self.browser_capabilities = browser_capabilities
         else:
             if is_new:
-                raise exceptions.MissingModelValueException('browser_capabilities')
+                raise exceptions.MissingModelValueException(
+                    'browser_capabilities'
+                )
 
         # STARTING TIMESTAMP
         starting_timestamp = data.get('starting_timestamp')

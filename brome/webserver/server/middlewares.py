@@ -1,18 +1,12 @@
 from mongoalchemy.session import Session
 
-from brome.webserver.server.settings import config
-from brome.webserver.server.prometheus_instruments import (
-    db_session_gauge,
-    db_session_counter
-)
+from brome.core.settings import BROME_CONFIG
 
 async def db_handler(app, handler):
     async def middleware(request):
         if request.path.startswith('/api/'):
-            db_session_gauge.inc()
-            db_session_counter.inc()
             request.db_session = Session.connect(
-                config.get("MONGO_DATABASE_NAME")
+                BROME_CONFIG['database'].get("mongo_database_name")
             )
 
         response = await handler(request)

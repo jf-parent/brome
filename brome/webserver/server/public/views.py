@@ -4,15 +4,10 @@ from aiohttp import web
 import aiohttp_jinja2
 from aiohttp_session import get_session
 
-from brome.core import exceptions
-from brome.webserver.server.settings import config
 from brome.webserver.server.server_decorator import (
-    exception_handler,
-    csrf_protected
+    exception_handler
 )
-from brome.model.user import User
-from brome.model.resetpasswordtoken import Resetpasswordtoken
-from brome.webserver.server.auth import set_session, get_user_from_session
+from brome.webserver.server.auth import get_user_from_session
 from brome.webserver.server.utils import generate_token
 
 logger = logging.getLogger('bromewebserver')
@@ -59,92 +54,3 @@ async def api_get_session(request):
 
     resp_data = {'success': success, 'user': user, 'token': token}
     return web.json_response(resp_data)
-
-
-@exception_handler()
-@csrf_protected()
-async def api_validate_reset_password_token(request):
-    logger.debug('validate_reset_password_token')
-
-    try:
-        data = await request.json()
-        reset_password_token = data['reset_password_token']
-    except:
-        raise exceptions.InvalidRequestException('Missing json data')
-
-    token_query = request.db_session.query(Resetpasswordtoken)\
-        .filter(Resetpasswordtoken.token == reset_password_token)
-    if token_query.count():
-        reset_password_token = token_query.one()
-        user = request.db_session.query(User)\
-            .filter(User.mongo_id == reset_password_token.user_uid).one()
-
-        context = {
-            'user': user,
-            'db_session': request.db_session,
-            'method': 'update',
-            'target': reset_password_token,
-            'queue': request.app.queue
-        }
-
-        ret = reset_password_token.use(context)
-        if ret:
-            await set_session(user, request)
-            context['method'] = 'read'
-            resp_data = {
-                'success': True,
-                'user': await user.serialize(context)
-            }
-            return web.json_response(resp_data)
-
-    # TOKEN NOT FOUND
-    else:
-        raise exceptions.TokenInvalidException('Token not found')
-
-
-@exception_handler()
-@csrf_protected()
-async def api_send_reset_password_token(request):
-    logger.debug('send_reset_password_token')
-
-    try:
-        data = await request.json()
-        email = data['email']
-    except:
-        raise exceptions.InvalidRequestException('Missing json data')
-
-    user_query = request.db_session.query(User)\
-        .filter(User.email == email)
-    if user_query.count():
-        user = user_query.one()
-
-        # NOTE disable user cannot reset their password
-        if not user.enable:
-            raise exceptions.EmailNotFound(
-                '{email} belong to a disabled user'.format(email=email)
-                )
-
-        context = {
-            'user': user,
-            'db_session': request.db_session,
-            'method': 'create',
-            'data': {
-                'user_uid': user.get_uid()
-            },
-            'queue': request.app.queue
-        }
-
-        reset_password_token = Resetpasswordtoken()
-        await reset_password_token.validate_and_save(context)
-
-        resp_data = {'success': True}
-
-        # TEST
-        if config.get('ENV', 'production') == 'test':
-            resp_data['reset_password_token'] = reset_password_token.token
-
-        return web.json_response(resp_data)
-
-    # EMAIL NOT FOUND
-    else:
-        raise exceptions.EmailNotFound(email)

@@ -10,11 +10,10 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common import proxy
 
+from brome.core.settings import BROME_CONFIG
 from brome.core.stateful import Stateful
 from brome.core.proxy_driver import ProxyDriver
 from brome.core.configurator import (
-    get_config_value,
-    parse_brome_config_from_browser_config,
     test_config_to_dict
 )
 from brome.model.testinstance import Testinstance
@@ -52,6 +51,12 @@ class BaseTest(object):
         self._localhost_instance = kwargs.get('localhost_instance')
         self._log_file_path = ''
 
+        with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
+            test_batch = session.query(Testbatch)\
+                .filter(Testbatch.mongo_id == test_batch_id)\
+                .one()
+            self._test_batch_friendly_name = test_batch.friendly_name
+
         self._crash_error = False
 
         # TEST BATCH DIRECTORY
@@ -67,6 +72,8 @@ class BaseTest(object):
                 'network_capture',
                 string_to_filename('%s.data' % self._name)
             )
+        else:
+            self._network_capture_file_relative_path = ''
 
         # LOGGING
         self.configure_logger()
@@ -92,10 +99,10 @@ class BaseTest(object):
 
         # TEST KWARGS
         self._test_config = test_config_to_dict(
-            self.get_config_value("runner:test_config")
+            BROME_CONFIG['runner'].get('test_config')
         )
 
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+        with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
 
             extra_data = {}
             if self._browser_config.location == 'ec2':
@@ -131,7 +138,7 @@ class BaseTest(object):
         self.detect_feature()
 
     def detect_feature(self):
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+        with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
             test_batch = session.query(Testbatch)\
                 .filter(Testbatch.mongo_id == self._test_batch_id).one()
 
@@ -149,7 +156,7 @@ class BaseTest(object):
                 test_batch.feature_screenshots = True
 
             # BOT DIARY
-            if self.get_config_value("bot_diary:enable_bot_diary"):
+            if BROME_CONFIG['bot_diary']['enable_bot_diary']:
                 test_batch.feature_bot_diaries = False
 
             # TODO VNC
@@ -299,8 +306,8 @@ class BaseTest(object):
         elif self._browser_config.location == 'saucelabs':
             driver = webdriver.Remote(
                 command_executor='http://%s:%s@ondemand.saucelabs.com:80/wd/hub' % (  # noqa
-                    self.get_config_value("saucelabs:username"),
-                    self.get_config_value("saucelabs:key")
+                    BROME_CONFIG['saucelabs']['username'],
+                    BROME_CONFIG['saucelabs']['key']
                 ),
                 desired_capabilities=self._browser_config.config
             )
@@ -309,8 +316,8 @@ class BaseTest(object):
         elif self._browser_config.location == 'browserstack':
             driver = webdriver.Remote(
                 command_executor='http://%s:%s@hub.browserstack.com:80/wd/hub' % (  # noqa
-                    self.get_config_value("browserstack:username"),
-                    self.get_config_value("browserstack:key")
+                    BROME_CONFIG['browserstack']['username'],
+                    BROME_CONFIG['browserstack']['key']
                 ),
                 desired_capabilities=self._browser_config.config
             )
@@ -352,8 +359,8 @@ class BaseTest(object):
 
             try:
                 command_executor = "http://%s:%s/wd/hub" % (  # noqa
-                    self.get_config_value("grid_runner:selenium_server_ip"),
-                    self.get_config_value("grid_runner:selenium_server_port")
+                    BROME_CONFIG['grid_runner']['selenium_server_ip'],
+                    BROME_CONFIG['grid_runner']['selenium_server_port']
                 )
 
                 if desired_cap['browserName'].lower() == "firefox" \
@@ -420,13 +427,13 @@ class BaseTest(object):
 
         # Extract the server name
         server = urllib.parse.urlparse(
-            self.pdriver.get_config_value("project:url")
+            BROME_CONFIG['project']['url']
         ).netloc
 
-        if self.get_config_value("project:test_batch_result_path"):
+        if BROME_CONFIG['project']['test_batch_result_path']:
             states_dir = os.path.join(
-                self.get_config_value("project:absolute_path"),
-                self.get_config_value("project:script_folder_name"),
+                BROME_CONFIG['project']['absolute_path'],
+                BROME_CONFIG['project']['script_folder_name'],
                 "states"
             )
             create_dir_if_doesnt_exist(states_dir)
@@ -579,10 +586,10 @@ class BaseTest(object):
             create_dir_if_doesnt_exist(self._test_log_dir)
 
         # Format
-        format_ = self.get_config_value("logger_test:format")
+        format_ = BROME_CONFIG['logger_test']['format']
 
         # Stream logger
-        if self.get_config_value('logger_test:streamlogger'):
+        if BROME_CONFIG['logger_test']['streamlogger']:
             sh = logging.StreamHandler()
             stream_formatter = logging.Formatter(format_)
             sh.setFormatter(stream_formatter)
@@ -590,7 +597,7 @@ class BaseTest(object):
 
         # File logger
         if self._runner_dir:
-            if self.get_config_value('logger_test:filelogger'):
+            if BROME_CONFIG['logger_test']['filelogger']:
                 test_name = string_to_filename(self._name)
                 self._log_file_path = os.path.join(
                     self._test_log_dir,
@@ -611,12 +618,12 @@ class BaseTest(object):
 
         # Set level
         self._logger.setLevel(getattr(
-            logging, self.get_config_value('logger_test:level'))
+            logging, BROME_CONFIG['logger_test']['level'])
         )
 
     def get_logger_dict(self):
         return {
-            'batchid': self._test_batch_id,
+            'batchid': self._test_batch_friendly_name,
             'testname': u"%s" % self._name
         }
 
@@ -687,14 +694,15 @@ class BaseTest(object):
 
         self.quit_driver()
 
-        if self.get_config_value("runner:play_sound_on_test_finished"):
-            say(self.get_config_value("runner:sound_on_test_finished"))
+        if BROME_CONFIG['runner']['play_sound_on_test_finished']:
+            say(BROME_CONFIG['runner']['sound_on_test_finished'])
 
         ending_timestamp = ending_timestamp
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+        with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
             test_instance = session.query(Testinstance)\
                 .filter(Testinstance.mongo_id == self._test_instance_id).one()
             test_instance.ending_timestamp = ending_timestamp
+            test_instance.terminated = True
             session.save(test_instance, safe=True)
 
         self.info_log("Ending timestamp: %s" % ending_timestamp)
@@ -721,10 +729,10 @@ class BaseTest(object):
         pass
 
     def fail(self, tb):
-        if self.get_config_value("runner:play_sound_on_test_crash"):
-            say(self.get_config_value("runner:sound_on_test_crash"))
+        if BROME_CONFIG['runner']['play_sound_on_test_crash']:
+            say(BROME_CONFIG['runner']['sound_on_test_crash'])
 
-        if self.get_config_value("runner:embed_on_test_crash"):
+        if BROME_CONFIG['runner']['embed_on_test_crash']:
             self.pdriver.embed()
 
         if self.pdriver.bot_diary:
@@ -769,7 +777,7 @@ class BaseTest(object):
             self.pdriver.take_screenshot(screenshot_path=crash_screenshot_path)
 
         # CRASH OBJECT
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+        with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
             test_crash = Testcrash()
             test_crash.title = self._name
             test_crash.browser_capabilities = self.pdriver.capabilities
@@ -784,22 +792,6 @@ class BaseTest(object):
             test_crash.test_batch_id = self._test_batch_id
 
             session.save(test_crash, safe=True)
-
-    def get_config_value(self, config_name):
-        if not hasattr(self, 'browser_brome_config'):
-            self._browser_brome_config = parse_brome_config_from_browser_config(self._browser_config.config)  # noqa
-
-        config_list = [
-            self._browser_brome_config,
-            self._runner.config,
-            self._runner.brome_config
-        ]
-        value = get_config_value(config_list, config_name)
-
-        if hasattr(self, '_logger'):
-            self.debug_log("config_value (%s): %s" % (config_name, value))
-
-        return value
 
     def configure_test_result_dir(self):
 
@@ -886,7 +878,7 @@ class BaseTest(object):
     def get_test_result_summary(self):
         results = []
 
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+        with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
             base_query = session.query(Testresult).filter(Testresult.test_instance_id == self._test_instance_id).filter(Testresult.browser_id == self.pdriver.get_id())  # noqa
             total_test = base_query.count()
             total_test_successful = base_query.filter(Testresult.result == True).count()  # noqa

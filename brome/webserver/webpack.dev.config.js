@@ -1,21 +1,13 @@
 const webpack = require('webpack');
 const fs = require('fs')
 const path = require('path');
-var serverConfig
-
-const isTravis = process.env.NODE_ENV == 'travis';
-if (isTravis) {
-    serverConfig = require('./configs/server-travis');
-} else {
-    serverConfig = require('./configs/server');
-}
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BUILD_DIR = path.resolve(__dirname, 'dist-dev');
 const APP_DIR = path.resolve(__dirname, 'client');
-const serverAddr = serverConfig['HOST'] + ':' + serverConfig['PORT'];
+const serverAddr = 'localhost:8000'
 const clientPort = '8080';
-const clientAddr = serverConfig['HOST'] + ':' + clientPort;
+const clientAddr = 'localhost:' + clientPort;
 
 console.log('[*] BUILD_DIR:', BUILD_DIR);
 console.log('[*] APP_DIR:', APP_DIR);

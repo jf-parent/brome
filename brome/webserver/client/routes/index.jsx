@@ -4,11 +4,7 @@ import Logout from 'routes/Logout'
 import Profile from 'routes/Profile'
 import Video from 'routes/Video'
 import ErrorPage from 'routes/ErrorPage'
-import ForgottenPassword from 'routes/ForgottenPassword'
 import Register from 'routes/Register'
-import Confirmation from 'routes/Confirmation'
-import ResetPassword from 'routes/ResetPassword'
-import Dashboard from 'routes/Dashboard'
 import TestBatchList from 'routes/TestBatchList'
 import TestBatchDetail from 'routes/TestBatchDetail'
 import TestBatchRunnerLog from 'routes/TestBatchRunnerLog'
@@ -19,13 +15,14 @@ import TestInstanceLog from 'routes/TestInstanceLog'
 import TestBatchScreenshots from 'routes/TestBatchScreenshots'
 import TestBatchCrashes from 'routes/TestBatchCrashes'
 import TestBatchTestResults from 'routes/TestBatchTestResults'
+import StartTestBatch from 'routes/StartTestBatch'
 
 export const createRoutes = (store) => ({
   path: '/',
   component: CoreLayout,
   childRoutes: [
-    Dashboard(store),
     TestBatchList(store),
+    StartTestBatch(store),
     TestBatchScreenshots(store),
     TestBatchCrashes(store),
     TestBatchTestResults(store),
@@ -35,16 +32,13 @@ export const createRoutes = (store) => ({
     TestInstanceList(store),
     TestInstanceNetworkCapture(store),
     TestInstanceDetailList(store),
-    ResetPassword(store),
     Login(store),
     Profile(store),
-    ForgottenPassword(store),
     Logout(store),
     Register(store),
-    Confirmation(store),
     Video(store),
     ErrorPage(store)
   ]
 })
 
-export const notAuthRoutes = ['/login', '/register', '/forgottenpassword']
+export const notAuthRoutes = ['/login', '/register']

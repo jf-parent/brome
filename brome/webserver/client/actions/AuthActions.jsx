@@ -1,12 +1,9 @@
 import axios from 'axios'
 
-import { getNotifications } from 'actions/NotificationActions'
-
 // ====================================
 // Constants
 // ====================================
 
-export const UPDATE_SESSION_NOTIFICATIONS = 'UPDATE_SESSION_NOTIFICATIONS'
 export const UPDATE_SESSION_USER = 'UPDATE_SESSION_USER'
 export const AUTH_GETTING_SESSION = 'AUTH_GETTING_SESSION'
 export const AUTH_GETTING_SESSION_SUCCESS = 'AUTH_GETTING_SESSION_SUCCESS'
@@ -37,18 +34,10 @@ export function getSession (loadingContext = false) {
         logger.debug('/api/get_session (response)', response)
         if (response.data.success) {
           dispatch(getSessionSuccess(response.data))
-          dispatch(getNotifications(response.data))
         } else {
           dispatch(getSessionError(response.data))
         }
       })
-  }
-}
-
-export function updateSessionNotifications (data) {
-  return {
-    type: UPDATE_SESSION_NOTIFICATIONS,
-    data
   }
 }
 

@@ -1,7 +1,3 @@
-#! -*- coding: utf-8 -*-
-
-import webbrowser
-import shutil
 import pickle
 import hashlib
 import os
@@ -11,15 +7,14 @@ from glob import glob
 
 from brome.core.utils import (
     update_test,
-    DbSessionContext,
-    delete_database
+    DbSessionContext
 )
+from brome.webserver.server.app import run_app
 from brome.core.grep import grep_files
 from brome.runner.local_runner import LocalRunner
 from brome.runner.grid_runner import GridRunner
+from brome.core.settings import BROME_CONFIG
 from brome.core.configurator import (
-    save_brome_config,
-    get_config_value,
     generate_brome_config
 )
 
@@ -31,20 +26,29 @@ class Brome(object):
         self.configure(**kwargs)
 
     def configure(self, **kwargs):
-        self.config = kwargs.get('config', generate_brome_config())
-        self.selector_dict = kwargs.get('selector_dict', {})
-        self.test_dict = kwargs.get('test_dict', {})
-        self.browsers_config = kwargs.get('browsers_config', {})
-        self.tests = kwargs.get('tests', [])
+        brome_config = kwargs.get('config', dict())
+        selector_dict = kwargs.get('selector_dict', dict())
+        test_dict = kwargs.get('test_dict', dict())
+        browsers_config = kwargs.get('browsers_config', dict())
+        self.tests = kwargs.get('tests', list())
 
-        if 'project' in self.config:
+        if 'project' in brome_config:
             absolute_path = kwargs.get('absolute_path')
-            self.config['project']['absolute_path'] = absolute_path
+            brome_config['project']['absolute_path'] = absolute_path
             if not absolute_path:
                 print('[Warning] absolute_path not provided in the brome.configure()')  # noqa
 
+        BROME_CONFIG.update(generate_brome_config())
+        for key in iter(BROME_CONFIG):
+            if key in brome_config:
+                BROME_CONFIG[key].update(brome_config[key])
+
+        BROME_CONFIG['selector_dict'] = selector_dict
+        BROME_CONFIG['browsers_config'] = browsers_config
+        BROME_CONFIG['test_dict'] = test_dict
+
     def print_usage(self):
-        print('$ ./bro admin | run | webserver | list | find')
+        print('$ ./bro run | webserver | list | find')
         exit(1)
 
     def execute(self, args):
@@ -53,8 +57,6 @@ class Brome(object):
 
         if args[1] == 'run':
             self.run(args[2:])
-        elif args[1] == 'admin':
-            self.admin(args[2:])
         elif args[1] == 'find':
             self.find(args[2:])
         elif args[1] == 'list':
@@ -124,190 +126,53 @@ class Brome(object):
                             help='The config that will be pass to the test. ex: "key=value,key1=value1"'  # noqa
         )
 
-        def brome_config_string(value):
-            try:
-                re.match("([^:]+:[^=]+=[^,]+,?)+", value).group(0)
-                return value
-            except AttributeError:
-                print("--brome-config '%s' does not match required format (section:key=value,section1:key1=value1)" % (value))  # noqa
-                exit(1)
+        parsed_args = parser.parse_args(args)
+        run_args = vars(parsed_args)
+        BROME_CONFIG['runner_args'] = run_args
 
-        # BROME CONFIG KWARGS
-        parser.add_argument(
-                            '--brome-config',
-                            type=brome_config_string,
-                            dest='brome_config',
-                            help='The config that will be pass to the brome runner. ex: "section:key=value,section1:key1=value1"'  # noqa
-        )
-
-        self.parsed_args = parser.parse_args(args)
-
-        if self.test_dict:
+        if BROME_CONFIG['test_dict']:
             self.auto_update_test()
 
-        if self.parsed_args.localhost_runner:
-            browsers_id = [self.parsed_args.localhost_runner]
-        elif self.parsed_args.remote_runner:
-            browsers_id = self.parsed_args.remote_runner.split(',')
+        if run_args['localhost_runner']:
+            browsers_id = [run_args['localhost_runner']]
+        elif run_args['remote_runner']:
+            browsers_id = run_args['remote_runner'].split(',')
         else:
-            print('Please select -r or -l')
-            exit(1)
+            raise Exception('Please select -r or -l')
 
         for browser_id in browsers_id:
-            if browser_id not in self.browsers_config.keys():
-                print('This browser id is not available in the provided browsers config')  # noqa
-                print('Supported browser(s) are: %s' % self.browsers_config.keys())  # noqa
-                exit(1)
+            if browser_id not in BROME_CONFIG['browsers_config'].keys():
+                raise Exception("""
+                    This browser id is not available
+                    in the provided browsers config\n
+                    Supported browser(s) are: {browsers}
+                """.format(
+                    browsers=BROME_CONFIG['browsers_config'].keys()
+                ))
 
         # LOCALHOST RUNNER
-        if self.parsed_args.localhost_runner:
+        if run_args['localhost_runner']:
             LocalRunner(self).execute()
 
         # REMOTE RUNNER
-        elif self.parsed_args.remote_runner:
+        elif run_args['remote_runner']:
             GridRunner(self).execute()
 
         # ERROR
         else:
-            print('Select either -l "{browser_id}" or -r "{browser_id}"')
-
-    def admin(self, args):
-        parser = argparse.ArgumentParser(description='Brome admin')
-
-        parser.add_argument(
-                            '--generate-config',
-                            dest='generate_config',
-                            action='store_true',
-                            help='Generate the default brome config'
-        )
-
-        parser.add_argument(
-                            '--reset',
-                            dest='reset',
-                            action='store_true',
-                            help='Reset the database + delete the test batch results + update the test table'  # noqa
-        )
-
-        parser.add_argument(
-                            '--delete-test-states',
-                            dest='delete_test_states',
-                            action='store_true',
-                            help='Delete all the test states'
-        )
-
-        parser.add_argument(
-                            '--delete-test-results',
-                            dest='delete_test_result',
-                            action='store_true',
-                            help='Delete all the test batch results'
-        )
-
-        parser.add_argument(
-                            '--reset-database',
-                            dest='reset_database',
-                            action='store_true',
-                            help='Reset the project database'
-        )
-
-        parser.add_argument(
-                            '--delete-database',
-                            dest='delete_database',
-                            action='store_true',
-                            help='Delete the project database'
-        )
-
-        parser.add_argument(
-                            '--update-test',
-                            dest='update_test',
-                            action='store_true',
-                            help='Update the test in the database'
-        )
-
-        parsed_args = parser.parse_args(args)
-
-        def reset_database():
-            delete_database(
-                self.get_config_value('database:mongo_database_name')
-            )
-
-        def delete_test_states():
-            states_dir = os.path.join(
-                self.get_config_value("project:absolute_path"),
-                self.get_config_value("brome:script_folder_name"),
-                "states"
-            )
-            try:
-                shutil.rmtree(states_dir)
-            except OSError:
-                pass
-
-            try:
-                os.makedirs(states_dir)
-            except OSError:
-                pass
-
-            print('States deleted')
-
-        def delete_test_batch_result():
-            test_batch_result_path = self.get_config_value(
-                'project:test_batch_result_path'
-            )
-            if os.path.exists(test_batch_result_path):
-                shutil.rmtree(test_batch_result_path)
-                print(
-                    'Test batch result (%s) deleted!'
-                    % self.get_config_value('project:test_batch_result_path')
-                )
-            else:
-                print('Nothing to delete')
-
-        if parsed_args.reset:
-            reset_database()
-            delete_test_batch_result()
-            if self.test_dict:
-                self.update_test()
-        elif parsed_args.generate_config:
-            output_path = "./brome.yml"
-            config = generate_brome_config()
-            save_brome_config(output_path, config)
-        elif parsed_args.delete_test_result:
-            delete_test_batch_result()
-        elif parsed_args.delete_test_states:
-            delete_test_states()
-        elif parsed_args.reset_database:
-            delete_database(
-                self.get_config_value('database:mongo_database_name')
-            )
-        elif parsed_args.delete_database:
-            delete_database(
-                self.get_config_value('database:mongo_database_name')
-            )
-        elif parsed_args.update_test:
-            self.update_test()
-
-    def open_browser(self):
-        if self.get_config_value("webserver:open_browser"):
-            webbrowser.open(
-                "http://%s:%s/tb/list" %
-                (
-                    self.get_config_value("webserver:HOST"),
-                    self.get_config_value("webserver:PORT")
-                )
+            raise Exception(
+                'Select either -l "{browser_id}" or -r "{browser_id}"'
             )
 
     def webserver(self, args):
-        # TODO find out why top-level importing run_app break the logger
-        from brome.webserver.server.app import run_app
-        self.config['webserver']['MONGO_DATABASE_NAME'] = self.config['database']['mongo_database_name']  # noqa
-        self.config['webserver']['MONGO_HOST'] = self.config['database']['mongo_host']  # noqa
-        run_app(self.config['webserver'])
+        run_app()
 
     def list_(self, args):
         query = os.path.join(
-                        self.get_config_value("project:absolute_path"),
-                        self.get_config_value("brome:script_folder_name"),
+                        BROME_CONFIG['project']['absolute_path'],
+                        BROME_CONFIG['brome']['script_folder_name'],
                         "%s*.py" %
-                        self.get_config_value('brome:script_test_prefix')
+                        BROME_CONFIG['brome']['script_test_prefix']
                     )
 
         tests = glob(query)
@@ -356,11 +221,11 @@ class Brome(object):
 
         paths = [
             os.path.join(
-                self.get_config_value("project:absolute_path"),
-                self.get_config_value("brome:script_folder_name")
+                BROME_CONFIG['project']['absolute_path'],
+                BROME_CONFIG['brome']['script_folder_name']
             ),
             os.path.join(
-                self.get_config_value("project:absolute_path"),
+                BROME_CONFIG['project']['absolute_path'],
                 "model"
             ),
         ]
@@ -370,12 +235,12 @@ class Brome(object):
         else:
             if parsed_args.unused_selector:
                 print('Unused selector variable:')
-                dict_ = self.selector_dict
+                dict_ = BROME_CONFIG['selector_dict']
                 regex_ = selector_regex
 
             elif parsed_args.unused_test_id:
                 print('Unused test id:')
-                dict_ = self.test_dict
+                dict_ = BROME_CONFIG['test_dict']
                 regex_ = test_id_regex
 
             try:
@@ -388,30 +253,22 @@ class Brome(object):
             except KeyboardInterrupt:
                 pass
 
-    def get_config_value(self, config_name):
-        config_list = [
-            self.config
-        ]
-        value = get_config_value(config_list, config_name)
-
-        return value
-
     def update_test(self):
-            if self.test_dict:
-                with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
-                    update_test(session, self.test_dict)
+            if BROME_CONFIG['test_dict']:
+                with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
+                    update_test(session, BROME_CONFIG['test_dict'])
             else:
                 raise Exception("No test dictionary provided")
 
     def auto_update_test(self):
         brome_memory_pickle_path = os.path.join(
-            self.get_config_value("project:absolute_path"),
+            BROME_CONFIG['project']['absolute_path'],
             ".brome.pkl"
         )
 
         new_hash = hashlib.sha1(
-            self.test_dict.__repr__().encode('utf')
-            ).hexdigest()
+            BROME_CONFIG['test_dict'].__repr__().encode('utf')
+        ).hexdigest()
 
         if os.path.isfile(brome_memory_pickle_path):
             with open(brome_memory_pickle_path, "rb") as fd:
@@ -430,3 +287,4 @@ class Brome(object):
 
             with open(brome_memory_pickle_path, "wb") as fd:
                 pickle.dump(data, fd)
+            self.update_test()

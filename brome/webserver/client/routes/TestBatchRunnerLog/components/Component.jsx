@@ -41,7 +41,7 @@ class TestBatchRunnerLog extends BaseComponent {
             parent: response.data.parent,
             name: response.data.name
           })
-          if (!response.parent.terminated) {
+          if (!response.data.parent.terminated) {
             this._interval = setTimeout(
               () => {
                 this.fetchTestBachRunnerLog(testBatchUid, response.data.total)

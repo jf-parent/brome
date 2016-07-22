@@ -10,6 +10,7 @@ from mongoalchemy.fields import (
 )
 
 from brome.model.basemodel import BaseModel
+from brome.model.testinstance import Testinstance
 from brome.model.testcrash import Testcrash
 from brome.model.testresult import Testresult
 from brome.model.testscreenshot import Testscreenshot
@@ -22,10 +23,9 @@ class Testbatch(BaseModel):
     pid = IntField()
     killed = BoolField(default=False)
     total_tests = IntField()
-    total_executing_tests = IntField(default=0)
-    total_executed_tests = IntField(default=0)
     starting_timestamp = DateTimeField()
     ending_timestamp = DateTimeField(required=False)
+    terminated = BoolField(default=False)
     feature_session_video_capture = BoolField(default=False)
     feature_network_capture = BoolField(default=False)
     feature_bot_diaries = BoolField(default=False)
@@ -75,6 +75,22 @@ class Testbatch(BaseModel):
 
         return data
 
+    async def get_total_executings_tests(self, context):
+        db_session = context.get('db_session')
+
+        return db_session.query(Testinstance)\
+            .filter(Testinstance.terminated == False)\
+            .filter(Testinstance.test_batch_id == self.mongo_id)\
+            .count()  # noqa
+
+    async def get_total_executed_tests(self, context):
+        db_session = context.get('db_session')
+
+        return db_session.query(Testinstance)\
+            .filter(Testinstance.terminated == True)\
+            .filter(Testinstance.test_batch_id == self.mongo_id)\
+            .count()  # noqa
+
     async def get_test_crashes(self, context):
         db_session = context.get('db_session')
 
@@ -107,8 +123,8 @@ class Testbatch(BaseModel):
         data['friendly_name'] = self.friendly_name
         data['killed'] = self.killed
         data['total_tests'] = self.total_tests
-        data['total_executed_tests'] = self.total_executed_tests
-        data['total_executing_tests'] = self.total_executing_tests
+        data['total_executed_tests'] = await self.get_total_executed_tests(context)  # noqa
+        data['total_executing_tests'] = await self.get_total_executings_tests(context)  # noqa
         data['starting_timestamp'] = self.starting_timestamp.isoformat()
         data['nb_screenshot'] = await self.get_nb_screenshot(context)
         data['root_path'] = self.root_path
@@ -126,15 +142,15 @@ class Testbatch(BaseModel):
         data['test_crashes'] = await self.get_test_crashes(context)
         data['test_results'] = await self.get_test_results(context)
 
+        data['terminated'] = self.terminated
         # Terminated test batch
-        if hasattr(self, 'ending_timestamp'):
+        if self.terminated:
             data['ending_timestamp'] = self.ending_timestamp.isoformat()
-            data['terminated'] = True
 
         # Running test batch
         else:
             data['ending_timestamp'] = False
-            data['terminated'] = False
+
         return data
 
     async def method_autorized(self, context):

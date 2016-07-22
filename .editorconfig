@@ -22,19 +22,19 @@ insert_final_newline = false
 [*.md]
 trim_trailing_whitespace = false
 
-[client/**.less]
+[**.less]
 indent_style = space
 indent_size = 2
 
-[client/**.js]
+[**.js]
 indent_style = space
 indent_size = 2
 
-[client/**.jsx]
+[**.jsx]
 indent_style = space
 indent_size = 2
 
-[client/**.json]
+[**.json]
 indent_style = space
 indent_size = 2
 

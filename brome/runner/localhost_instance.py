@@ -4,6 +4,7 @@ from subprocess import Popen
 
 import psutil
 
+from brome.core.settings import BROME_CONFIG
 from brome.core.utils import (
     create_dir_if_doesnt_exist,
     string_to_filename,
@@ -90,11 +91,15 @@ class LocalhostInstance(BaseInstance):
             string_to_filename('%s.data' % self.test_name)
         )
 
-        path_to_mitmproxy = self.runner.brome.get_config_value(
-            "mitmproxy:path"
-        )
+        path_to_mitmproxy = BROME_CONFIG['mitmproxy']['path']
 
-        filter_ = self.runner.brome.get_config_value("mitmproxy:filter")
+        if not path_to_mitmproxy:
+            raise Exception("""
+                You need to set the mitmproxy:path config to be able
+                to the use the proxy with this browser
+            """)
+
+        filter_ = BROME_CONFIG['mitmproxy']['filter']
         command = [
             path_to_mitmproxy,
             "-p",

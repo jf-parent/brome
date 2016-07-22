@@ -2,6 +2,7 @@ import traceback
 from datetime import datetime
 
 from brome.runner.localhost_instance import LocalhostInstance
+from brome.core.settings import BROME_CONFIG
 from brome.runner.base_runner import BaseRunner
 from brome.runner.browser_config import BrowserConfig
 from brome.model.testbatch import Testbatch
@@ -23,8 +24,8 @@ class LocalRunner(BaseRunner):
 
         self.browser_config = BrowserConfig(
             runner=self,
-            browser_id=self.get_config_value("runner:localhost_runner"),
-            browsers_config=self.brome.browsers_config
+            browser_id=BROME_CONFIG['runner_args']['localhost_runner'],
+            browsers_config=BROME_CONFIG['browsers_config']
         )
 
         try:
@@ -56,7 +57,7 @@ class LocalRunner(BaseRunner):
 
             localhost_instance.startup()
 
-            with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+            with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
                 test_batch = session.query(Testbatch)\
                     .filter(Testbatch.mongo_id == self.test_batch_id).one()
                 test_batch.total_executing_tests = 1
@@ -76,7 +77,7 @@ class LocalRunner(BaseRunner):
 
             localhost_instance.tear_down()
 
-            with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+            with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
                 test_batch = session.query(Testbatch)\
                     .filter(Testbatch.mongo_id == self.test_batch_id).one()
                 test_batch.total_executed_tests += 1
@@ -88,10 +89,11 @@ class LocalRunner(BaseRunner):
 
         self.info_log('The test batch is finished.')
 
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+        with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
             test_batch = session.query(Testbatch)\
                 .filter(Testbatch.mongo_id == self.test_batch_id).one()
             test_batch.ending_timestamp = datetime.now()
+            test_batch.terminated = True
             session.save(test_batch, safe=True)
 
         self.print_test_summary(self.executed_tests)

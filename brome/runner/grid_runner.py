@@ -12,6 +12,7 @@ import virtualbox
 from brome.core.utils import (
     DbSessionContext
 )
+from brome.core.settings import BROME_CONFIG
 from brome.runner.base_runner import BaseRunner
 from brome.model.testbatch import Testbatch
 from brome.runner import ec2_instance
@@ -42,13 +43,11 @@ class GridRunner(BaseRunner):
 
         try:
             # START SELENIUM GRID
-            if self.get_config_value('grid_runner:start_selenium_server'):
+            if BROME_CONFIG['grid_runner']['start_selenium_server']:
                 self.start_selenium_server()
 
             # Get all the browsers id
-            self.browsers_id = self.get_config_value(
-                'runner:remote_runner'
-            ).split(',')
+            self.browsers_id = BROME_CONFIG['runner_args']['remote_runner'].split(',')  # noqa
 
             # Start all the instances
             instance_threads = []
@@ -56,7 +55,7 @@ class GridRunner(BaseRunner):
                 browser_config = BrowserConfig(
                     runner=self,
                     browser_id=browser_id,
-                    browsers_config=self.browsers_config
+                    browsers_config=BROME_CONFIG['browsers_config']
                 )
 
                 self.browser_configs[browser_id] = browser_config
@@ -159,7 +158,7 @@ class GridRunner(BaseRunner):
                         )
 
             # MILESTONE
-            with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+            with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
                 test_batch = session.query(Testbatch)\
                     .filter(Testbatch.mongo_id == self.test_batch_id).one()
                 runner_metadata = test_batch.runner_metadata
@@ -173,7 +172,7 @@ class GridRunner(BaseRunner):
             self.info_log("The test batch is now ready!")
 
             # MILESTONE
-            with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+            with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
                 test_batch = session.query(Testbatch)\
                     .filter(Testbatch.mongo_id == self.test_batch_id).one()
                 runner_metadata = test_batch.runner_metadata
@@ -196,7 +195,7 @@ class GridRunner(BaseRunner):
                     self.tear_down_instances()
 
                     # MILESTONE
-                    with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+                    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
                         test_batch = session.query(Testbatch)\
                             .filter(Testbatch.mongo_id == self.test_batch_id)\
                             .one()
@@ -206,12 +205,12 @@ class GridRunner(BaseRunner):
                         session.save(test_batch, safe=True)
 
                     # Kill selenium server
-                    if self.get_config_value('grid_runner:kill_selenium_server'):  # noqa
+                    if BROME_CONFIG['grid_runner']['kill_selenium_server']:  # noqa
                         if self.selenium_pid:
                             self.kill_pid(self.selenium_pid)
 
                             # MILESTONE
-                            with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+                            with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
                                 test_batch = session.query(Testbatch)\
                                     .filter(Testbatch.mongo_id == self.test_batch_id).one()  # noqa
                                 runner_metadata = test_batch.runner_metadata
@@ -302,7 +301,7 @@ class GridRunner(BaseRunner):
 
                             executed_tests.append(test_)
 
-                active_thread = threading.active_count() - 1
+                active_thread = len([tn for tn in threading.enumerate() if type(tn) != threading._MainThread and hasattr(tn, 'test')])  # noqa
                 self.info_log("active_thread=%s" % active_thread)
                 if active_thread:
                     try:
@@ -322,7 +321,7 @@ class GridRunner(BaseRunner):
                 # TIMEOUT
                 now = datetime.now()
                 if (self.starting_timestamp - now).total_seconds() >\
-                        self.get_config_value("grid_runner:max_running_time"):
+                        BROME_CONFIG['grid_runner']['max_running_time']:
 
                     self.error_log("max_running_time reached... terminating!")
                     raise TestRunnerKilledException()
@@ -343,10 +342,11 @@ class GridRunner(BaseRunner):
         self.print_test_summary(executed_tests)
 
     def set_ending_timestamp(self):
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+        with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
             test_batch = session.query(Testbatch)\
                 .filter(Testbatch.mongo_id == self.test_batch_id).one()
             test_batch.ending_timestamp = datetime.now()
+            test_batch.terminated = True
             session.save(test_batch, safe=True)
 
     def kill_test_batch_if_necessary(self):
@@ -355,7 +355,7 @@ class GridRunner(BaseRunner):
             If the test_batch.killed is set to true
             then the test batch will be kill
         """
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+        with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
             test_batch = session.query(Testbatch)\
                 .filter(Testbatch.mongo_id == self.test_batch_id).one()
 
@@ -383,8 +383,8 @@ class GridRunner(BaseRunner):
         """Start the selenium server
         """
 
-        ip = self.get_config_value("grid_runner:selenium_server_ip")
-        port = self.get_config_value("grid_runner:selenium_server_port")
+        ip = BROME_CONFIG['grid_runner']['selenium_server_ip']
+        port = BROME_CONFIG['grid_runner']['selenium_server_port']
 
         def is_selenium_server_is_running():
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -395,10 +395,9 @@ class GridRunner(BaseRunner):
         if not is_selenium_server_is_running():
             self.info_log('Starting selenium server...')
 
-            command = self.get_config_value(
-                "grid_runner:selenium_server_command")\
+            command = BROME_CONFIG['grid_runner']['selenium_server_command']\
                 .format(
-                    **self.get_config_value("grid_runner:*")
+                    **BROME_CONFIG['grid_runner']
                 )
 
             self.info_log('Selenium hub command: %s' % command)

@@ -2,6 +2,7 @@
 
 import os
 import asyncio
+from logging.handlers import TimedRotatingFileHandler
 import logging
 
 from redis import Redis
@@ -10,24 +11,13 @@ import aioredis
 from aiohttp_session import redis_storage, session_middleware
 import jinja2
 import aiohttp_jinja2
-from prometheus_client import start_http_server
 from aiohttp import web
 
-from brome.webserver.server.prometheus_instruments import db_session_gauge
 from brome.webserver.server.routes import routes
 from brome.webserver.server.middlewares import db_handler
-from brome.webserver.server.settings import config, ROOT
+from brome.core.settings import BROME_CONFIG
 
 logger = logging.getLogger('bromewebserver')
-
-
-async def on_shutdown(app):
-    pass
-    """
-    for ws in app['websockets']:
-        await ws.close(code=1001, message='Server shutdown')
-    """
-
 
 async def shutdown(server, app, handler):
 
@@ -39,10 +29,41 @@ async def shutdown(server, app, handler):
     await app.redis_pool.clear()
 
 
-async def init(loop, config_args=None):
+async def init(loop):
+    ROOT = os.path.join(
+        os.path.abspath(os.path.dirname(__file__)),
+        '..'
+    )
+
     # CONFIG
-    config.configure(config_args)
-    logger.debug('Env: {env}'.format(env=config.get('ENV')))
+    logger = logging.getLogger('bromewebserver')
+    logger.debug('Env: {env}'.format(env=BROME_CONFIG['webserver']['env']))
+
+    # LOGGER
+    logger.setLevel(
+        getattr(logging, BROME_CONFIG['webserver'].get('log_level', 'INFO'))
+    )
+
+    formatter = logging.Formatter(
+        '[L:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
+        datefmt='%d-%m-%Y %H:%M:%S'
+    )
+
+    # StreamHandler
+    if BROME_CONFIG['webserver'].get('streamlogger', True):
+        sh = logging.StreamHandler()
+        sh.setFormatter(formatter)
+        logger.addHandler(sh)
+
+    # FileHandler
+    if BROME_CONFIG['webserver'].get('filelogger', False):
+        if BROME_CONFIG['webserver'].get('log_file_path'):
+            fh = TimedRotatingFileHandler(
+                BROME_CONFIG['webserver'].get('log_file_path'),
+                when="midnight"
+            )
+            fh.setFormatter(formatter)
+            logger.addHandler(fh)
 
     # SESSION
     redis_pool = await aioredis.create_pool(('localhost', 6379))
@@ -57,21 +78,17 @@ async def init(loop, config_args=None):
     # QUEUE
     app.queue = Queue(connection=Redis())
 
-    # WEBSOCKET
-    """
-    app['websockets'] = []
-    """
-
     handler = app.make_handler()
 
     # ROUTES
     for route in routes:
         app.router.add_route(route[0], route[1], route[2], name=route[3])
 
-    if config.get('ENV', 'production') in ['development', 'test']:
+    if BROME_CONFIG['webserver'].get('env', 'production') in \
+            ['development', 'test']:
         static_path = os.path.join(ROOT, 'dist-dev')
     else:
-        if config.get('RELEASE', 'latest') == 'latest':
+        if BROME_CONFIG['webserver'].get('release', 'latest') == 'latest':
             latest_version_path = os.path.join(
                 ROOT,
                 'releases',
@@ -83,10 +100,11 @@ async def init(loop, config_args=None):
             else:
                 raise Exception("The latest.txt file doesn't exists")
         else:
-            release_version = config.get('RELEASE')
+            release_version = BROME_CONFIG['webserver'].get('release')
 
         static_path = os.path.join(ROOT, 'releases', release_version)
 
+    # TODO create a symlink to the tb_results dir
     app.router.add_static('/', static_path, name='static')
     logger.info(
         "Serving static: {static_path}"
@@ -102,30 +120,24 @@ async def init(loop, config_args=None):
         if hasattr(request, 'db_session'):
             request.db_session.end()
             # request.db_session.db.connection.disconnect()
-            db_session_gauge.dec()
 
     app.on_response_prepare.append(after_request)
 
-    # SHUTDOWN
-    app.on_shutdown.append(on_shutdown)
-
     serv_generator = loop.create_server(
         handler,
-        config.get('HOST'),
-        config.get('PORT')
+        BROME_CONFIG['webserver'].get('host'),
+        BROME_CONFIG['webserver'].get('port')
     )
-
-    # PROMETHEUS CLIENT
-    if not config.get('ENV', 'production') == 'test':
-        start_http_server(8001)
 
     return serv_generator, handler, app
 
 
-def run_app(config=None):
+def run_app():
     loop = asyncio.get_event_loop()
 
-    serv_generator, handler, app = loop.run_until_complete(init(loop, config))
+    serv_generator, handler, app = loop.run_until_complete(
+        init(loop)
+    )
 
     serv = loop.run_until_complete(serv_generator)
 

@@ -95,14 +95,6 @@ class Login extends BaseComponent {
             />
           </Link>
         </p>
-        <p>
-          <Link to='/forgottenpassword'>
-            <FormattedMessage
-              id='login.ForgottenPassword-btn'
-              defaultMessage='Forgot password?'
-            />
-          </Link>
-        </p>
       </center>
     )
   }

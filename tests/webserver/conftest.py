@@ -8,9 +8,7 @@ from webtest_aiohttp import TestApp
 
 from brome.webserver.server.app import init
 from brome.core.utils import DbSessionContext, delete_database
-from brome.model.resetpasswordtoken import Resetpasswordtoken
 from brome.model.user import User
-from brome.model.notification import Notification
 from brome.model.testbatch import Testbatch
 from brome.model.test import Test
 from brome.model.testcrash import Testcrash
@@ -131,12 +129,10 @@ def client():
             {
                 'name': 'test',
                 'email': 'test@test.com',
-                'email_validation_token': '123456',
                 'password': '123456'
             }, {
                 'name': 'to.disable',
                 'email': 'to.disable@to.disable.com',
-                'email_validation_token': '1337',
                 'password': '123456'
             }, {
                 'name': 'admin',
@@ -151,23 +147,6 @@ def client():
             }
         ]
 
-        notifications = [
-            {
-                'user_uid': None,
-                'message': 'Test 1'
-            }, {
-                'user_uid': None,
-                'message': 'Test 2'
-            }, {
-                'user_uid': None,
-                'message': 'Test 3'
-            }, {
-                'user_uid': None,
-                'message': 'Test 4',
-                'seen': True
-            }
-        ]
-
         for user_data in users:
             user = User()
             context = {
@@ -177,31 +156,6 @@ def client():
             }
 
             loop.run_until_complete(user.validate_and_save(context))
-
-            context = {
-                'db_session': session,
-                'method': 'create',
-                'data': {
-                    'user_uid': user.get_uid()
-                }
-            }
-            resetpasswordtoken = Resetpasswordtoken()
-            loop.run_until_complete(
-                resetpasswordtoken.validate_and_save(context)
-            )
-            for notification_data in notifications:
-                notification = Notification()
-                notification_data['user_uid'] = user.get_uid()
-
-                context = {
-                    'db_session': session,
-                    'method': 'create',
-                    'data': notification_data
-                }
-
-                loop.run_until_complete(
-                    notification.validate_and_save(context)
-                )
 
     def login(self, email, password='123456'):
         self.post_json(

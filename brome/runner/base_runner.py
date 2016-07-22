@@ -8,7 +8,7 @@ from haikunator import Haikunator
 import yaml
 import psutil
 
-from brome.core.configurator import runner_args_to_dict, get_config_value
+from brome.core.settings import BROME_CONFIG
 from brome.model.test import Test
 from brome.model.testbatch import Testbatch
 from brome.model.testinstance import Testinstance
@@ -32,17 +32,6 @@ class BaseRunner(object):
         self.brome = brome
         self.log_file_path = ''
 
-        self.browsers_config = self.brome.browsers_config
-
-        # CONFIG
-        if hasattr(self.brome, 'parsed_args'):
-            self.commandline_args = self.brome.parsed_args
-            self.config = runner_args_to_dict(self.commandline_args)
-        else:
-            self.config = {}
-
-        self.brome_config = self.brome.config
-
         # Current pid of the runner
         current_pid = os.getpid()
 
@@ -58,7 +47,7 @@ class BaseRunner(object):
             self.tests = self.get_activated_tests()
 
         # Create test batch
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+        with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
             self.starting_timestamp = datetime.now()
 
             haikunator = Haikunator()
@@ -70,16 +59,18 @@ class BaseRunner(object):
                 delimiter='.'
             )
             test_batch.pid = current_pid
-            test_batch.total_tests = len(self.tests)
+            if BROME_CONFIG['runner_args']['remote_runner']:
+                test_batch.total_tests = len(self.tests) * len(BROME_CONFIG['runner_args']['remote_runner'].split(','))  # noqa
+            else:
+                test_batch.total_tests = len(self.tests) * len(BROME_CONFIG['runner_args']['local_runner'].split(','))  # noqa
 
             session.save(test_batch, safe=True)
 
         self.test_batch_id = test_batch.get_uid()
+        self.test_batch_friendly_name = test_batch.friendly_name
 
         # RUNNER LOG DIR
-        self.root_test_result_dir = self.get_config_value(
-            "project:test_batch_result_path"
-        )
+        self.root_test_result_dir = BROME_CONFIG["project"]["test_batch_result_path"]  # noqa
 
         if self.root_test_result_dir:
             self.runner_dir = os.path.join(
@@ -99,11 +90,11 @@ class BaseRunner(object):
         self.configure_logger()
 
         # SCREENSHOT CACHE
-        if self.get_config_value('runner:cache_screenshot'):
+        if BROME_CONFIG['runner']['cache_screenshot']:
             # Dictionary that contains all the screenshot name
             self.screenshot_cache = {}
 
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+        with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
             test_batch = session.query(Testbatch)\
                 .filter(Testbatch.mongo_id == self.test_batch_id)\
                 .one()
@@ -154,13 +145,13 @@ class BaseRunner(object):
 
         available_tests = []
 
-        script_folder_name = self.get_config_value('brome:script_folder_name')
-        script_test_prefix = self.get_config_value('brome:script_test_prefix')
+        script_folder_name = BROME_CONFIG['brome']['script_folder_name']
+        script_test_prefix = BROME_CONFIG['brome']['script_test_prefix']
 
         if search_query:
 
             tests_path = os.path.join(
-                self.get_config_value('project:absolute_path'),
+                BROME_CONFIG['project']['absolute_path'],
                 script_folder_name,
                 '%s%s.py' % (script_test_prefix, search_query)
             )
@@ -208,22 +199,20 @@ class BaseRunner(object):
         tests = []
 
         # test file
-        if self.get_config_value('runner:test_file'):
-            test_file_path = self.get_config_value('runner:test_file')
+        if BROME_CONFIG['runner_args']['test_file']:
+            test_file_path = BROME_CONFIG['runner_args']['test_file']
             with open(test_file_path, 'r') as f:
                 test_list = yaml.load(f)
 
             for test in test_list:
                 tests.append(self.get_available_tests(test)[0])
 
-        elif self.get_config_value('runner:test_name'):
+        elif BROME_CONFIG['runner_args']['test_name']:
             tests = self.get_available_tests(
-                test_name=self.get_config_value('runner:test_name')
+                test_name=BROME_CONFIG['runner_args']['test_name']
             )
         else:
-            test_search_query = self.get_config_value(
-                'runner:test_search_query'
-            )
+            test_search_query = BROME_CONFIG['runner_args']['test_search_query']  # noqa
 
             # by index or slice e.g.: [0:12], [:], [0], [-1]
             if test_search_query.find('[') != -1:
@@ -238,24 +227,6 @@ class BaseRunner(object):
 
         return tests
 
-    def get_config_value(self, config_name):
-        """Return the effective config value
-
-        Args:
-            config_name (str)
-
-        Returns:
-            value (the type vary according to the config_name)
-        """
-
-        config_list = [
-            self.config,
-            self.brome_config
-        ]
-        value = get_config_value(config_list, config_name)
-
-        return value
-
     def configure_logger(self):
         """Configure the test batch runner logger
         """
@@ -264,17 +235,17 @@ class BaseRunner(object):
 
         self.logger = logging.getLogger(logger_name)
 
-        format_ = self.get_config_value("logger_runner:format")
+        format_ = BROME_CONFIG['logger_runner']['format']
 
         # Stream logger
-        if self.get_config_value('logger_runner:streamlogger'):
+        if BROME_CONFIG['logger_runner']['streamlogger']:
             sh = logging.StreamHandler()
             stream_formatter = logging.Formatter(format_)
             sh.setFormatter(stream_formatter)
             self.logger.addHandler(sh)
 
         # File logger
-        if self.get_config_value('logger_runner:filelogger') and \
+        if BROME_CONFIG['logger_runner']['filelogger'] and \
                 self.runner_dir:
 
             self.log_file_path = os.path.join(
@@ -296,7 +267,7 @@ class BaseRunner(object):
         self.logger.setLevel(
             getattr(
                 logging,
-                self.get_config_value('logger_runner:level')
+                BROME_CONFIG['logger_runner']['level']
                 )
             )
 
@@ -311,7 +282,7 @@ class BaseRunner(object):
 
         separator = '---------------------'
 
-        with DbSessionContext(self.get_config_value('database:mongo_database_name')) as session:  # noqa
+        with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
             test_batch = session.query(Testbatch).filter(Testbatch.mongo_id == self.test_batch_id).one()  # noqa
 
             # TITLE
@@ -406,7 +377,7 @@ class BaseRunner(object):
             self.info_log('Finished')
 
     def get_logger_dict(self):
-        return {'batchid': self.test_batch_id}
+        return {'batchid': self.test_batch_friendly_name}
 
     def debug_log(self, msg):
         self.logger.debug(

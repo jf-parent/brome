@@ -1,13 +1,10 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router'
-import { bindActionCreators } from 'redux'
 import { FormattedMessage } from 'react-intl'
 
-import NotificationPopup from './NotificationPopup'
 import BaseComponent from 'core/BaseComponent'
 import UserNavStyle from './UserNavStyle.postcss'
-import { actions } from 'actions/NotificationActions'
 
 class UserNav extends BaseComponent {
 
@@ -15,29 +12,12 @@ class UserNav extends BaseComponent {
     super(props)
 
     this._initLogger()
-    this._bind('onOpenNotification')
-  }
-
-  onOpenNotification (event) {
-    this.props.actions.doOpenNotificationPopup()
   }
 
   render () {
-    let notificationNumber = null
-    if (this.props.state.notification.newNotificationNumber > 0) {
-      notificationNumber = <span className={'badge ' + UserNavStyle['badge-notify']}>{this.props.state.notification.newNotificationNumber}</span>
-    }
-
     return (
       <div>
-        <NotificationPopup />
         <ul className='nav navbar-nav navbar-right nav-pills'>
-          <span className={'pull-left ' + UserNavStyle['bell']}>
-            <button className='btn btn-default btn-lg btn-link' onClick={this.onOpenNotification} style={{'fontSize': '24px'}}>
-              <span className='glyphicon glyphicon-bell'></span>
-            </button>
-            {notificationNumber}
-          </span>
           <li role='presentation' className='dropdown'>
             <a className='dropdown-toggle small' data-toggle='dropdown' href='#' role='button' aria-haspopup='true' aria-expanded='false'>
               {this.props.state.session.user.name}
@@ -85,10 +65,4 @@ function mapStateToProps (state) {
   }
 }
 
-function mapDispatchToProps (dispatch) {
-  return {
-    actions: bindActionCreators(actions, dispatch)
-  }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(UserNav)
+export default connect(mapStateToProps)(UserNav)

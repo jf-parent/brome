@@ -10,14 +10,9 @@ from mongoalchemy.fields import (
 )
 from validate_email import validate_email
 
-from brome.webserver.jobs.send_email import send_email
 from brome.webserver.server.utils import SafeStringField
-from brome.webserver.server.prometheus_instruments import active_user_gauge
-from brome.webserver.server.settings import config
 from brome.core import exceptions
-from brome.model.emailconfirmationtoken import Emailconfirmationtoken
 from brome.model.basemodel import BaseModel
-from brome.model.notification import Notification
 
 NAME_MIN_LEN = 2  # e.g.: Ed
 NAME_MAX_LEN = 60  # e.g.: Hubert Blaine Wolfeschlegelsteinhausenbergerdorff, Sr. # noqa
@@ -28,7 +23,6 @@ class User(BaseModel):
     email = SafeStringField(required=True)
     role = EnumField(StringField(), 'admin', 'user', default="user")
     enable = BoolField(default=True)
-    email_confirmed = BoolField(default=False)
     gravatar_url = StringField(default="")
     # settings =
     # social_id =
@@ -73,14 +67,13 @@ class User(BaseModel):
             return False
 
     async def gen_hashed_password(self, raw_password, salt_str=False):
-        master_secret_key = config.get("MASTER_PASSWORD")
         if not salt_str:
             salt = bcrypt.gensalt()
             salt_str = salt.decode('utf-8')
         else:
             salt = bytes(salt_str.encode('utf-8'))
 
-        mixed_password = raw_password + salt_str + master_secret_key
+        mixed_password = raw_password + salt_str
         hashed_password = bcrypt.hashpw(
             mixed_password.encode('utf-8'),
             salt
@@ -107,25 +100,11 @@ class User(BaseModel):
         return {k: data[k] for k in data if k in editable_fields}
 
     async def validate_and_save(self, context):
-        queue = context.get('queue')
         data = context.get('data')
         db_session = context.get('db_session')
         save = context.get('save', True)
 
         is_new = await self.is_new()
-
-        # EMAIL CONFIRMED
-        email_confirmed = data.get('email_confirmed')
-        if email_confirmed is not None:
-            self.email_confirmed = email_confirmed
-            if email_confirmed:
-                notification_data = {
-                    'message': 'notification.YourEmailHasBeenConfirmed'
-                }
-                await self.add_notification(
-                    db_session,
-                    notification_data
-                )
 
         # NAME
         name = data.get('name')
@@ -191,14 +170,6 @@ class User(BaseModel):
                 self.email = email
                 self.email_confirmed = False
 
-                # NOTIFICATON FOR CONFIRMATION EMAIL
-                if not is_new:
-                    notification_data = {
-                        'message': 'notification.PleaseConfirmYourEmail',
-                        'template_data': {'email': email}
-                    }
-                    await self.add_notification(db_session, notification_data)
-
                 # GRAVATAR
                 gravatar_url = "{base_url}{md5_hash}?{params}".format(
                     base_url="https://www.gravatar.com/avatar/",
@@ -217,16 +188,6 @@ class User(BaseModel):
 
         if save:
             db_session.save(self, safe=True)
-
-        if not self.email_confirmed:
-            email_confirmation_token = Emailconfirmationtoken()
-            context['data']['user_uid'] = self.get_uid()
-            await email_confirmation_token.validate_and_save(context)
-            if config.get('ENV', 'production') == 'production' and queue:
-                self.send_email_confirmation_email(
-                    queue,
-                    email_confirmation_token
-                )
 
     async def set_password(self, password):
         if await self.is_password_valid(password):
@@ -264,44 +225,8 @@ class User(BaseModel):
         data['uid'] = self.get_uid()
         data['name'] = self.name
         data['email'] = self.email
-        data['email_confirmed'] = self.email_confirmed
         data['gravatar_url'] = self.gravatar_url
         return data
 
-    async def add_notification(self, db_session, data):
-        data['user_uid'] = self.get_uid()
-        context = {
-            'data': data,
-            'db_session': db_session
-        }
-        notification = Notification()
-        await notification.validate_and_save(context)
-
-    def send_email_confirmation_email(self, queue, email_confirmation_token):
-        # FORMAT EMAIL TEMPLATE
-        email = config.get('email_confirmation_email')
-        email = email.copy()
-        email['text'] = email['text'].format(
-            email_validation_token=self.email_validation_token.token
-        )
-        email['html'] = email['html'].format(
-            email_validation_token=self.email_validation_token.token
-        )
-        email['to'][0]['email'] = email['to'][0]['email'].format(
-            user_email=self.email
-        )
-        email['to'][0]['name'] = email['to'][0]['name'].format(
-            user_name=self.name
-        )
-
-        # ADD THE SEND EMAIL TO THE QUEUE
-        queue.enqueue(
-            send_email,
-            config.get('REST_API_ID'),
-            config.get('REST_API_SECRET'),
-            email
-        )
-
     def logout(self, session):
         del session['uid']
-        active_user_gauge.dec()

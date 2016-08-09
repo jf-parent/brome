@@ -20,12 +20,7 @@ class TestInstanceNetworkCapture extends BaseComponent {
     this._bind(
       'getTestBatch',
       'getTestBatchUid',
-      'fetchTestInstanceNetworkCapture',
-      'onFirstClick',
-      'onPreviousClick',
-      'onNextClick',
-      'onLastClick',
-      'getCurrentPage'
+      'fetchTestInstanceNetworkCapture'
     )
   }
 
@@ -61,33 +56,6 @@ class TestInstanceNetworkCapture extends BaseComponent {
     this.debug('componentWillUnmount')
 
     clearInterval(this._interval)
-  }
-
-  onFirstClick () {
-    this.debug('onFirstClick')
-    this.fetchTestInstanceNetworkCapture(0)
-  }
-
-  onLastClick () {
-    this.debug('onLastClick')
-    let skip = Math.floor(this.props.state.testinstancenetworkcapture.totalTestInstance / TEST_INSTANCE_NETWORK_CAPTURE_LIMIT) * TEST_INSTANCE_NETWORK_CAPTURE_LIMIT
-    this.fetchTestInstanceNetworkCapture(skip)
-  }
-
-  onNextClick () {
-    this.debug('onNextClick')
-    let skip = (this.getCurrentPage() + 1) * TEST_INSTANCE_NETWORK_CAPTURE_LIMIT
-    this.fetchTestInstanceNetworkCapture(skip)
-  }
-
-  onPreviousClick () {
-    this.debug('onPreviousClick')
-    let skip = this.props.state.testinstancenetworkcapture.skip - TEST_INSTANCE_NETWORK_CAPTURE_LIMIT
-    this.fetchTestInstanceNetworkCapture(skip)
-  }
-
-  getCurrentPage () {
-    return this.props.state.testinstancenetworkcapture.skip / this.props.state.testinstancenetworkcapture.limit
   }
 
   fetchTestInstanceNetworkCapture (skip) {
@@ -156,23 +124,12 @@ class TestInstanceNetworkCapture extends BaseComponent {
             })
           })()}
           </ul>
-          {(() => {
-            if (testBatch.terminated) {
-              let totalPage = parseInt(Math.ceil(this.props.state.testinstancenetworkcapture.totalTestInstance / TEST_INSTANCE_NETWORK_CAPTURE_LIMIT))
-              return (
-                <Pager
-                  totalPage={totalPage}
-                  currentPage={this.getCurrentPage()}
-                  onFirstClick={this.onFirstClick}
-                  onLastClick={this.onLastClick}
-                  onNextClick={this.onNextClick}
-                  onPreviousClick={this.onPreviousClick}
-                />
-              )
-            } else {
-              return null
-            }
-          })()}
+          <Pager
+            skippedItem={testinstancenetworkcapture.skip}
+            fetchData={this.fetchTestInstanceNetworkCapture}
+            totalItem={testinstancenetworkcapture.totalTestInstanceNetworkCapture}
+            itemPerPage={TEST_INSTANCE_NETWORK_CAPTURE_LIMIT}
+          />
         </div>
       )
     }

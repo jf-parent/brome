@@ -19,23 +19,14 @@ class TestBatchList extends BaseComponent {
     this._initLogger()
     this._bind(
       'getTestBatchDiv',
-      'fetchTestBatch',
-      'onFirstClick',
-      'onPreviousClick',
-      'onNextClick',
-      'onLastClick',
-      'getCurrentPage'
+      'fetchTestBatch'
     )
   }
 
-  getCurrentPage () {
-    return this.props.state.testbatchlist.skip / this.props.state.testbatchlist.limit
-  }
-
-  fetchTestBatch (currentPage) {
+  fetchTestBatch (skip) {
     this.props.actions.doLoadTestBatchList(
       this.props.state.session,
-      currentPage,
+      skip,
       TEST_BATCH_LIMIT
     )
   }
@@ -53,29 +44,6 @@ class TestBatchList extends BaseComponent {
   componentWillUnmount () {
     this.debug('componentWillUnmount')
     clearInterval(this._interval)
-  }
-
-  onFirstClick () {
-    this.debug('onFirstClick')
-    this.fetchTestBatch(0)
-  }
-
-  onLastClick () {
-    this.debug('onLastClick')
-    let skip = Math.floor(this.props.state.testbatchlist.totalTestBatch / TEST_BATCH_LIMIT) * TEST_BATCH_LIMIT
-    this.fetchTestBatch(skip)
-  }
-
-  onNextClick () {
-    this.debug('onNextClick')
-    let nextPage = (this.getCurrentPage() + 1) * TEST_BATCH_LIMIT
-    this.fetchTestBatch(nextPage)
-  }
-
-  onPreviousClick () {
-    this.debug('onPreviousClick')
-    let previousPage = this.props.state.testbatchlist.skip - TEST_BATCH_LIMIT
-    this.fetchTestBatch(previousPage)
   }
 
   getTestBatchDiv (testBatch, index) {
@@ -243,23 +211,12 @@ class TestBatchList extends BaseComponent {
               )
             }
           })()}
-          {(() => {
-            if (testbatchlist.totalTestBatch > TEST_BATCH_LIMIT) {
-              let totalPage = parseInt(Math.ceil(testbatchlist.totalTestBatch / TEST_BATCH_LIMIT))
-              return (
-                <Pager
-                  totalPage={totalPage}
-                  currentPage={this.getCurrentPage()}
-                  onFirstClick={this.onFirstClick}
-                  onLastClick={this.onLastClick}
-                  onNextClick={this.onNextClick}
-                  onPreviousClick={this.onPreviousClick}
-                />
-              )
-            } else {
-              return null
-            }
-          })()}
+          <Pager
+            skippedItem={testbatchlist.skip}
+            fetchData={this.fetchTestBatch}
+            totalItem={testbatchlist.totalTestBatch}
+            itemPerPage={TEST_BATCH_LIMIT}
+          />
         </div>
       )
     }

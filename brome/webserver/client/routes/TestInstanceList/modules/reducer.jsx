@@ -40,7 +40,7 @@ export function doFetchTestInstance (session, testBatchUid, skip, limit) {
         logger.debug('/api/crud (data) (response)', data, response)
 
         if (response.data.success) {
-          dispatch(loadedTestInstanceListSuccess(response.data), skip, limit)
+          dispatch(loadedTestInstanceListSuccess(response.data, skip, limit))
         } else {
           dispatch(loadedTestInstanceListError(response.data.response[0].error))
         }
@@ -78,7 +78,7 @@ const initialState = {
   testBatch: null,
   totalTestInstance: 0,
   skip: 0,
-  limit: 10 // TODO use exported TEST_INSTANCE_LIMIT const from component instead
+  limit: 0
 }
 
 export default function testinstancelist (state = initialState, action) {

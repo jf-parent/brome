@@ -73,6 +73,8 @@ export const actions = {
 const initialState = {
   testBatchList: null,
   totalTestBatch: 0,
+  limit: 0,
+  skip: 0,
   error: null
 }
 

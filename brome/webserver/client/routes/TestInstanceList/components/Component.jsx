@@ -20,12 +20,7 @@ class TestInstanceList extends BaseComponent {
       'getTestBatch',
       'getPath',
       'getTestBatchUid',
-      'fetchTestInstance',
-      'onFirstClick',
-      'onPreviousClick',
-      'onNextClick',
-      'onLastClick',
-      'getCurrentPage'
+      'fetchTestInstance'
     )
   }
 
@@ -64,33 +59,6 @@ class TestInstanceList extends BaseComponent {
     clearInterval(this._interval)
   }
 
-  onFirstClick () {
-    this.debug('onFirstClick')
-    this.fetchTestInstance(0)
-  }
-
-  onLastClick () {
-    this.debug('onLastClick')
-    let skip = Math.floor(this.props.state.testinstancelist.totalTestInstance / TEST_INSTANCE_LIMIT) * TEST_INSTANCE_LIMIT
-    this.fetchTestInstance(skip)
-  }
-
-  onNextClick () {
-    this.debug('onNextClick')
-    let skip = (this.getCurrentPage() + 1) * TEST_INSTANCE_LIMIT
-    this.fetchTestInstance(skip)
-  }
-
-  onPreviousClick () {
-    this.debug('onPreviousClick')
-    let skip = this.props.state.testinstancelist.skip - TEST_INSTANCE_LIMIT
-    this.fetchTestInstance(skip)
-  }
-
-  getCurrentPage () {
-    return this.props.state.testinstancelist.skip / this.props.state.testinstancelist.limit
-  }
-
   fetchTestInstance (skip) {
     this.props.actions.doFetchTestInstance(
       this.props.state.session,
@@ -126,8 +94,6 @@ class TestInstanceList extends BaseComponent {
       )
     } else {
       let testInstances = this.props.state.testinstancelist.testInstanceList
-      let totalPage = parseInt(Math.ceil(this.props.state.testinstancelist.totalTestInstance / TEST_INSTANCE_LIMIT))
-      let currentPage = this.getCurrentPage()
       let testBatch = this.getTestBatch()
 
       return (
@@ -156,22 +122,12 @@ class TestInstanceList extends BaseComponent {
             })
           })()}
           </ul>
-          {(() => {
-            if (testBatch.terminated) {
-              return (
-                <Pager
-                  totalPage={totalPage}
-                  currentPage={currentPage}
-                  onFirstClick={this.onFirstClick}
-                  onLastClick={this.onLastClick}
-                  onNextClick={this.onNextClick}
-                  onPreviousClick={this.onPreviousClick}
-                />
-              )
-            } else {
-              return null
-            }
-          })()}
+          <Pager
+            skippedItem={testinstancelist.skip}
+            fetchData={this.fetchTestInstance}
+            totalItem={testinstancelist.totalTestInstance}
+            itemPerPage={TEST_INSTANCE_LIMIT}
+          />
         </div>
       )
     }

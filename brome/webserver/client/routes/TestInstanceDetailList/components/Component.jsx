@@ -23,12 +23,7 @@ class TestInstanceDetailList extends BaseComponent {
       'pad2',
       'getTestBatch',
       'getTestBatchUid',
-      'fetchTestInstanceDetailList',
-      'onFirstClick',
-      'onPreviousClick',
-      'onNextClick',
-      'onLastClick',
-      'getCurrentPage'
+      'fetchTestInstanceDetailList'
     )
   }
 
@@ -64,33 +59,6 @@ class TestInstanceDetailList extends BaseComponent {
     this.debug('componentWillUnmount')
 
     clearInterval(this._interval)
-  }
-
-  onFirstClick () {
-    this.debug('onFirstClick')
-    this.fetchTestInstanceDetailList(0)
-  }
-
-  onLastClick () {
-    this.debug('onLastClick')
-    let skip = Math.floor(this.props.state.testinstancedetaillist.totalTestInstance / TEST_INSTANCE_LIMIT) * TEST_INSTANCE_LIMIT
-    this.fetchTestInstanceDetailList(skip)
-  }
-
-  onNextClick () {
-    this.debug('onNextClick')
-    let skip = (this.getCurrentPage() + 1) * TEST_INSTANCE_LIMIT
-    this.fetchTestInstanceDetailList(skip)
-  }
-
-  onPreviousClick () {
-    this.debug('onPreviousClick')
-    let skip = this.props.state.testinstancedetaillist.skip - TEST_INSTANCE_LIMIT
-    this.fetchTestInstanceDetailList(skip)
-  }
-
-  getCurrentPage () {
-    return this.props.state.testinstancedetaillist.skip / this.props.state.testinstancedetaillist.limit
   }
 
   fetchTestInstanceDetailList (skip) {
@@ -273,23 +241,12 @@ class TestInstanceDetailList extends BaseComponent {
             })
           })()}
           </ul>
-          {(() => {
-            if (testBatch.terminated) {
-              let totalPage = parseInt(Math.ceil(this.props.state.testinstancedetaillist.totalTestInstance / TEST_INSTANCE_LIMIT))
-              return (
-                <Pager
-                  totalPage={totalPage}
-                  currentPage={this.getCurrentPage()}
-                  onFirstClick={this.onFirstClick}
-                  onLastClick={this.onLastClick}
-                  onNextClick={this.onNextClick}
-                  onPreviousClick={this.onPreviousClick}
-                />
-              )
-            } else {
-              return null
-            }
-          })()}
+          <Pager
+            skippedItem={testinstancedetaillist.skip}
+            fetchData={this.fetchTestInstanceDetailList}
+            totalItem={testinstancedetaillist.totalTestInstance}
+            itemPerPage={TEST_INSTANCE_LIMIT}
+          />
         </div>
       )
     }

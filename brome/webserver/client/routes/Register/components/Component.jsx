@@ -47,7 +47,7 @@ class Register extends BaseComponent {
 
     this.debug('onSubmit')
 
-    let nextPath = '/dashboard'
+    let nextPath = '/testbatchlist'
     if (this.props.state.router.locationBeforeTransitions.state) {
       nextPath = this.props.state.router.locationBeforeTransitions.state.nextPath
     }

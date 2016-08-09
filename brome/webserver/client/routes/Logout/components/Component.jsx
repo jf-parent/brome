@@ -30,7 +30,9 @@ class Logout extends BaseComponent {
       )
     } else {
       return (
-        <Loading />
+        <div className='container-fluid'>
+          <Loading style={{left: '50%'}} />
+        </div>
       )
     }
   }

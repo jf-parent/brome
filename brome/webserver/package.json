@@ -1,7 +1,7 @@
 {
-  "name": "webbase",
+  "name": "Brome",
   "version": "1.0.0",
-  "description": "Base for web",
+  "description": "Webserver for Brome",
   "scripts": {
     "start": "NODE_ENV=development ./node_modules/webpack-dev-server/bin/webpack-dev-server.js",
     "test": "NODE_ENV=test ./node_modules/karma/bin/karma start karma.conf.js",
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jf-parent/webbase.git"
+    "url": "git+https://github.com/jf-parent/brome.git"
   },
   "keywords": [
     "react",
@@ -29,9 +29,9 @@
   "author": "parent.j.f@gmail.com",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/jf-parent/webbase/issues"
+    "url": "https://github.com/jf-parent/brome/issues"
   },
-  "homepage": "https://github.com/jf-parent/webbase#readme",
+  "homepage": "https://github.com/jf-parent/brome#readme",
   "dependencies": {},
   "devDependencies": {
     "autoprefixer": "^6.3.6",

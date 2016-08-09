@@ -25,7 +25,7 @@ const MultiCheckboxSet = React.createClass({
   },
 
   componentDidMount () {
-    const value = this.props.value || []
+    const value = this.props.value
     this.setValue(value)
     this.setState({
       value: value
@@ -67,7 +67,7 @@ const MultiCheckboxSet = React.createClass({
                   data-item={item}
                   name={name}
                   onChange={this.changeValue}
-                  checked={contains(this.state.value, item)}
+                  checked={contains(this.state._value, item)}
                 />
                 <span style={itemStyle}>{item}</span>
               </div>

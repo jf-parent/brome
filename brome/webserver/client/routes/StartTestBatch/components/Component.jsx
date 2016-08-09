@@ -29,17 +29,27 @@ class StartTestBatch extends BaseComponent {
     this._initLogger()
     this._bind(
       'enableButton',
+      'uncheckAll',
+      'checkAll',
       'disableButton',
       'onSubmit'
     )
+
+    this.state = {
+      'selectedTests': []
+    }
   }
 
   componentWillMount () {
     this.props.actions.doLoadBromeConfig()
   }
 
-  componentWillUnmount () {
-    this.debug('componentWillUnmount')
+  uncheckAll () {
+    this.setState({selectedTests: []})
+  }
+
+  checkAll () {
+    this.setState({selectedTests: this.props.state.starttestbatch.tests})
   }
 
   onSubmit (event) {
@@ -73,6 +83,7 @@ class StartTestBatch extends BaseComponent {
     } else {
       let browsers = Object.keys(starttestbatch.bromeConfig['browsers_config'])
       let tests = starttestbatch.tests
+      let selectedTests = this.state.selectedTests
 
       return (
         <div className='container-fluid'>
@@ -96,9 +107,12 @@ class StartTestBatch extends BaseComponent {
               </Panel>
             </Collapse>
             <Collapse>
-              <Panel header='Tests (select at least one):'>
+              <Panel header='Tests (run all by default):'>
+                <a className='btn btn-default btn-link' onClick={this.uncheckAll}>Uncheck All</a>
+                {' - '}
+                <a className='btn btn-default btn-link' onClick={this.checkAll}>Check All</a>
                 <MultiCheckboxSet
-                  value={tests}
+                  value={selectedTests}
                   name='tests'
                   items={tests}
                   validations='requiredOneTest'

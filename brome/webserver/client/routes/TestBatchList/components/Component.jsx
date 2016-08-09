@@ -198,19 +198,51 @@ class TestBatchList extends BaseComponent {
     } else {
       return (
         <div className='container-fluid'>
-          <h1>
-            <FormattedMessage
-              id='testBatchList.TestBatchListHeader'
-              defaultMessage='Test Batch List'
-            />
-          </h1>
-          <div className={'row ' + CoreLayoutStyle['no-gutter']}>
-            {(() => {
-              return testbatchlist.testBatchList.map((testBatch, index) => {
+          {(() => {
+            if (testbatchlist.testBatchList.length) {
+              let list = testbatchlist.testBatchList.map((testBatch, index) => {
                 return this.getTestBatchDiv(testBatch, index)
               })
-            })()}
-          </div>
+              return (
+                <div>
+                  <h1>
+                    <FormattedMessage
+                      id='testBatchList.TestBatchListHeader'
+                      defaultMessage='Test Batch List'
+                    />
+                  </h1>
+                  <div className={'row ' + CoreLayoutStyle['no-gutter']}>
+                    {list}
+                  </div>
+                </div>
+              )
+            } else {
+              return (
+                <div>
+                  <div className={'row ' + CoreLayoutStyle['no-gutter']}>
+                    <div className='col-xs-1 col-sm-1 col-md-8 col-lg-8 col-md-offset-2 col-lg-offset-2'>
+                      <h1>
+                        <FormattedMessage
+                          id='testBatchList.EmptyTestBatchList'
+                          defaultMessage='There is no test batch:/'
+                        />
+                      </h1>
+                    </div>
+                  </div>
+                  <div className={'row ' + CoreLayoutStyle['no-gutter']}>
+                    <div className='col-xs-1 col-sm-1 col-md-2 col-lg-2 col-md-offset-5 col-lg-offset-5'>
+                      <Link className='btn btn-default' to='/starttestbatch'>
+                        <FormattedMessage
+                          id='testBatchList.StartNewTestBatch'
+                          defaultMessage='Start Test A New Batch'
+                        />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )
+            }
+          })()}
           {(() => {
             if (testbatchlist.totalTestBatch > TEST_BATCH_LIMIT) {
               let totalPage = parseInt(Math.ceil(testbatchlist.totalTestBatch / TEST_BATCH_LIMIT))

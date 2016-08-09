@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router'
 import { FormattedMessage } from 'react-intl'
+import 'font-awesome-webpack'
 
 import BaseComponent from 'core/BaseComponent'
 import UserNavStyle from './UserNavStyle.postcss'
@@ -21,6 +22,7 @@ class UserNav extends BaseComponent {
           <li role='presentation' className='dropdown'>
             <a className='dropdown-toggle small' data-toggle='dropdown' href='#' role='button' aria-haspopup='true' aria-expanded='false'>
               {this.props.state.session.user.name}
+              {' '}
               <i className='fa fa-caret-down' aria-hidden='true'></i>
               <div className={'pull-right ' + UserNavStyle['profile-img']}>
                 <img className='img-responsive img-circle' src={this.props.state.session.user.gravatar_url} />

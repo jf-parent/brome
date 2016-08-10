@@ -121,6 +121,13 @@ default_config["proxy_element"]["use_touch_instead_of_click"] = {
     'title': 'Use touch instead of click'
 }
 
+default_config["proxy_element"]["wait_until_clickable"] = {
+    'default': True,
+    'type': 'checkbox',
+    'visible': True,
+    'title': 'Wait until clickable'
+}
+
 # BROWSERSTACK
 default_config["browserstack"]["username"] = {
     'default': '',

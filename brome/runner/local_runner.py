@@ -77,12 +77,6 @@ class LocalRunner(BaseRunner):
 
             localhost_instance.tear_down()
 
-            with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
-                test_batch = session.query(Testbatch)\
-                    .filter(Testbatch.mongo_id == self.test_batch_id).one()
-                test_batch.total_executed_tests += 1
-                session.save(test_batch, safe=True)
-
     def terminate(self):
         """Terminate the test batch
         """

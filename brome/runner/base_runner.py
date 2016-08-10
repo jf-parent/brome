@@ -62,7 +62,7 @@ class BaseRunner(object):
             if BROME_CONFIG['runner_args']['remote_runner']:
                 test_batch.total_tests = len(self.tests) * len(BROME_CONFIG['runner_args']['remote_runner'].split(','))  # noqa
             else:
-                test_batch.total_tests = len(self.tests) * len(BROME_CONFIG['runner_args']['local_runner'].split(','))  # noqa
+                test_batch.total_tests = len(self.tests) * len(BROME_CONFIG['runner_args']['localhost_runner'].split(','))  # noqa
 
             session.save(test_batch, safe=True)
 

@@ -1291,7 +1291,7 @@ class ProxyDriver(object):
 
         wait_until_visible = kwargs.get(
             'wait_until_visible',
-            BROME_CONFIG['proxy_driver:wait_until_visible_before_assert_visible']  # noqa
+            BROME_CONFIG['proxy_driver']['wait_until_visible_before_assert_visible']  # noqa
         )
         self.debug_log("effective wait_until_visible: %s" % wait_until_visible)
 
@@ -1304,7 +1304,7 @@ class ProxyDriver(object):
             if element.text == value:
                 if highlight:
                     element.highlight(
-                        BROME_CONFIG['highlight']['style_on_assertion_success']
+                        highlight=BROME_CONFIG['highlight']['style_on_assertion_success']  # noqa
                     )
                 if testid is not None:
                     self.create_test_result(testid, True)
@@ -1413,19 +1413,23 @@ class ProxyDriver(object):
             extra_data['javascript_error'] = self.get_javascript_error()
 
         with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
+            test = None
             if testid in BROME_CONFIG['test_dict']:
-                test = session.query(Test).filter(Test.test_id == testid).one()
-                test_config = BROME_CONFIG['test_dict'][testid]
-                if type(test_config) == dict:
-                    if 'embed' in test_config:
-                        embed = test_config['embed']
-                        test_name = test_config['name']
-                else:
-                    test_name = test_config
+                query = session.query(Test).filter(Test.test_id == testid)
+                if query.count():
+                    test = query.one()
 
-                embed_title = '[%s] %s' % (testid, test_name)
-            else:
-                test = None
+                    test_config = BROME_CONFIG['test_dict'][testid]
+                    if type(test_config) == dict:
+                        if 'embed' in test_config:
+                            embed = test_config['embed']
+                            test_name = test_config['name']
+                    else:
+                        test_name = test_config
+
+                    embed_title = '[%s] %s' % (testid, test_name)
+
+            if not test:
                 test_name = testid
                 embed_title = test_name
 
@@ -1498,7 +1502,8 @@ class ProxyDriver(object):
             test_result.video_capture_path = videocapture_path
             test_result.extra_data = extra_data
             test_result.title = test_name
-            test_result.test_id = test.get_uid()
+            if test:
+                test_result.test_id = test.get_uid()
             test_result.test_instance_id = self.test_instance._test_instance_id
             test_result.test_batch_id = self.runner.test_batch_id
 

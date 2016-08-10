@@ -23,7 +23,7 @@ class Testresult(BaseModel):
 
     extra_data = DictField(StringField(), default=dict())
 
-    test_id = ObjectIdField()
+    test_id = ObjectIdField(required=False)
     test_instance_id = ObjectIdField()
     test_batch_id = ObjectIdField()
 
@@ -50,7 +50,10 @@ class Testresult(BaseModel):
         # data['video_capture_current_time'] = video_capture_current_time
         data['extra_data'] = self.extra_data
         data['title'] = self.title
-        data['test_id'] = str(self.test_id)
+        if hasattr(self, 'test_id'):
+            data['test_id'] = str(self.test_id)
+        else:
+            data['test_id'] = False
         data['test_instance_id'] = str(self.test_instance_id)
         data['test_batch_id'] = str(self.test_batch_id)
         return data
@@ -126,9 +129,6 @@ class Testresult(BaseModel):
         test_id = data.get('test_id')
         if test_id is not None:
             self.test_id = test_id
-        else:
-            if is_new:
-                raise exceptions.MissingModelValueException('test_id')
 
         # TEST INSTANCE ID
         test_instance_id = data.get('test_instance_id')

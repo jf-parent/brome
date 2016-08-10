@@ -3,6 +3,7 @@ from time import sleep
 
 from selenium.webdriver.common.touch_actions import TouchActions
 from selenium.common import exceptions
+from selenium.webdriver.common.action_chains import ActionChains
 
 from brome.core.settings import BROME_CONFIG
 
@@ -132,6 +133,64 @@ class ProxyElement(object):
             sleep(2)
             self._element = self.pdriver.find(self.selector._selector)
             _click()
+
+        return True
+
+    def double_click(self, **kwargs):
+        self.debug_log("Double clicking on element")
+
+        highlight = kwargs.get(
+            'highlight',
+            BROME_CONFIG['highlight']['highlight_when_element_is_clicked']
+        )
+        wait_until_clickable = kwargs.get(
+            'wait_until_clickable',
+            BROME_CONFIG['proxy_element']['wait_until_clickable']
+        )
+
+        if wait_until_clickable:
+            # TODO manage the raise exception better
+            self.pdriver.wait_until_clickable(
+                self.selector._selector,
+                raise_exception=True
+            )
+
+        if highlight:
+            self.highlight(
+                style=BROME_CONFIG['highlight']['style_when_element_is_clicked']  # noqa
+            )
+
+        def _double_click():
+            if BROME_CONFIG['proxy_element']['use_touch_instead_of_click']:
+                touch_action = TouchActions(self.pdriver._driver)
+                touch_action.double_tap(self._element).perform()
+            else:
+                ActionChains(self.pdriver)\
+                    .double_click(self._element).perform()
+
+        if self.pdriver.bot_diary:
+            self.pdriver.bot_diary.add_auto_entry(
+                "I double clicked on",
+                selector=self.selector._selector
+            )
+
+        try:
+            _double_click()
+        except (
+                    exceptions.InvalidElementStateException,
+                    exceptions.WebDriverException
+                ) as e:
+            self.debug_log("click exception: %s" % e)
+            sleep(2)
+            self.scroll_into_view()
+            _double_click()
+        except exceptions.StaleElementReferenceException as e:
+            self.debug_log(
+                "click exception StaleElementReferenceException: %s" % e
+            )
+            sleep(2)
+            self._element = self.pdriver.find(self.selector._selector)
+            _double_click()
 
         return True
 
@@ -308,5 +367,19 @@ class ProxyElement(object):
                 tb = traceback.format_exc()
                 self.error_log('select_all WebDriverException: %s' % tb)
                 return False
+
+        return True
+
+    def hover(self, **kwargs):
+        self.debug_log("Hovering element")
+
+        try:
+            ActionChains(self.pdriver)\
+                .move_to_element(self._element)\
+                .perform()
+        except exceptions.WebDriverException:
+            tb = traceback.format_exc()
+            self.error_log('hover WebDriverException: %s' % tb)
+            return False
 
         return True

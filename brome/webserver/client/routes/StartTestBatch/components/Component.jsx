@@ -81,7 +81,7 @@ class StartTestBatch extends BaseComponent {
     } else if (starttestbatch.error !== null) {
       return <ErrorMsg msgId={starttestbatch.error} />
     } else {
-      let browsers = Object.keys(starttestbatch.bromeConfig['browsers_config'])
+      let browsers = Object.keys(starttestbatch.bromeConfig['browsers_config']).sort()
       let tests = starttestbatch.tests
       let selectedTests = this.state.selectedTests
 

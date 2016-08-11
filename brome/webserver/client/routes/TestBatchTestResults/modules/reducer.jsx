@@ -4,6 +4,7 @@ import axios from 'axios'
 // Constants
 // ====================================
 
+export const LOADING_TEST_RESULTS = 'LOADING_TEST_RESULTS'
 export const LOADED_TEST_RESULTS_SUCCESS = 'LOADED_TEST_RESULTS_SUCCESS'
 export const LOADED_TEST_RESULTS_ERROR = 'LOADED_TEST_RESULTS_ERROR'
 
@@ -14,8 +15,12 @@ export const LOADED_TEST_RESULTS_ERROR = 'LOADED_TEST_RESULTS_ERROR'
 const logger = require('loglevel').getLogger('TestBatchTestResults')
 logger.setLevel(__LOGLEVEL__)
 
-export function doLoadTestResults (session, testBatchUid, skip, limit) {
+export function doLoadTestResults (session, testBatchUid, skip, limit, loading) {
   return dispatch => {
+    if (loading) {
+      dispatch({type: LOADING_TEST_RESULTS})
+    }
+
     let data = {
       token: session.token,
       actions: [
@@ -73,6 +78,7 @@ export const actions = {
 
 const initialState = {
   testResults: [],
+  loading: true,
   totalTestResults: 0,
   testBatch: null,
   error: null,
@@ -82,10 +88,19 @@ const initialState = {
 
 export default function testbatchtestresults (state = initialState, action) {
   switch (action.type) {
+    case LOADING_TEST_RESULTS:
+      return Object.assign({},
+        initialState,
+        {
+          loading: true
+        }
+      )
+
     case LOADED_TEST_RESULTS_SUCCESS:
       return Object.assign({},
         initialState,
         {
+          loading: false,
           testResults: action.data.results[0].results,
           totalTestResults: action.data.results[0].total,
           testBatch: action.data.results[1].results[0],
@@ -98,6 +113,7 @@ export default function testbatchtestresults (state = initialState, action) {
       return Object.assign({},
         initialState,
         {
+          loading: false,
           error: action.error
         }
       )

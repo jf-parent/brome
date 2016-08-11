@@ -18,5 +18,16 @@
   "forgottenPassword.ResetPasswordTokenInvalidException": "Reset password token invalid",
   "notification.PleaseConfirmYourEmail": "Please confirm your email: {email}",
   "profile.settingsSaveSuccessfully": "Profile settings save successfully!",
-  "resetPassword.ResetPasswordSuccess": "Your password has been changed successfully!"
+  "resetPassword.ResetPasswordSuccess": "Your password has been changed successfully!",
+  "testBatchDetail.TerminatedTestBatchError": "The test batch could not be terminated. See runner log...",
+  "testBatchDetail.TerminatedTestBatchSuccess": "The test batch will be terminated shortly...",
+  "testBatchDetail.DeletedTestBatchError": "The test batch could not be deleted. See server log...",
+  "testBatchDetail.deletedTestBatchSuccess": "The test batch has been deleted!",
+  "testBatchDetail.NbInstanceToSetup": "{nb} instance to setup",
+  "testBatchDetail.InstanceSetupCompleted": "All instances are ready",
+  "testBatchDetail.InstanceTearDownCompleted": "Tear down of instances finished",
+  "testBatchDetail.SeleniumServerKilled": "Selenium server killed",
+  "testBatchDetail.SeleniumServerAlreadyRunning": "Selenium server already running",
+  "testBatchDetail.SeleniumServerStarted": "Selenium server started",
+  "testBatchDetail.TerminatingTestBatch": "Terminating Test Batch"
 }

@@ -8,7 +8,7 @@ import 'rc-collapse/assets/index.css'
 import VideoPlayer from 'components/ux/VideoPlayer'
 import Loading from 'components/ux/Loading'
 import ErrorMsg from 'components/ux/ErrorMsg'
-// import ComponentStyle from './ComponentStyle.postcss'
+import ComponentStyle from './ComponentStyle.postcss'
 import Pager from 'components/ux/Pager'
 import BaseComponent from 'core/BaseComponent'
 
@@ -26,9 +26,10 @@ class TestBatchTestResults extends BaseComponent {
   }
 
   componentWillMount () {
+    this.fetchTestResults(this.props.state.testbatchtestresults.skip, true)
     this._interval = setInterval(
       () => {
-        this.fetchTestResults(this.props.state.testbatchtestresults.skip)
+        this.fetchTestResults(this.props.state.testbatchtestresults.skip, false)
       },
       2000
     )
@@ -57,19 +58,20 @@ class TestBatchTestResults extends BaseComponent {
     return this.props.location.query['testbatchuid']
   }
 
-  fetchTestResults (skip) {
+  fetchTestResults (skip, loading = false) {
     this.props.actions.doLoadTestResults(
       this.props.state.session,
       this.getTestBatchUid(),
       skip,
-      TEST_RESULT_LIMIT
+      TEST_RESULT_LIMIT,
+      loading
     )
   }
 
   render () {
     let testbatchtestresults = this.props.state.testbatchtestresults
 
-    if (!testbatchtestresults.testResults.length) {
+    if (testbatchtestresults.loading) {
       return (
         <div className='container-fluid'>
           <Loading style={{left: '50%'}} />
@@ -97,15 +99,19 @@ class TestBatchTestResults extends BaseComponent {
                 headerStyle['color'] = 'red'
                 headerIcon = 'fa-thumbs-down'
               }
-              let header = <span>
-                <i className={'fa ' + headerIcon} style={headerStyle} aria-hidden='true'></i>{' '}{testResult.title}
+              let header = <div className={ComponentStyle['text-ellipsis']}>
+                <i className={'fa ' + headerIcon} style={headerStyle} aria-hidden='true'></i>
+                {' '}
+                {testResult.test_id}
+                {' '}
+                {testResult.title}
                 <BrowserBadge
                   browserName={testResult.browser_capabilities.browserName}
                   browserVersion={testResult.browser_capabilities.version}
                   browserIcon={testResult.browser_capabilities.browserName}
                   platform={testResult.browser_capabilities.platform}
                 />
-              </span>
+              </div>
               return (
                 <div key={index}>
                   <Collapse accordion>

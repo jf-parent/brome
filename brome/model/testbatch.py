@@ -44,6 +44,42 @@ class Testbatch(BaseModel):
         except AttributeError:
             return "Testbatch uninitialized"
 
+    def add_milestone(self, milestone_id, values=None, index=None):
+        if 'milestones' not in self.runner_metadata.keys():
+            self.runner_metadata['milestones'] = {}
+
+        effective_index = index
+        effective_values = values
+        if not index:
+            effective_index = len(self.runner_metadata['milestones'])
+
+        if not values:
+            effective_values = {}
+
+        self.runner_metadata['milestones'][milestone_id] = {
+            'msg_id': milestone_id,
+            'index': effective_index,
+            'values': effective_values
+        }
+
+    def update_milestone(self, milestone_id, values):
+        self.runner_metadata['milestones'][milestone_id]['values'] = values
+
+    async def get_milestones(self):
+        data = []
+        if 'milestones' in self.runner_metadata.keys():
+            sorted_milestones = sorted(
+                self.runner_metadata['milestones'].values(),
+                key=lambda x: x['index']
+            )
+            for milestone in sorted_milestones:
+                data.append({
+                    'values': milestone['values'],
+                    'msgId': milestone['msg_id']
+                })
+
+        return data
+
     async def get_test_results(self, context):
         db_session = context.get('db_session')
 
@@ -115,7 +151,20 @@ class Testbatch(BaseModel):
         return query.count()
 
     async def sanitize_data(self, context):
-        return []
+        author = context.get('author')
+        data = context.get('data')
+
+        if author:
+            if author.role == 'admin':
+                return data
+            else:
+                editable_fields = [
+                    'killed'
+                ]
+        else:
+            editable_fields = []
+
+        return {k: data[k] for k in data if k in editable_fields}
 
     async def serialize(self, context):
         data = {}
@@ -123,6 +172,7 @@ class Testbatch(BaseModel):
         data['friendly_name'] = self.friendly_name
         data['killed'] = self.killed
         data['total_tests'] = self.total_tests
+        data['runner_metadata'] = self.runner_metadata
         data['total_executed_tests'] = await self.get_total_executed_tests(context)  # noqa
         data['total_executing_tests'] = await self.get_total_executings_tests(context)  # noqa
         data['starting_timestamp'] = self.starting_timestamp.isoformat()
@@ -137,7 +187,7 @@ class Testbatch(BaseModel):
             'instance_vnc': self.feature_instance_vnc,
             'style_quality': self.feature_style_quality
         }
-        data['runner_metadata'] = self.runner_metadata
+        data['milestones'] = await self.get_milestones()
 
         data['test_crashes'] = await self.get_test_crashes(context)
         data['test_results'] = await self.get_test_results(context)
@@ -156,16 +206,14 @@ class Testbatch(BaseModel):
     async def method_autorized(self, context):
         author = context.get('author')
         method = context.get('method')
-        if method in ['create', 'update']:
+
+        if method in ['create']:
             return False
         else:
-            if method == 'delete':
-                if author.role == 'admin':
-                    return True
-                else:
-                    return False
-            else:
+            if author:
                 return True
+            else:
+                return False
 
     async def validate_and_save(self, context):
         data = context.get('data')

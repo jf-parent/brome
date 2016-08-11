@@ -4,7 +4,9 @@ import { Link } from 'react-router'
 import 'font-awesome-webpack'
 import { Line } from 'rc-progress'
 
+import LaddaButton from 'components/ux/LaddaButton'
 import ErrorMsg from 'components/ux/ErrorMsg'
+import SuccessMsg from 'components/ux/SuccessMsg'
 import Loading from 'components/ux/Loading'
 import ComponentStyle from './ComponentStyle.postcss'
 import CoreLayoutStyle from 'layouts/CoreLayout/CoreLayoutStyle.postcss'
@@ -21,8 +23,11 @@ class TestBatchDetail extends BaseComponent {
       'fetchTestBatchDetail',
       'getToolbelt',
       'getTool',
+      'onDelete',
+      'onTerminate',
       'getActionToolbelt',
       'getProgress',
+      'getNotification',
       'getTestResults',
       'getCrashes',
       'getMilestone'
@@ -50,21 +55,75 @@ class TestBatchDetail extends BaseComponent {
   componentWillUnmount () {
     this.debug('componentWillUnmount')
     clearInterval(this._interval)
+    this.props.actions.doReset()
+  }
+
+  onTerminate () {
+    let data = {
+      token: this.props.state.session.token,
+      actions: {
+        action: 'update',
+        uid: this.getTestBatchUid(),
+        model: 'testbatch',
+        data: {
+          killed: true
+        }
+      }
+    }
+
+    this.props.actions.doTerminate(data)
+  }
+
+  onDelete () {
+    let data = {
+      token: this.props.state.session.token,
+      actions: {
+        action: 'delete',
+        uid: this.getTestBatchUid(),
+        model: 'testbatch'
+      }
+    }
+    this.props.actions.doDelete(data)
+  }
+
+  getNotification () {
+    let testbatchdetail = this.props.state.testbatchdetail
+    if (testbatchdetail.terminatedTestBatchError) {
+      return (
+        <ErrorMsg msgId='testBatchDetail.TerminatedTestBatchError' />
+      )
+    } else if (testbatchdetail.terminatedTestBatchSuccess) {
+      return (
+        <SuccessMsg msgId='testBatchDetail.TerminatedTestBatchSuccess' />
+      )
+    } else if (testbatchdetail.deletedTestBatchError) {
+      return (
+        <ErrorMsg msgId='testBatchDetail.DeletedTestBatchError' />
+      )
+    } else if (testbatchdetail.deletedTestBatchSuccess) {
+      return (
+        <SuccessMsg msgId='testBatchDetail.DeletedTestBatchSuccess' />
+      )
+    } else {
+      return null
+    }
   }
 
   getActionToolbelt () {
-    if (this.props.state.testbatchdetail.testBatch.terminated) {
+    let testbatchdetail = this.props.state.testbatchdetail
+
+    if (testbatchdetail.testBatch[this.getTestBatchUid()].terminated) {
       return (
         <div className={'row ' + CoreLayoutStyle['no-gutter']}>
           <div className='pull-right'>
-            <button className='btn btn-default'>
+            <LaddaButton isLoading={testbatchdetail.deletingTestBatch} onClick={this.onDelete}>
               <i className='fa fa-trash-o' aria-hidden='true'></i>
               {' '}
               <FormattedMessage
                 id='testBatchDetail.Delete'
                 defaultMessage='Delete'
               />
-            </button>
+            </LaddaButton>
           </div>
         </div>
       )
@@ -72,14 +131,14 @@ class TestBatchDetail extends BaseComponent {
       return (
         <div className={'row ' + CoreLayoutStyle['no-gutter']}>
           <div className='pull-right'>
-            <button className='btn btn-default'>
+            <LaddaButton isLoading={testbatchdetail.terminatingTestBatch} onClick={this.onTerminate}>
               <i className='fa fa-plug' aria-hidden='true'></i>
               {' '}
               <FormattedMessage
                 id='testBatchDetail.Terminated'
                 defaultMessage='Terminate'
               />
-            </button>
+            </LaddaButton>
           </div>
         </div>
       )
@@ -166,15 +225,26 @@ class TestBatchDetail extends BaseComponent {
         </h3>
         <ul>
           {(() => {
-            return failedTests.map((value, index) => {
+            if (failedTests.length) {
+              return failedTests.map((value, index) => {
+                return (
+                  <li key={index}>
+                    <small>
+                      {value.title}
+                    </small>
+                  </li>
+                )
+              })
+            } else {
               return (
-                <li key={index}>
-                  <small>
-                    {value.title}
-                  </small>
+                <li>
+                  <FormattedMessage
+                    id='testBatchDetail.NoTestFailed'
+                    defaultMessage='No test failed'
+                  />
                 </li>
               )
-            })
+            }
           })()}
         </ul>
       </div>
@@ -199,22 +269,33 @@ class TestBatchDetail extends BaseComponent {
           (<span style={nbOfCrashesStyle}>{nbOfCrashes}</span>):
         </h3>
         <ul>
-          {
-            testCrashes.map((value, index) => {
+          {(() => {
+            if (testCrashes.length) {
+              return testCrashes.map((value, index) => {
+                return (
+                  <li key={index}>
+                    <small>{value['title']}</small>
+                  </li>
+                )
+              })
+            } else {
               return (
-                <li key={index}>
-                  <small>{value['title']}</small>
+                <li>
+                  <FormattedMessage
+                    id='testBatchDetail.NoCrashes'
+                    defaultMessage='No crashes'
+                  />
                 </li>
               )
-            })
-          }
+            }
+          })()}
         </ul>
       </div>
     )
   }
 
   getMilestone () {
-    let runnerMetadata = this.getTestBatch().runner_metadata
+    let milestones = this.getTestBatch().milestones
     return (
       <div>
         <h3 className={ComponentStyle['section-header']}>
@@ -225,14 +306,15 @@ class TestBatchDetail extends BaseComponent {
         </h3>
         <ul>
           {(() => {
-            if (Object.keys(runnerMetadata).length) {
-              return Object.keys(runnerMetadata).map((key, index) => {
+            if (milestones.length) {
+              return milestones.map((milestone, index) => {
                 return (
-                  <li>
+                  <li key={index}>
                     <small>
                       <FormattedMessage
-                        id={'testBatchDetail.' + key}
-                        defaultMessage={key}
+                        id={'testBatchDetail.' + milestone.msgId}
+                        defaultMessage={milestone.msgId}
+                        values={milestone.values}
                       />
                     </small>
                   </li>
@@ -324,7 +406,7 @@ class TestBatchDetail extends BaseComponent {
         id: 'testBatchDetail.TestResultsLabel',
         defaultMessage: 'Test Results ({nb_test_result})',
         values: {
-          nb_test_result: testBatch.test_results.nb_test_result
+          nb_test_result: testBatch.test_results.nb_test_result.toString()
         }
       },
       'bar-chart',
@@ -345,7 +427,7 @@ class TestBatchDetail extends BaseComponent {
         id: 'testBatchDetail.TestBatchScreenshots',
         defaultMessage: 'Screenshots ({nb_screenshot})',
         values: {
-          nb_screenshot: testBatch.nb_screenshot
+          nb_screenshot: testBatch.nb_screenshot.toString()
         }
       },
       'file-image-o',
@@ -357,7 +439,7 @@ class TestBatchDetail extends BaseComponent {
         id: 'testBatchDetail.TestInstanceCrashesLabel',
         defaultMessage: 'Crash reports ({nb_crashes})',
         values: {
-          nb_crashes: testBatch.test_crashes.length
+          nb_crashes: testBatch.test_crashes.length.toString()
         }
       },
       'exclamation-triangle',
@@ -462,14 +544,21 @@ class TestBatchDetail extends BaseComponent {
           <Loading style={{left: '50%'}} />
         </div>
       )
+    } else if (this.props.state.testbatchdetail.deletedTestBatchSuccess) {
+      return (
+        <div className='container-fluid'>
+          {this.getNotification()}
+        </div>
+      )
     } else {
       return (
         <div className='container-fluid'>
           {this.getActionToolbelt()}
+          {this.getNotification()}
           <h2 className='text-center'>
             <FormattedMessage
               id='testBatchDetail.HeaderTitle'
-              defaultMessage='Test Batch Detail'
+              defaultMessage='Test Batch Details'
             />
             <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
           </h2>

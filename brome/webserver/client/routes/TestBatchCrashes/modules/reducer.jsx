@@ -4,6 +4,7 @@ import axios from 'axios'
 // Constants
 // ====================================
 
+export const LOADING_TEST_BATCH_CRASHES = 'LOADING_TEST_BATCH_CRASHES'
 export const LOADED_TEST_BATCH_CRASHES_SUCCESS = 'LOADED_TEST_BATCH_CRASHES_SUCCESS'
 export const LOADED_TEST_BATCH_CRASHES_ERROR = 'LOADED_TEST_BATCH_CRASHES_ERROR'
 
@@ -14,8 +15,12 @@ export const LOADED_TEST_BATCH_CRASHES_ERROR = 'LOADED_TEST_BATCH_CRASHES_ERROR'
 const logger = require('loglevel').getLogger('TestBatchCrashes')
 logger.setLevel(__LOGLEVEL__)
 
-export function doLoadTestBatchCrashes (session, testBatchUid) {
+export function doLoadTestBatchCrashes (session, testBatchUid, loading) {
   return dispatch => {
+    if (loading) {
+      dispatch({type: LOADING_TEST_BATCH_CRASHES})
+    }
+
     let data = {
       token: session.token,
       actions: [
@@ -72,16 +77,26 @@ export const actions = {
 
 const initialState = {
   error: null,
+  loading: true,
   testBatch: null,
   crashes: null
 }
 
 export default function testbatchcrashes (state = initialState, action) {
   switch (action.type) {
+    case LOADING_TEST_BATCH_CRASHES:
+      return Object.assign({},
+        initialState,
+        {
+          loading: true
+        }
+      )
+
     case LOADED_TEST_BATCH_CRASHES_SUCCESS:
       return Object.assign({},
         initialState,
         {
+          loading: false,
           crashes: action.data.results[0].results,
           testBatch: action.data.results[1].results[0]
         }
@@ -91,6 +106,7 @@ export default function testbatchcrashes (state = initialState, action) {
       return Object.assign({},
         initialState,
         {
+          loading: false,
           error: action.error,
           testBatch: action.data.results[1].results[0]
         }

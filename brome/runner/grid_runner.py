@@ -158,13 +158,15 @@ class GridRunner(BaseRunner):
                         )
 
             # MILESTONE
-            with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
-                test_batch = session.query(Testbatch)\
-                    .filter(Testbatch.mongo_id == self.test_batch_id).one()
-                runner_metadata = test_batch.runner_metadata
-                runner_metadata['nb_instance_to_setup'] = len(instance_threads)
-                test_batch.runner_metadata = runner_metadata
-                session.save(test_batch, safe=True)
+            if len(instance_threads):
+                with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
+                    test_batch = session.query(Testbatch)\
+                        .filter(Testbatch.mongo_id == self.test_batch_id).one()
+                    test_batch.add_milestone(
+                        'NbInstanceToSetup',
+                        {'nb': len(instance_threads)}
+                    )
+                    session.save(test_batch, safe=True)
 
             for t in instance_threads:
                 t.join()
@@ -172,13 +174,12 @@ class GridRunner(BaseRunner):
             self.info_log("The test batch is now ready!")
 
             # MILESTONE
-            with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
-                test_batch = session.query(Testbatch)\
-                    .filter(Testbatch.mongo_id == self.test_batch_id).one()
-                runner_metadata = test_batch.runner_metadata
-                runner_metadata['instance_setup_completed'] = True
-                test_batch.runner_metadata = runner_metadata
-                session.save(test_batch, safe=True)
+            if len(instance_threads):
+                with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
+                    test_batch = session.query(Testbatch)\
+                        .filter(Testbatch.mongo_id == self.test_batch_id).one()
+                    test_batch.add_milestone('InstanceSetupCompleted')
+                    session.save(test_batch, safe=True)
 
             try:
                 self.run()
@@ -199,9 +200,7 @@ class GridRunner(BaseRunner):
                         test_batch = session.query(Testbatch)\
                             .filter(Testbatch.mongo_id == self.test_batch_id)\
                             .one()
-                        runner_metadata = test_batch.runner_metadata
-                        runner_metadata['instance_teardown_completed'] = True
-                        test_batch.runner_metadata = runner_metadata
+                        test_batch.add_milestone('InstanceTearDownCompleted')
                         session.save(test_batch, safe=True)
 
                     # Kill selenium server
@@ -213,9 +212,9 @@ class GridRunner(BaseRunner):
                             with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
                                 test_batch = session.query(Testbatch)\
                                     .filter(Testbatch.mongo_id == self.test_batch_id).one()  # noqa
-                                runner_metadata = test_batch.runner_metadata
-                                runner_metadata['selenium_server_killed'] = True  # noqa
-                                test_batch.runner_metadata = runner_metadata
+                                test_batch.add_milestone(
+                                    'SeleniumServerKilled'
+                                )
                                 session.save(test_batch, safe=True)
 
                     # Kill xvfb process
@@ -358,15 +357,17 @@ class GridRunner(BaseRunner):
         with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
             test_batch = session.query(Testbatch)\
                 .filter(Testbatch.mongo_id == self.test_batch_id).one()
+            if test_batch.killed:
+                test_batch.add_milestone('TerminatingTestBatch')
+                session.save(test_batch, safe=True)
 
-        if test_batch.killed:
-            self.info_log("Killing itself")
-            for t in [t for t in threading.enumerate() if type(t) != threading._MainThread]:  # noqa
-                if not t.test.ending_timestamp:
-                    self.info_log("Killing: %s" % t.test._name)
-                    t.test.end()
+                self.info_log("Killing itself")
+                for t in [t for t in threading.enumerate() if type(t) != threading._MainThread]:  # noqa
+                    if not t.test.ending_timestamp:
+                        self.info_log("Killing: %s" % t.test._name)
+                        t.test.end()
 
-            raise TestRunnerKilledException("Killed")
+                raise TestRunnerKilledException("Killed")
 
     def tear_down_instances(self):
         """Tear down all instances
@@ -410,9 +411,28 @@ class GridRunner(BaseRunner):
 
             self.selenium_pid = process.pid
 
+            # Milestone
+            with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
+                test_batch = session.query(Testbatch)\
+                    .filter(Testbatch.mongo_id == self.test_batch_id).one()  # noqa
+                test_batch.add_milestone(
+                    'SeleniumServerStarted'
+                )
+                session.save(test_batch, safe=True)
+
             self.info_log('Selenium server pid: %s' % self.selenium_pid)
         else:
             self.info_log('Selenium is already running.')
+
+            # Milestone
+            with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
+                test_batch = session.query(Testbatch)\
+                    .filter(Testbatch.mongo_id == self.test_batch_id).one()  # noqa
+                test_batch.add_milestone(
+                    'SeleniumServerAlreadyRunning'
+                )
+                session.save(test_batch, safe=True)
+
             return True
 
         for i in range(30):

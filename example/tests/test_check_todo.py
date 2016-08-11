@@ -13,3 +13,5 @@ class Test(BaseTest):
         todo.check()
 
         todo.assert_visible("sv:todo_completed", "#2")
+
+        raise Exception('test')

@@ -104,7 +104,6 @@ async def init(loop):
 
         static_path = os.path.join(ROOT, 'releases', release_version)
 
-    # TODO create a symlink to the tb_results dir
     app.router.add_static('/', static_path, name='static')
     logger.info(
         "Serving static: {static_path}"
@@ -112,6 +111,21 @@ async def init(loop):
             static_path=static_path
         )
     )
+
+    try:
+        os.symlink(
+            os.path.join(
+                BROME_CONFIG['project']['test_batch_result_path'],
+                'tb_results'
+            ),
+            os.path.join(static_path, 'tb_results')
+        )
+        logger.info(
+            "Serving test batch results from symlink: %s"
+            % BROME_CONFIG['project']['test_batch_result_path']
+        )
+    except FileExistsError:
+        pass
 
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(static_path))
 

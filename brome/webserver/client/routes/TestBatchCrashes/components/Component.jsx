@@ -26,9 +26,10 @@ class TestBatchCrashes extends BaseComponent {
   componentWillMount () {
     this.debug('componentWillMount')
 
+    this.fetchTestBatchCrashes(true)
     this._interval = setInterval(
       () => {
-        this.fetchTestBatchCrashes()
+        this.fetchTestBatchCrashes(false)
       },
       2000
     )
@@ -53,10 +54,11 @@ class TestBatchCrashes extends BaseComponent {
     clearInterval(this._interval)
   }
 
-  fetchTestBatchCrashes () {
+  fetchTestBatchCrashes (loading) {
     this.props.actions.doLoadTestBatchCrashes(
       this.props.state.session,
-      this.getTestBatchUid()
+      this.getTestBatchUid(),
+      loading
     )
   }
 

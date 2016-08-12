@@ -3,6 +3,7 @@ import React from 'react'
 import ImageGallery from 'react-image-gallery'
 import 'react-image-gallery/build/image-gallery.css'
 
+import BrowserBadge from 'components/ux/BrowserBadge'
 import Loading from 'components/ux/Loading'
 import ErrorMsg from 'components/ux/ErrorMsg'
 import ComponentStyle from './ComponentStyle.postcss'
@@ -14,6 +15,11 @@ class TestBatchScreenshots extends BaseComponent {
 
     this._initLogger()
     this._bind(
+      'getBrowserId',
+      'getBrowserIcon',
+      'getBrowserName',
+      'getBrowserVersion',
+      'getPlatform',
       'fetchScreenshots',
       'fullScreen',
       'playSlider',
@@ -47,6 +53,7 @@ class TestBatchScreenshots extends BaseComponent {
   }
 
   fetchScreenshots (testBatchUid) {
+    let browserId = this.getBrowserId()
     let data = {
       token: this.props.state.session.token,
       actions: [
@@ -54,7 +61,8 @@ class TestBatchScreenshots extends BaseComponent {
           action: 'read',
           model: 'testscreenshot',
           filters: {
-            test_batch_id: testBatchUid
+            test_batch_id: testBatchUid,
+            browser_id: browserId
           }
         }, {
           action: 'read',
@@ -65,6 +73,26 @@ class TestBatchScreenshots extends BaseComponent {
     }
 
     this.props.actions.doFetchScreenshots(data)
+  }
+
+  getBrowserId () {
+    return this.props.location.query['browserId']
+  }
+
+  getBrowserName () {
+    return this.props.location.query['browserName']
+  }
+
+  getBrowserIcon () {
+    return this.props.location.query['browserIcon']
+  }
+
+  getBrowserVersion () {
+    return this.props.location.query['browserVersion']
+  }
+
+  getPlatform () {
+    return this.props.location.query['platform']
   }
 
   pauseSlider () {
@@ -125,13 +153,29 @@ class TestBatchScreenshots extends BaseComponent {
       testBatchScreenshots.screenshots.map((value, index) => {
         items.push({
           original: value.file_path,
+          description: value.title,
           thumbnail: value.file_path
         })
       })
 
       return (
         <div className='container-fluid'>
-          <h2>Test Batch Screenshots <small>({testBatchScreenshots.testBatch.friendly_name}) ({testBatchScreenshots.testBatch.uid})</small></h2>
+          <h2>
+            Test Batch Screenshots
+            {' - '}
+            <small>
+              ({testBatchScreenshots.testBatch.friendly_name}) ({testBatchScreenshots.testBatch.uid})
+            </small>
+            {' - '}
+            <small>
+              <BrowserBadge
+                browserName={this.getBrowserName()}
+                browserIcon={this.getBrowserIcon()}
+                browserVersion={this.getBrowserVersion()}
+                platform={this.getPlatform()}
+              />
+            </small>
+          </h2>
           <ImageGallery
             ref='imageGallery'
             items={items}

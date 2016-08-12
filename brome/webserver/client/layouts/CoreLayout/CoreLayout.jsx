@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { bindActionCreators } from 'redux'
 
+import './global.css'
 import GrowlNotification from 'components/ux/GrowlNotification'
 import CoreLayoutStyle from './CoreLayoutStyle.postcss'
 import BaseComponent from 'core/BaseComponent'

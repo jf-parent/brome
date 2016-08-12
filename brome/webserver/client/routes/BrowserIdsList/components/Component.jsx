@@ -9,25 +9,25 @@ import Pager from 'components/ux/Pager'
 import Loading from 'components/ux/Loading'
 import BaseComponent from 'core/BaseComponent'
 
-const TEST_INSTANCE_LIMIT = 10
+const BROWSER_IDS_LIMIT = 10
 
-class TestInstanceList extends BaseComponent {
+class BrowserIdsList extends BaseComponent {
   constructor (props) {
     super(props)
 
     this._initLogger()
     this._bind(
-      'getTestBatch',
       'getPath',
       'getTestBatchUid',
-      'fetchTestInstance'
+      'getTestBatch',
+      'fetchBrowserIds'
     )
   }
 
   componentWillMount () {
     this.debug('componentWillUnmount')
 
-    this.fetchTestInstance(0)
+    this.fetchBrowserIds(0)
   }
 
   componentWillReceiveProps () {
@@ -46,7 +46,7 @@ class TestInstanceList extends BaseComponent {
       // Alive
       } else {
         this._interval = setTimeout(() => {
-          this.fetchTestInstance(0)
+          this.fetchBrowserIds(0)
         },
         2000)
       }
@@ -59,12 +59,22 @@ class TestInstanceList extends BaseComponent {
     clearInterval(this._interval)
   }
 
-  fetchTestInstance (skip) {
-    this.props.actions.doFetchTestInstance(
-      this.props.state.session,
-      this.getTestBatchUid(),
+  fetchBrowserIds (skip) {
+    let data = {
+      token: this.props.state.session.token,
+      actions: {
+        action: 'read',
+        uid: this.getTestBatchUid(),
+        skip: skip,
+        limit: BROWSER_IDS_LIMIT,
+        model: 'testbatch'
+      }
+    }
+
+    this.props.actions.doFetchBrowserIds(
+      data,
       skip,
-      TEST_INSTANCE_LIMIT
+      BROWSER_IDS_LIMIT
     )
   }
 
@@ -77,44 +87,52 @@ class TestInstanceList extends BaseComponent {
   }
 
   getTestBatch () {
-    return this.props.state.testinstancelist.testBatch
+    return this.props.state.browseridslist.testBatch
   }
 
   render () {
-    let testinstancelist = this.props.state.testinstancelist
+    let browseridslist = this.props.state.browseridslist
     let path = this.getPath()
 
-    if (testinstancelist.error) {
-      return <ErrorMsg msgId={testinstancelist.error} />
-    } else if (testinstancelist.testInstanceList === null) {
+    if (browseridslist.error) {
+      return <ErrorMsg msgId={browseridslist.error} />
+    } else if (browseridslist.loading) {
       return (
         <div className='container-fluid'>
           <Loading style={{left: '50%'}} />
         </div>
       )
     } else {
-      let testInstances = this.props.state.testinstancelist.testInstanceList
+      let browserIdsList = browseridslist.browserIdsList
       let testBatch = this.getTestBatch()
 
       return (
         <div>
           <h2 className='text-center'>
-            Test Instance List <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
+            Browser Ids List <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
           </h2>
           <ul>
           {(() => {
-            return testInstances.map((testInstance, index) => {
-              // TODO ellipsis
+            return browserIdsList.map((browserId, index) => {
               return (
                 <li key={index}>
                   <small>
-                    <Link className='btn btn-default btn-link' to={path + '?testinstanceuid=' + testInstance.uid}>
-                      {testInstance.name}
+                    <Link
+                      className='btn btn-default btn-link'
+                      to={
+                        path +
+                        '?browserId=' + browserId.id +
+                        '&browserName=' + browserId.capabilities.browserName +
+                        '&browserIcon=' + browserId.capabilities.browserName +
+                        '&browserVersion=' + browserId.capabilities.version +
+                        '&platform=' + browserId.capabilities.platform
+                      }
+                    >
                       <BrowserBadge
-                        browserName={testInstance.browser_capabilities.browserName}
-                        browserIcon={testInstance.browser_capabilities.browserName}
-                        browserVersion={testInstance.browser_capabilities.version}
-                        platform={testInstance.browser_capabilities.platform}
+                        browserName={browserId.capabilities.browserName}
+                        browserIcon={browserId.capabilities.browserName}
+                        browserVersion={browserId.capabilities.version}
+                        platform={browserId.capabilities.platform}
                       />
                     </Link>
                   </small>
@@ -124,10 +142,10 @@ class TestInstanceList extends BaseComponent {
           })()}
           </ul>
           <Pager
-            skippedItem={testinstancelist.skip}
-            fetchData={this.fetchTestInstance}
-            totalItem={testinstancelist.totalTestInstance}
-            itemPerPage={TEST_INSTANCE_LIMIT}
+            skippedItem={browseridslist.skip}
+            fetchData={this.fetchBrowserIds}
+            totalItem={browseridslist.totalBrowserIds}
+            itemPerPage={BROWSER_IDS_LIMIT}
           />
         </div>
       )
@@ -135,4 +153,4 @@ class TestInstanceList extends BaseComponent {
   }
 }
 
-module.exports = TestInstanceList
+module.exports = BrowserIdsList

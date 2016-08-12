@@ -91,7 +91,9 @@ class TestBatchCrashes extends BaseComponent {
             let crashes = testbatchcrashes.crashes
 
             return crashes.map((crash, index) => {
-              let crashTitle = <span>
+              let crashTitle = <div style={{top: '-40px'}} className='text-ellipsis'>
+                <i className='fa fa-exclamation-triangle' aria-hidden='true'></i>
+                {' '}
                 {crash.title}
                 <BrowserBadge
                   browserName={crash.browser_capabilities.browserName}
@@ -99,7 +101,7 @@ class TestBatchCrashes extends BaseComponent {
                   browserVersion={crash.browser_capabilities.version}
                   platform={crash.browser_capabilities.platform}
                 />
-              </span>
+              </div>
 
               return (
                 <div key={index}>

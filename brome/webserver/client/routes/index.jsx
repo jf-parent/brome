@@ -5,6 +5,7 @@ import Profile from 'routes/Profile'
 import Video from 'routes/Video'
 import ErrorPage from 'routes/ErrorPage'
 import Register from 'routes/Register'
+import browserIdsList from 'routes/browserIdsList'
 import TestBatchList from 'routes/TestBatchList'
 import TestBatchDetail from 'routes/TestBatchDetail'
 import TestBatchRunnerLog from 'routes/TestBatchRunnerLog'
@@ -22,6 +23,7 @@ export const createRoutes = (store) => ({
   component: CoreLayout,
   childRoutes: [
     TestBatchList(store),
+    browserIdsList(store),
     StartTestBatch(store),
     TestBatchScreenshots(store),
     TestBatchCrashes(store),

@@ -962,17 +962,17 @@ class ProxyDriver(object):
 
             if take_screenshot:
                 if self.test_instance._runner_dir:
-                    screenshot_name = '%s.png' % \
+                    _screenshot_name = '%s.png' % \
                         string_to_filename(screenshot_name)
 
                     relative_path = os.path.join(
                             self.test_instance._screenshot_relative_dir,
-                            screenshot_name
+                            _screenshot_name
                     )
 
                     full_path = os.path.join(
                             self.test_instance._screenshot_dir,
-                            screenshot_name
+                            _screenshot_name
                     )
 
                     self._driver.save_screenshot(
@@ -982,16 +982,17 @@ class ProxyDriver(object):
                     save_to_db = True
         else:
             if self.test_instance._runner_dir:
-                screenshot_name = '%s.png' % get_timestamp()
+                screenshot_name = get_timestamp()
+                _screenshot_name = '%s.png' % screenshot_name
 
                 relative_path = os.path.join(
                         self.test_instance._screenshot_relative_dir,
-                        screenshot_name
+                        _screenshot_name
                 )
 
                 full_path = os.path.join(
                         self.test_instance._screenshot_dir,
-                        screenshot_name
+                        _screenshot_name
                 )
 
                 self._driver.save_screenshot(
@@ -1028,15 +1029,15 @@ class ProxyDriver(object):
         self.info_log("Taking a quality screenshot...")
 
         if self.test_instance._runner_dir:
-            screenshot_name = '%s.png' % string_to_filename(screenshot_name)
+            _screenshot_name = '%s.png' % string_to_filename(screenshot_name)
             relative_path = os.path.join(
                     self.test_instance._quality_screenshot_relative_dir,
-                    screenshot_name
+                    _screenshot_name
                 )
 
             full_path = os.path.join(
                     self.test_instance._quality_screenshot_dir,
-                    screenshot_name
+                    _screenshot_name
                 )
             self._driver.save_screenshot(
                 full_path

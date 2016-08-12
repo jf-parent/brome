@@ -105,7 +105,9 @@ class TestInstanceDetailList extends BaseComponent {
           <ul>
           {(() => {
             return testInstances.map((testInstance, index) => {
-              let title = <span>
+              let title = <div style={{top: '-40px'}} className='text-ellipsis'>
+                <i className='fa fa-sticky-note-o' aria-hidden='true'></i>
+                {' '}
                 {testInstance.name}
                 <BrowserBadge
                   browserName={testInstance.browser_capabilities.browserName}
@@ -113,7 +115,7 @@ class TestInstanceDetailList extends BaseComponent {
                   browserVersion={testInstance.browser_capabilities.version}
                   platform={testInstance.browser_capabilities.platform}
                 />
-              </span>
+              </div>
               let startingTimestamp = moment(testInstance.starting_timestamp)
               let endingTimestamp
               if (testInstance.ending_timestamp) {

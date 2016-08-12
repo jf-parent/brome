@@ -65,6 +65,29 @@ class Testbatch(BaseModel):
     def update_milestone(self, milestone_id, values):
         self.runner_metadata['milestones'][milestone_id]['values'] = values
 
+    async def get_browser_ids(self, context):
+        db_session = context.get('db_session')
+
+        browser_ids = []
+
+        unique_browser_ids = db_session.query(Testinstance)\
+            .filter(Testinstance.test_batch_id == self.get_uid())\
+            .distinct('browser_id')
+
+        for browser_id in unique_browser_ids:
+            capabilities = db_session.query(Testinstance)\
+                .filter(Testinstance.test_batch_id == self.get_uid())\
+                .filter(Testinstance.browser_id == browser_id)\
+                .first().browser_capabilities
+
+            browser_id_dict = {
+                'id': browser_id,
+                'capabilities': capabilities
+            }
+            browser_ids.append(browser_id_dict)
+
+        return browser_ids
+
     async def get_milestones(self):
         data = []
         if 'milestones' in self.runner_metadata.keys():
@@ -172,7 +195,7 @@ class Testbatch(BaseModel):
         data['friendly_name'] = self.friendly_name
         data['killed'] = self.killed
         data['total_tests'] = self.total_tests
-        data['runner_metadata'] = self.runner_metadata
+        data['browser_ids'] = await self.get_browser_ids(context)
         data['total_executed_tests'] = await self.get_total_executed_tests(context)  # noqa
         data['total_executing_tests'] = await self.get_total_executings_tests(context)  # noqa
         data['starting_timestamp'] = self.starting_timestamp.isoformat()

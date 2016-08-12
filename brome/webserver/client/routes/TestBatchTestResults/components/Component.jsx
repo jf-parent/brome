@@ -8,7 +8,7 @@ import 'rc-collapse/assets/index.css'
 import VideoPlayer from 'components/ux/VideoPlayer'
 import Loading from 'components/ux/Loading'
 import ErrorMsg from 'components/ux/ErrorMsg'
-import ComponentStyle from './ComponentStyle.postcss'
+// import ComponentStyle from './ComponentStyle.postcss'
 import Pager from 'components/ux/Pager'
 import BaseComponent from 'core/BaseComponent'
 
@@ -99,7 +99,7 @@ class TestBatchTestResults extends BaseComponent {
                 headerStyle['color'] = 'red'
                 headerIcon = 'fa-thumbs-down'
               }
-              let header = <div className={ComponentStyle['text-ellipsis']}>
+              let header = <div style={{top: '-40px'}} className='text-ellipsis'>
                 <i className={'fa ' + headerIcon} style={headerStyle} aria-hidden='true'></i>
                 {' '}
                 {testResult.test_id}

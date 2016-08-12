@@ -1,5 +1,6 @@
 import pickle
 import hashlib
+import shutil
 import os
 import argparse
 import re
@@ -7,6 +8,7 @@ from glob import glob
 
 from brome.core.utils import (
     update_test,
+    delete_database,
     DbSessionContext
 )
 from brome.webserver.server.app import run_app
@@ -48,7 +50,7 @@ class Brome(object):
         BROME_CONFIG['test_dict'] = test_dict
 
     def print_usage(self):
-        print('$ ./bro run | webserver | list | find')
+        print('$ ./bro admin | run | webserver | list | find')
         exit(1)
 
     def execute(self, args):
@@ -57,6 +59,8 @@ class Brome(object):
 
         if args[1] == 'run':
             self.run(args[2:])
+        elif args[1] == 'admin':
+            self.admin(args[2:])
         elif args[1] == 'find':
             self.find(args[2:])
         elif args[1] == 'list':
@@ -180,6 +184,89 @@ class Brome(object):
         for index, test in enumerate(tests):
             test_name = test.split(os.sep)[-1][5:-3]
             print("[%s]\t%s" % (index, test_name))
+
+    def admin(self, args):
+        parser = argparse.ArgumentParser(description='Brome admin')
+
+        parser.add_argument(
+                            '--reset',
+                            dest='reset',
+                            action='store_true',
+                            help='delete the database + delete the test batch results + update the test collection'  # noqa
+        )
+
+        parser.add_argument(
+                            '--delete-test-states',
+                            dest='delete_test_states',
+                            action='store_true',
+                            help='Delete all the test states'
+        )
+
+        parser.add_argument(
+                            '--delete-test-results',
+                            dest='delete_test_result',
+                            action='store_true',
+                            help='Delete all the test batch results'
+        )
+
+        parser.add_argument(
+                            '--delete-database',
+                            dest='delete_database',
+                            action='store_true',
+                            help='Delete the project database'
+        )
+
+        parser.add_argument(
+                            '--update-test',
+                            dest='update_test',
+                            action='store_true',
+                            help='Update the test in the database'
+        )
+
+        parsed_args = parser.parse_args(args)
+
+        def delete_test_states():
+            states_dir = os.path.join(
+                BROME_CONFIG["project"]["absolute_path"],
+                BROME_CONFIG["brome"]["script_folder_name"],
+                "states"
+            )
+            try:
+                shutil.rmtree(states_dir)
+            except OSError:
+                pass
+
+            try:
+                os.makedirs(states_dir)
+            except OSError:
+                pass
+
+            print('States deleted')
+
+        def delete_test_batch_result():
+            tb_results_path = os.path.join(
+                BROME_CONFIG['project']['test_batch_result_path'],
+                'tb_results'
+            )
+            if os.path.exists(tb_results_path):
+                shutil.rmtree(tb_results_path)
+                print('Test batch result (%s) deleted!' % tb_results_path)
+            else:
+                print('Nothing to delete')
+
+        if parsed_args.reset:
+            delete_database(BROME_CONFIG['database']['mongo_database_name'])
+            delete_test_batch_result()
+            if BROME_CONFIG['test_dict']:
+                self.update_test()
+        elif parsed_args.delete_test_result:
+            delete_test_batch_result()
+        elif parsed_args.delete_test_states:
+            delete_test_states()
+        elif parsed_args.delete_database:
+            delete_database(BROME_CONFIG['database']['mongo_database_name'])
+        elif parsed_args.update_test:
+            self.update_test()
 
     def find(self, args):
         parser = argparse.ArgumentParser(description='Brome find')

@@ -92,7 +92,7 @@ class TestBatchDetail extends BaseComponent {
       return (
         <ErrorMsg msgId='testBatchDetail.TerminatedTestBatchError' />
       )
-    } else if (testbatchdetail.terminatedTestBatchSuccess) {
+    } else if (testbatchdetail.terminatedTestBatchSuccess && !this.getTestBatch().terminated) {
       return (
         <SuccessMsg msgId='testBatchDetail.TerminatedTestBatchSuccess' />
       )
@@ -422,7 +422,7 @@ class TestBatchDetail extends BaseComponent {
       true
     )
     let screenshots = this.getTool(
-      'testbatchscreenshots',
+      'browseridslist',
       {
         id: 'testBatchDetail.TestBatchScreenshots',
         defaultMessage: 'Screenshots ({nb_screenshot})',
@@ -431,7 +431,8 @@ class TestBatchDetail extends BaseComponent {
         }
       },
       'file-image-o',
-      testBatchFeatures['screenshots']
+      testBatchFeatures['screenshots'],
+      '&path=testbatchscreenshots'
     )
     let crashReports = this.getTool(
       'testbatchcrashes',

@@ -6,6 +6,7 @@ import Collapse, { Panel } from 'rc-collapse'
 import 'rc-collapse/assets/index.css'
 
 // import ComponentStyle from './ComponentStyle.postcss'
+import Breadcrumbs from 'components/ux/Breadcrumbs'
 import BrowserBadge from 'components/ux/BrowserBadge'
 import ErrorMsg from 'components/ux/ErrorMsg'
 import Pager from 'components/ux/Pager'
@@ -96,9 +97,20 @@ class TestInstanceDetailList extends BaseComponent {
     } else {
       let testInstances = this.props.state.testinstancedetaillist.testInstanceDetailList
       let testBatch = this.getTestBatch()
+      let routes = [
+        {
+          msgId: 'TestBatchDetail',
+          to: '/testbatchdetail?testbatchuid=' + testBatch.uid
+        },
+        {
+          msgId: 'TestInstanceDetailList',
+          disable: true
+        }
+      ]
 
       return (
         <div>
+          <Breadcrumbs routes={routes} />
           <h2 className='text-center'>
             Test Instance List <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
           </h2>

@@ -4,6 +4,7 @@ import Collapse, { Panel } from 'rc-collapse'
 import 'rc-collapse/assets/index.css'
 
 // import ComponentStyle from './ComponentStyle.postcss'
+import Breadcrumbs from 'components/ux/Breadcrumbs'
 import BrowserBadge from 'components/ux/BrowserBadge'
 import ErrorMsg from 'components/ux/ErrorMsg'
 import Pager from 'components/ux/Pager'
@@ -89,9 +90,20 @@ class TestInstanceNetworkCapture extends BaseComponent {
     } else {
       let testInstances = this.props.state.testinstancenetworkcapture.testInstanceNetworkCaptureList
       let testBatch = this.getTestBatch()
+      let routes = [
+        {
+          msgId: 'TestBatchDetail',
+          to: '/testbatchdetail?testbatchuid=' + testBatch.uid
+        },
+        {
+          msgId: 'TestInstanceNetworkCapture',
+          disable: true
+        }
+      ]
 
       return (
         <div>
+          <Breadcrumbs routes={routes} />
           <h2 className='text-center'>
             Test Instance Network Capture List <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
           </h2>

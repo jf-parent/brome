@@ -3,6 +3,7 @@ import React from 'react'
 import ImageGallery from 'react-image-gallery'
 import 'react-image-gallery/build/image-gallery.css'
 
+import Breadcrumbs from 'components/ux/Breadcrumbs'
 import BrowserBadge from 'components/ux/BrowserBadge'
 import Loading from 'components/ux/Loading'
 import ErrorMsg from 'components/ux/ErrorMsg'
@@ -157,9 +158,24 @@ class TestBatchScreenshots extends BaseComponent {
           thumbnail: value.file_path
         })
       })
+      let routes = [
+        {
+          msgId: 'TestBatchDetail',
+          to: '/testbatchdetail?testbatchuid=' + testBatchScreenshots.testBatch.uid
+        },
+        {
+          msgId: 'BrowserIdsList',
+          to: '/browseridslist?path=testbatchscreenshots&testbatchuid=' + testBatchScreenshots.testBatch.uid
+        },
+        {
+          msgId: 'TestBatchScreenshots',
+          disable: true
+        }
+      ]
 
       return (
         <div className='container-fluid'>
+          <Breadcrumbs routes={routes} />
           <h2>
             Test Batch Screenshots
             {' - '}

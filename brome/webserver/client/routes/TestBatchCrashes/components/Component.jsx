@@ -3,6 +3,7 @@ import React from 'react'
 import Collapse, { Panel } from 'rc-collapse'
 import 'rc-collapse/assets/index.css'
 
+import Breadcrumbs from 'components/ux/Breadcrumbs'
 import VideoPlayer from 'components/ux/VideoPlayer'
 import BrowserBadge from 'components/ux/BrowserBadge'
 import Loading from 'components/ux/Loading'
@@ -83,8 +84,19 @@ class TestBatchCrashes extends BaseComponent {
       )
     } else {
       let testBatch = this.props.state.testbatchcrashes.testBatch
+      let routes = [
+        {
+          msgId: 'TestBatchDetail',
+          to: '/testbatchdetail?testbatchuid=' + testBatch.uid
+        },
+        {
+          msgId: 'TestBatchCrashes',
+          disable: true
+        }
+      ]
       return (
         <div>
+          <Breadcrumbs routes={routes} />
           <h2>Test Batch Crashes <small>({testBatch.friendly_name}) ({testBatch.uid})</small></h2>
 
           {(() => {

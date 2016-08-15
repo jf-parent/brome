@@ -8,6 +8,7 @@ import 'rc-collapse/assets/index.css'
 import Select from 'react-select'
 import 'react-select/dist/react-select.css'
 
+import Breadcrumbs from 'components/ux/Breadcrumbs'
 import VideoPlayer from 'components/ux/VideoPlayer'
 import Loading from 'components/ux/Loading'
 import ErrorMsg from 'components/ux/ErrorMsg'
@@ -73,14 +74,15 @@ class TestBatchTestResults extends BaseComponent {
     let testid = this.refs.inputFilterBy.value
     let testbatchtestresults = this.props.state.testbatchtestresults
 
-    if (testid) {
-      this.fetchTestResults(
-        0,
-        true,
-        testid,
-        testbatchtestresults.orderBy
-      )
+    if (testid === '') {
+      testid = true
     }
+    this.fetchTestResults(
+      0,
+      true,
+      testid,
+      testbatchtestresults.orderBy
+    )
   }
 
   onChangeOrderBy (orderBy) {
@@ -144,9 +146,20 @@ class TestBatchTestResults extends BaseComponent {
         {value: 'result_asc', label: 'Result (asc)'},
         {value: 'result_desc', label: 'Result (desc)'}
       ]
+      let routes = [
+        {
+          msgId: 'TestBatchDetail',
+          to: '/testbatchdetail?testbatchuid=' + testBatch.uid
+        },
+        {
+          msgId: 'TestBatchTestResults',
+          disable: true
+        }
+      ]
 
       return (
         <div className='container-fluid'>
+          <Breadcrumbs routes={routes} />
           <div className='row'>
             <div className='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
               <h2>Test Results <small>({testBatch.friendly_name}) ({testBatch.uid})</small></h2>
@@ -179,68 +192,78 @@ class TestBatchTestResults extends BaseComponent {
           {(() => {
             let testResults = testbatchtestresults.testResults
 
-            return testResults.map((testResult, index) => {
-              let headerStyle = {}
-              let headerIcon = null
-              if (testResult.result) {
-                headerStyle['color'] = 'green'
-                headerIcon = 'fa-thumbs-up'
-              } else {
-                headerStyle['color'] = 'red'
-                headerIcon = 'fa-thumbs-down'
-              }
-              let header = <div style={{top: '-40px'}} className='text-ellipsis'>
-                <i className={'fa ' + headerIcon} style={headerStyle} aria-hidden='true'></i>
-                {' '}
-                {testResult.testid}
-                {' '}
-                {testResult.title}
-                <BrowserBadge
-                  browserName={testResult.browser_capabilities.browserName}
-                  browserVersion={testResult.browser_capabilities.version}
-                  browserIcon={testResult.browser_capabilities.browserName}
-                  platform={testResult.browser_capabilities.platform}
-                />
-              </div>
+            if (testResults.length) {
+              return testResults.map((testResult, index) => {
+                let headerStyle = {}
+                let headerIcon = null
+                if (testResult.result) {
+                  headerStyle['color'] = 'green'
+                  headerIcon = 'fa-thumbs-up'
+                } else {
+                  headerStyle['color'] = 'red'
+                  headerIcon = 'fa-thumbs-down'
+                }
+                let header = <div style={{top: '-40px'}} className='text-ellipsis'>
+                  <i className={'fa ' + headerIcon} style={headerStyle} aria-hidden='true'></i>
+                  {' '}
+                  {testResult.testid}
+                  {' '}
+                  {testResult.title}
+                  <BrowserBadge
+                    browserName={testResult.browser_capabilities.browserName}
+                    browserVersion={testResult.browser_capabilities.version}
+                    browserIcon={testResult.browser_capabilities.browserName}
+                    platform={testResult.browser_capabilities.platform}
+                  />
+                </div>
+                return (
+                  <div className='row' key={index}>
+                    <Collapse accordion>
+                      <Panel header={header} key={index}>
+                        <Collapse accordion>
+                          <Panel header='Screenshot'>
+                            {(() => {
+                              if (testResult.screenshot_path !== '') {
+                                return (
+                                  <a href={testResult.screenshot_path} target='_blank'>
+                                    <img className='img-responsive' src={testResult.screenshot_path} />
+                                  </a>
+                                )
+                              } else {
+                                return (
+                                  <small>No screenshot</small>
+                                )
+                              }
+                            })()}
+                          </Panel>
+                          <Panel header='Video Capture'>
+                            {(() => {
+                              if (testResult.video_capture_path !== '') {
+                                return (
+                                  <VideoPlayer src={testResult.video_capture_path} currentTime={testResult.video_capture_current_time} />
+                                )
+                              } else {
+                                return (
+                                  <small>No video capture</small>
+                                )
+                              }
+                            })()}
+                          </Panel>
+                        </Collapse>
+                      </Panel>
+                    </Collapse>
+                  </div>
+                )
+              })
+            } else {
               return (
-                <div className='row' key={index}>
-                  <Collapse accordion>
-                    <Panel header={header} key={index}>
-                      <Collapse accordion>
-                        <Panel header='Screenshot'>
-                          {(() => {
-                            if (testResult.screenshot_path !== '') {
-                              return (
-                                <a href={testResult.screenshot_path} target='_blank'>
-                                  <img className='img-responsive' src={testResult.screenshot_path} />
-                                </a>
-                              )
-                            } else {
-                              return (
-                                <small>No screenshot</small>
-                              )
-                            }
-                          })()}
-                        </Panel>
-                        <Panel header='Video Capture'>
-                          {(() => {
-                            if (testResult.video_capture_path !== '') {
-                              return (
-                                <VideoPlayer src={testResult.video_capture_path} currentTime={testResult.video_capture_current_time} />
-                              )
-                            } else {
-                              return (
-                                <small>No video capture</small>
-                              )
-                            }
-                          })()}
-                        </Panel>
-                      </Collapse>
-                    </Panel>
-                  </Collapse>
+                <div className='row' style={{marginBottom: '15px'}}>
+                  <div className='col-xs-12 col-sm-12 col-md-3 col-lg-3 col-md-offset-5 col-lg-offset-5'>
+                    <h2>No Test Result</h2>
+                  </div>
                 </div>
               )
-            })
+            }
           })()}
           <Pager
             skippedItem={testbatchtestresults.skip}

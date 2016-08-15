@@ -1,7 +1,7 @@
 import React from 'react'
 import { defineMessages, FormattedMessage } from 'react-intl'
 
-import ComponentStyle from './ComponentStyle.postcss'
+// import ComponentStyle from './ComponentStyle.postcss'
 import SecureFormStyle from 'components/ux/SecureFormStyle.postcss'
 import SecureForm from 'components/ux/SecureForm'
 import ErrorMsg from 'components/ux/ErrorMsg'
@@ -87,19 +87,6 @@ class Profile extends BaseComponent {
     const oldPasswordPlaceholder = formatMessage(profileMessages.oldPasswordPlaceholder)
     const newPasswordPlaceholder = formatMessage(profileMessages.newPasswordPlaceholder)
 
-    // EMAIL CONFIRMATION
-    let emailConfirmed = null
-    if (this.props.state.session.user.email_confirmed) {
-      emailConfirmed = <i className={'fa fa-check-circle-o ' + ComponentStyle['email-confirmed']} aria-hidden='true'></i>
-    } else {
-      emailConfirmed = <i className={'fa fa-times ' + ComponentStyle['email-not-confirmed']} aria-hidden='true'>
-        &nbsp;<FormattedMessage
-          id='profile.EmailNotVerified'
-          defaultMessage='your email is not verified'
-        />
-      </i>
-    }
-
     return (
       <center>
         <SecureForm ref='form' onValid={this.enableButton} onInvalid={this.disableButton} session={this.props.state.session}>
@@ -110,7 +97,6 @@ class Profile extends BaseComponent {
               defaultMessage='Settings'
             />
           </h2>
-          {emailConfirmed}
           <ValidatedInput type='email' name='email' placeholder={emailPlaceholder} validations='isEmail' autoFocus _value={this.props.state.session.user.email} />
           <ValidatedInput type='text' name='name' placeholder={namePlaceholder} validations='minLength:2' maxLength='60' _value={this.props.state.session.user.name} />
           <PasswordInput type='password' name='old_password' quiet placeholder={oldPasswordPlaceholder} />

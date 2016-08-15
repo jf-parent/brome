@@ -2,6 +2,7 @@ import React from 'react'
 import axios from 'axios'
 // import { FormattedMessage } from 'react-intl'
 
+import Breadcrumbs from 'components/ux/Breadcrumbs'
 import Loading from 'components/ux/Loading'
 import ErrorMsg from 'components/ux/ErrorMsg'
 // import ComponentStyle from './ComponentStyle.postcss'
@@ -90,9 +91,20 @@ class TestBatchRunnerLog extends BaseComponent {
         margin: '4px',
         overflow: 'scroll'
       }
+      let routes = [
+        {
+          msgId: 'TestBatchDetail',
+          to: '/testbatchdetail?testbatchuid=' + this.state.parent.uid
+        },
+        {
+          msgId: 'TestBatchRunnerLog',
+          disable: true
+        }
+      ]
 
       return (
         <div>
+          <Breadcrumbs routes={routes} />
           <h2>Test Batch Log <small>({this.state.parent.friendly_name}) ({this.state.parent.uid})</small></h2>
           <span>
             Log:{' '}

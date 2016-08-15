@@ -3,6 +3,7 @@ import axios from 'axios'
 // import { FormattedMessage } from 'react-intl'
 
 // import ComponentStyle from './ComponentStyle.postcss'
+import Breadcrumbs from 'components/ux/Breadcrumbs'
 import BrowserBadge from 'components/ux/BrowserBadge'
 import Loading from 'components/ux/Loading'
 import ErrorMsg from 'components/ux/ErrorMsg'
@@ -43,7 +44,7 @@ class TestInstanceLog extends BaseComponent {
             name: response.data.name
           })
 
-          if (!response.parent.terminated) {
+          if (!response.data.parent.terminated) {
             this._interval = setTimeout(
               () => {
                 this.fetchTestInstanceLog(testInstanceUid, response.data.total)
@@ -92,6 +93,20 @@ class TestInstanceLog extends BaseComponent {
         margin: '4px',
         overflow: 'scroll'
       }
+      let routes = [
+        {
+          msgId: 'TestBatchDetail',
+          to: '/testbatchdetail?testbatchuid=' + this.state.parent.test_batch_id
+        },
+        {
+          msgId: 'TestInstanceList',
+          to: 'testinstancelist?path=testinstancelog&testbatchuid=' + this.state.parent.test_batch_id
+        },
+        {
+          msgId: 'TestInstanceLog',
+          disable: true
+        }
+      ]
 
       let browserBadge = <BrowserBadge
         browserName={this.state.parent.browser_capabilities.browserName}
@@ -101,6 +116,7 @@ class TestInstanceLog extends BaseComponent {
       />
       return (
         <div>
+          <Breadcrumbs routes={routes} />
           <h2>Test Batch Log <small>({this.state.parent.name} - {browserBadge}) ({this.state.parent.test_batch_id})</small></h2>
           <span>
             Log:{' '}

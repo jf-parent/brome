@@ -38,7 +38,7 @@ class BrowserBadge extends Component {
             return null
           }
         })()}
-        <small>{' '}{this.title(this.props.browserName)}</small>
+        <small><b>{' '}{this.title(this.props.browserName)}</b></small>
         {(() => {
           // Browser Version
           if (this.props.browserVersion) {
@@ -53,7 +53,7 @@ class BrowserBadge extends Component {
           // Platform
           if (this.props.platform) {
             return (
-              <b>{' - '}{this.props.platform}</b>
+              <small>{' - '}{this.props.platform}</small>
             )
           } else {
             return null

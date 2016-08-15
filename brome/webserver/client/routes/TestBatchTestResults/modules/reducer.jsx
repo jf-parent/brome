@@ -40,7 +40,9 @@ export function doLoadTestResults (session, testBatchUid, skip, limit, loading, 
       ]
     }
 
-    if (filterBy) {
+    if (typeof filterBy === 'boolean') {
+      filterBy = null
+    } else if (filterBy) {
       data.actions[0]['filters'] = {
         'testid': filterBy
       }

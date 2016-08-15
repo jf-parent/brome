@@ -3,6 +3,7 @@ import { Link } from 'react-router'
 // import { FormattedMessage } from 'react-intl'
 
 // import ComponentStyle from './ComponentStyle.postcss'
+import Breadcrumbs from 'components/ux/Breadcrumbs'
 import BrowserBadge from 'components/ux/BrowserBadge'
 import ErrorMsg from 'components/ux/ErrorMsg'
 import Pager from 'components/ux/Pager'
@@ -105,9 +106,20 @@ class BrowserIdsList extends BaseComponent {
     } else {
       let browserIdsList = browseridslist.browserIdsList
       let testBatch = this.getTestBatch()
+      let routes = [
+        {
+          msgId: 'TestBatchDetail',
+          to: '/testbatchdetail?testbatchuid=' + testBatch.uid
+        },
+        {
+          msgId: 'BrowserIdsList',
+          disable: true
+        }
+      ]
 
       return (
         <div>
+          <Breadcrumbs routes={routes} />
           <h2 className='text-center'>
             Browser Ids List <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
           </h2>

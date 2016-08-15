@@ -1505,6 +1505,10 @@ class ProxyDriver(object):
             test_result.title = test_name
             if test:
                 test_result.test_id = test.get_uid()
+                test_result.testid = test.test_id
+            else:
+                test_result.testid = test_name
+
             test_result.test_instance_id = self.test_instance._test_instance_id
             test_result.test_batch_id = self.runner.test_batch_id
 

@@ -1,9 +1,12 @@
 import React from 'react'
-// import { FormattedMessage } from 'react-intl'
+import { FormattedMessage, defineMessages } from 'react-intl'
+import LaddaButton from 'components/ux/LaddaButton'
 import BrowserBadge from 'components/ux/BrowserBadge'
 import Collapse, { Panel } from 'rc-collapse'
 import 'font-awesome-webpack'
 import 'rc-collapse/assets/index.css'
+import Select from 'react-select'
+import 'react-select/dist/react-select.css'
 
 import VideoPlayer from 'components/ux/VideoPlayer'
 import Loading from 'components/ux/Loading'
@@ -14,6 +17,13 @@ import BaseComponent from 'core/BaseComponent'
 
 const TEST_RESULT_LIMIT = 10
 
+const testBatchTestResultsMessages = defineMessages({
+  filterByPlaceholder: {
+    id: 'testbatchtestresults.FilterBy',
+    defaultMessage: 'Search (test id)'
+  }
+})
+
 class TestBatchTestResults extends BaseComponent {
   constructor (props) {
     super(props)
@@ -21,6 +31,8 @@ class TestBatchTestResults extends BaseComponent {
     this._initLogger()
     this._bind(
       'fetchTestResults',
+      'onSearch',
+      'onChangeOrderBy',
       'getTestBatchUid'
     )
   }
@@ -33,6 +45,8 @@ class TestBatchTestResults extends BaseComponent {
       },
       2000
     )
+
+    // TODO add orderBy and filterBy url params
   }
 
   componentWillReceiveProps () {
@@ -54,17 +68,52 @@ class TestBatchTestResults extends BaseComponent {
     clearInterval(this._interval)
   }
 
+  onSearch (event) {
+    event.preventDefault()
+    let testid = this.refs.inputFilterBy.value
+    let testbatchtestresults = this.props.state.testbatchtestresults
+
+    if (testid) {
+      this.fetchTestResults(
+        0,
+        true,
+        testid,
+        testbatchtestresults.orderBy
+      )
+    }
+  }
+
+  onChangeOrderBy (orderBy) {
+    let testbatchtestresults = this.props.state.testbatchtestresults
+    let effectiveOrderBy = 'clear'
+
+    if (orderBy) {
+      effectiveOrderBy = orderBy.value
+    }
+
+    this.fetchTestResults(
+      0,
+      true,
+      testbatchtestresults.filterBy,
+      effectiveOrderBy
+    )
+  }
+
   getTestBatchUid () {
     return this.props.location.query['testbatchuid']
   }
 
-  fetchTestResults (skip, loading = false) {
+  fetchTestResults (skip, loading = false, filterBy = null, orderBy = null) {
+    let testbatchtestresults = this.props.state.testbatchtestresults
+
     this.props.actions.doLoadTestResults(
       this.props.state.session,
       this.getTestBatchUid(),
       skip,
       TEST_RESULT_LIMIT,
-      loading
+      loading,
+      filterBy || testbatchtestresults.filterBy,
+      orderBy || testbatchtestresults.orderBy,
     )
   }
 
@@ -80,12 +129,53 @@ class TestBatchTestResults extends BaseComponent {
     } else if (testbatchtestresults.error) {
       return <ErrorMsg msgId={testbatchtestresults.error} name='error-test-batch-test-results' />
     } else {
-      let testBatch = this.props.state.testbatchtestresults.testBatch
+      const { formatMessage } = this._reactInternalInstance._context.intl
+      const filterByPlaceholder = formatMessage(testBatchTestResultsMessages.filterByPlaceholder)
+      let testBatch = testbatchtestresults.testBatch
+
+      // TODO translate
+      let orderByOptions = [
+        {value: 'created_ts_asc', label: 'Created timestamp (asc)'},
+        {value: 'created_ts_desc', label: 'Created timestamp (desc)'},
+        {value: 'testid_asc', label: 'Test id (asc)'},
+        {value: 'testid_desc', label: 'Test id (desc)'},
+        {value: 'title_asc', label: 'Title (asc)'},
+        {value: 'title_desc', label: 'Title (desc)'},
+        {value: 'result_asc', label: 'Result (asc)'},
+        {value: 'result_desc', label: 'Result (desc)'}
+      ]
 
       return (
-        <div>
-          <h2>Test Results <small>({testBatch.friendly_name}) ({testBatch.uid})</small></h2>
-
+        <div className='container-fluid'>
+          <div className='row'>
+            <div className='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
+              <h2>Test Results <small>({testBatch.friendly_name}) ({testBatch.uid})</small></h2>
+            </div>
+          </div>
+          <div className='row' style={{marginBottom: '15px'}}>
+            <div className='col-xs-12 col-sm-12 col-md-3 col-lg-3'>
+              <Select
+                placeholder='OrderBy'
+                name='orderBy'
+                value={testbatchtestresults.orderBy}
+                options={orderByOptions}
+                onChange={this.onChangeOrderBy}
+              />
+            </div>
+            <div className='col-xs-12 col-sm-12 col-md-3 col-lg-3'>
+              <input className='form-control' ref='inputFilterBy' placeholder={filterByPlaceholder} required defaultValue={testbatchtestresults.filterBy} />
+            </div>
+            <div className='col-xs-12 col-sm-12 col-md-2 col-lg-2'>
+              <LaddaButton ref='searchButton' btnClass='btn btn-md btn-primary btn-block' isLoading={testbatchtestresults.loading} onSubmit={this.onSearch}>
+                <i className='fa fa-search' aria-hidden='true'></i>
+                {' '}
+                <FormattedMessage
+                  id='testBatchTestResults.Search'
+                  defaultMessage='Search'
+                />
+              </LaddaButton>
+            </div>
+          </div>
           {(() => {
             let testResults = testbatchtestresults.testResults
 
@@ -102,7 +192,7 @@ class TestBatchTestResults extends BaseComponent {
               let header = <div style={{top: '-40px'}} className='text-ellipsis'>
                 <i className={'fa ' + headerIcon} style={headerStyle} aria-hidden='true'></i>
                 {' '}
-                {testResult.test_id}
+                {testResult.testid}
                 {' '}
                 {testResult.title}
                 <BrowserBadge
@@ -113,7 +203,7 @@ class TestBatchTestResults extends BaseComponent {
                 />
               </div>
               return (
-                <div key={index}>
+                <div className='row' key={index}>
                   <Collapse accordion>
                     <Panel header={header} key={index}>
                       <Collapse accordion>

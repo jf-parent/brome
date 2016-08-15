@@ -123,6 +123,7 @@
     "react-router": "^2.4.1",
     "react-router-active-component": "^4.0.0-rc.0",
     "react-router-redux": "^4.0.4",
+    "react-select": "^1.0.0-beta14",
     "react-slick": "^0.12.2",
     "react-transform-hmr": "^1.0.4",
     "react-ux-password-field": "^0.9.12",

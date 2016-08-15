@@ -8,7 +8,6 @@ from mongoalchemy.fields import (
 
 
 from brome.model.basemodel import BaseModel
-from brome.model.test import Test
 from brome.core import exceptions
 
 
@@ -17,6 +16,7 @@ class Testresult(BaseModel):
     browser_capabilities = DictField(AnythingField())
     browser_id = StringField()
     title = StringField()
+    testid = StringField(default='')
 
     root_path = StringField(default='')
     screenshot_path = StringField(default='')
@@ -40,7 +40,6 @@ class Testresult(BaseModel):
         return []
 
     async def serialize(self, context):
-        db_session = context.get('db_session')
         data = {}
         data['uid'] = self.get_uid()
         data['result'] = self.result
@@ -52,13 +51,7 @@ class Testresult(BaseModel):
         # data['video_capture_current_time'] = video_capture_current_time
         data['extra_data'] = self.extra_data
         data['title'] = self.title
-        if hasattr(self, 'test_id'):
-            test = db_session.query(Test)\
-                .filter(Test.mongo_id == self.test_id)\
-                .one()
-            data['test_id'] = test.test_id
-        else:
-            data['test_id'] = False
+        data['testid'] = self.testid
         data['test_instance_id'] = str(self.test_instance_id)
         data['test_batch_id'] = str(self.test_batch_id)
         return data
@@ -129,6 +122,14 @@ class Testresult(BaseModel):
         else:
             if is_new:
                 raise exceptions.MissingModelValueException('title')
+
+        # TESTID
+        testid = data.get('testid')
+        if testid is not None:
+            self.testid = testid
+        else:
+            if is_new:
+                raise exceptions.MissingModelValueException('testid')
 
         # TEST ID
         test_id = data.get('test_id')

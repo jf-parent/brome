@@ -125,7 +125,7 @@ class EC2Instance(BaseInstance):
 
         if not self.browser_config.get('launch'):
             self.warning_log("Skipping launch")
-            return
+            return True
 
         self.info_log("Starting up")
 

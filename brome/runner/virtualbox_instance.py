@@ -31,7 +31,7 @@ class VirtualboxInstance(BaseInstance):
         """Return the ip address of the node
         """
 
-        return self.ip
+        return self.browser_config.get('ip')
 
     def execute_command(self, command, **kwargs):
         """Execute a command on the node
@@ -74,7 +74,7 @@ class VirtualboxInstance(BaseInstance):
 
         # Do not launch the virtual machine
         if not self.browser_config.get('launch', False):
-            return
+            return True
 
         self.info_log("Starting up")
 

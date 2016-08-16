@@ -80,19 +80,19 @@ runner:
   sound_on_test_crash: !!python/unicode 'Crash'
   sound_on_test_finished: !!python/unicode 'Test finished'
 webserver:
-  ENV: 'production'
-  HOST: !!python/unicode '127.0.0.1'
-  PORT: 8080
-  REGISTRATION_TOKEN: !!python/unicode '' # CHANGEME
-  FILELOGGER: true
-  LOG_LEVEL: !!python/unicode 'INFO'
-  STREAMLOGGER: true
-  RELEASE: "latest"
-  MASTER_PASSWORD: "" # CHANGEME
-  ADMIN:
-    ENV: "development"
-    LOG_LEVEL: "DEBUG"
-    USERNAME: "" # CHANGEME
-    PASSWORD: "" # CHANGEME
-    HOST: "0.0.0.0"
-    PORT: 31337
+  env: 'production'
+  host: !!python/unicode '127.0.0.1'
+  port: 8080
+  registration_token: !!python/unicode '' # CHANGEME
+  filelogger: true
+  log_level: !!python/unicode 'INFO'
+  streamlogger: true
+  release: "latest"
+  master_password: "" # CHANGEME
+  admin:
+    env: "development"
+    log_level: "DEBUG"
+    username: "" # CHANGEME
+    password: "" # CHANGEME
+    host: "0.0.0.0"
+    port: 31337

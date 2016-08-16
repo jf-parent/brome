@@ -7,7 +7,7 @@ from subprocess import Popen
 from datetime import datetime
 import math
 
-import virtualbox
+# import virtualbox
 
 from brome.core.utils import (
     DbSessionContext
@@ -98,15 +98,17 @@ class GridRunner(BaseRunner):
                 # VIRTUALBOX
                 elif browser_config.location == 'virtualbox':
                     # Instanciate only one vbox
+                    """
                     if not hasattr(self, 'vbox'):
                         self.vbox = virtualbox.VirtualBox()
+                    """
 
                     vbox_instance = virtualbox_instance.VirtualboxInstance(
                         runner=self,
                         browser_config=browser_config,
                         index=i,
-                        vbox=self.vbox
                     )
+                    # vbox=self.vbox
 
                     vbox_instance_thread = InstanceThread(vbox_instance)
                     vbox_instance_thread.start()
@@ -411,15 +413,6 @@ class GridRunner(BaseRunner):
 
             self.selenium_pid = process.pid
 
-            # Milestone
-            with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
-                test_batch = session.query(Testbatch)\
-                    .filter(Testbatch.mongo_id == self.test_batch_id).one()  # noqa
-                test_batch.add_milestone(
-                    'SeleniumServerStarted'
-                )
-                session.save(test_batch, safe=True)
-
             self.info_log('Selenium server pid: %s' % self.selenium_pid)
         else:
             self.info_log('Selenium is already running.')
@@ -441,6 +434,16 @@ class GridRunner(BaseRunner):
 
             if result:
                 self.info_log('[Done]Selenium server is running.')
+
+                # Milestone
+                with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
+                    test_batch = session.query(Testbatch)\
+                        .filter(Testbatch.mongo_id == self.test_batch_id).one()  # noqa
+                    test_batch.add_milestone(
+                        'SeleniumServerStarted'
+                    )
+                    session.save(test_batch, safe=True)
+
                 return True
             sleep(2)
 

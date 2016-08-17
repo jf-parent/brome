@@ -1,4 +1,5 @@
 from time import sleep
+from subprocess import Popen
 from subprocess import call
 
 import virtualbox
@@ -55,7 +56,7 @@ class VirtualboxInstance(BaseInstance):
             )
             password = self.browser_config.get('password')
 
-            ssh.connect(self.ip, username=username, password=password)
+            ssh.connect(self.get_ip(), username=username, password=password)
 
             stdin, stdout, stderr = ssh.exec_command(command)
 
@@ -67,6 +68,44 @@ class VirtualboxInstance(BaseInstance):
             msg = "Execute_command exception: %s" % str(e)
             self.error_log(msg)
             raise Exception(msg)
+
+    def scp_file_remote_to_local(self, remote_path, local_path):
+        """Scp a remote file to local
+
+        Args:
+            remote_path (str)
+            local_path (str)
+        """
+
+        sshadd_command = [
+            'ssh-add',
+            '/Users/pyrat/.ssh/ubuntuNode'
+        ]
+        self.info_log(
+            "executing command: %s" %
+            ' '.join(sshadd_command)
+        )
+        p = Popen(sshadd_command)
+        p.wait()
+
+        scp_command = [
+            'scp',
+            '-o',
+            'StrictHostKeyChecking=no',
+            '%s@%s:"%s"' %
+            (
+                self.browser_config.get('username'),
+                self.get_ip(),
+                remote_path
+            ),
+            local_path
+        ]
+        self.info_log(
+            "executing command: %s" %
+            ' '.join(scp_command)
+        )
+        p = Popen(scp_command)
+        p.wait()
 
     def startup(self):
         """This will launch and configure the virtual box machine
@@ -207,6 +246,35 @@ class VirtualboxInstance(BaseInstance):
 
         elif self.browser_config.get('platform').lower() == 'windows':
             self.session.console.power_down()
+
+    def start_video_recording(self, local_video_file_path, video_filename):
+        """Start the video recording
+        """
+
+        self.runner.info_log("Starting video recording...")
+
+        self.local_video_recording_file_path = local_video_file_path
+        self.remote_video_recording_file_path = video_filename
+
+        self.execute_command(
+            "./start_recording.sh '%s'" % self.remote_video_recording_file_path
+        )
+
+    def stop_video_recording(self):
+        """Stop the video recording
+        """
+
+        self.runner.info_log("Stopping video recording...")
+
+        self.execute_command("./stop_recording.sh")
+        # self.runner.info_log("output: %s"%output)
+
+        sleep(5)
+
+        self.scp_file_remote_to_local(
+            self.remote_video_recording_file_path,
+            self.local_video_recording_file_path
+        )
 
     def get_id(self):
         return '%s - %s' % (self.browser_config.browser_id, self.index)

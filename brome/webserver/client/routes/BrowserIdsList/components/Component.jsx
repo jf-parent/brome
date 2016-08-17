@@ -137,7 +137,8 @@ class BrowserIdsList extends BaseComponent {
                         '&browserName=' + browserId.capabilities.browserName +
                         '&browserIcon=' + browserId.capabilities.browserName +
                         '&browserVersion=' + browserId.capabilities.version +
-                        '&platform=' + browserId.capabilities.platform
+                        '&platform=' + browserId.capabilities.platform +
+                        '&testbatchuid=' + testBatch.uid
                       }
                     >
                       <BrowserBadge

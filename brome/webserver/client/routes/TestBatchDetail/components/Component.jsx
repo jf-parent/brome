@@ -383,13 +383,14 @@ class TestBatchDetail extends BaseComponent {
     let testBatch = this.getTestBatch()
     let testBatchFeatures = testBatch.features
     let sessionVideoCapture = this.getTool(
-      'sessionvideocapture',
+      'testinstancelist',
       {
         id: 'testBatchDetail.VideoCaptureLabel',
         defaultMessage: 'Video Capture'
       },
       'video-camera',
-      testBatchFeatures['session_video_capture']
+      testBatchFeatures['session_video_capture'],
+      '&path=testinstancevideo'
     )
     let networkCapture = this.getTool(
       'testinstancenetworkcapture',

@@ -17,12 +17,14 @@ import TestBatchScreenshots from 'routes/TestBatchScreenshots'
 import TestBatchCrashes from 'routes/TestBatchCrashes'
 import TestBatchTestResults from 'routes/TestBatchTestResults'
 import StartTestBatch from 'routes/StartTestBatch'
+import TestInstanceVideo from 'routes/TestInstanceVideo'
 
 export const createRoutes = (store) => ({
   path: '/',
   component: CoreLayout,
   childRoutes: [
     TestBatchList(store),
+    TestInstanceVideo(store),
     browserIdsList(store),
     StartTestBatch(store),
     TestBatchScreenshots(store),

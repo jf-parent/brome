@@ -105,17 +105,25 @@ class BaseTest(object):
         with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
 
             extra_data = {}
-            if self._browser_config.location == 'ec2':
+            if self._browser_config.location in 'ec2':
                 self._private_ip = self.pdriver.get_ip_of_node()
                 extra_data['instance_private_ip'] = self._runner.instances_ip[self._private_ip].private_ip  # noqa
                 extra_data['instance_public_ip'] = self._runner.instances_ip[self._private_ip].public_ip  # noqa
                 extra_data['instance_public_dns'] = self._runner.instances_ip[self._private_ip].public_dns  # noqa
                 extra_data['instance_private_dns'] = self._runner.instances_ip[self._private_ip].private_dns  # noqa
+            elif self._browser_config.location in 'virtualbox':
+                self._private_ip = self._browser_config.get('ip')
+                extra_data['instance_private_ip'] = self._private_ip
 
+            capabilities = {
+                'browserName': self.pdriver.capabilities['browserName'],
+                'platform': self.pdriver.capabilities['platform'],
+                'version': self.pdriver.capabilities['version']
+            }
             test_instance = Testinstance()
             test_instance.name = self._name
             test_instance.starting_timestamp = starting_timestamp
-            test_instance.browser_capabilities = self.pdriver.capabilities
+            test_instance.browser_capabilities = capabilities
             test_instance.browser_id = self.pdriver.get_id()
             test_instance.test_batch_id = self._test_batch_id
             test_instance.extra_data = extra_data
@@ -166,9 +174,9 @@ class BaseTest(object):
     def start_video_recording(self):
         self._video_capture_file_relative_path = ''
 
-        # TODO support virutalbox, localhost and more
+        # TODO support localhost and more
         if self._browser_config.get('record_session') and \
-                self._browser_config.location == 'ec2':
+                self._browser_config.location in ['ec2', 'virtualbox']:
             self.info_log("Starting screen capture...")
 
             video_capture_file = string_to_filename(
@@ -778,9 +786,14 @@ class BaseTest(object):
 
         # CRASH OBJECT
         with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
+            capabilities = {
+                'browserName': self.pdriver.capabilities['browserName'],
+                'platform': self.pdriver.capabilities['platform'],
+                'version': self.pdriver.capabilities['version']
+            }
             test_crash = Testcrash()
             test_crash.title = self._name
-            test_crash.browser_capabilities = self.pdriver.capabilities
+            test_crash.browser_capabilities = capabilities
             test_crash.browser_id = self.pdriver.get_id()
             test_crash.timestamp = datetime.now()
             test_crash.trace = str(tb)

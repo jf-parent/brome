@@ -52,12 +52,14 @@ class BaseRunner(object):
 
             haikunator = Haikunator()
 
-            test_batch = Testbatch()
-            test_batch.starting_timestamp = self.starting_timestamp
-            test_batch.friendly_name = haikunator.haikunate(
+            self.friendly_name = haikunator.haikunate(
                 token_length=0,
                 delimiter='.'
             )
+
+            test_batch = Testbatch()
+            test_batch.friendly_name = self.friendly_name
+            test_batch.starting_timestamp = self.starting_timestamp
             test_batch.pid = current_pid
             if BROME_CONFIG['runner_args']['remote_runner']:
                 test_batch.total_tests = len(self.tests) * len(BROME_CONFIG['runner_args']['remote_runner'].split(','))  # noqa
@@ -76,11 +78,11 @@ class BaseRunner(object):
             self.runner_dir = os.path.join(
                 self.root_test_result_dir,
                 "tb_results",
-                "tb_%s" % self.test_batch_id
+                "tb_%s" % self.friendly_name
             )
             self.relative_runner_dir = os.path.join(
                 "tb_results",
-                "tb_%s" % self.test_batch_id
+                "tb_%s" % self.friendly_name
             )
             create_dir_if_doesnt_exist(self.runner_dir)
         else:

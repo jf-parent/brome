@@ -1003,8 +1003,13 @@ class ProxyDriver(object):
 
         if save_to_db:
             with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
+                capabilities = {
+                    'browserName': self.capabilities['browserName'],
+                    'platform': self.capabilities['platform'],
+                    'version': self.capabilities['version']
+                }
                 screenshot = Testscreenshot()
-                screenshot.browser_capabilities = self.capabilities
+                screenshot.browser_capabilities = capabilities
                 screenshot.browser_id = self.get_id()
                 # TODO support s3
                 screenshot.location = 'local_file_system'
@@ -1044,9 +1049,14 @@ class ProxyDriver(object):
             )
 
             with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
+                capabilities = {
+                    'browserName': self.capabilities['browserName'],
+                    'platform': self.capabilities['platform'],
+                    'version': self.capabilities['version']
+                }
                 quality_screenshot = Testqualityscreenshot()
                 quality_screenshot.timestamp = datetime.now()
-                quality_screenshot.browser_capabilities = self.capabilities
+                quality_screenshot.browser_capabilities = capabilities
                 quality_screenshot.browser_id = self.get_id()
                 quality_screenshot.file_path = relative_path
                 # TODO support s3
@@ -1493,10 +1503,15 @@ class ProxyDriver(object):
                 if BROME_CONFIG['runner']['embed_on_assertion_failure'] and embed:  # noqa
                     self.embed(title=embed_title)
 
+            capabilities = {
+                'browserName': self.capabilities['browserName'],
+                'platform': self.capabilities['platform'],
+                'version': self.capabilities['version']
+            }
             test_result = Testresult()
             test_result.result = result
             test_result.timestamp = datetime.now()
-            test_result.browser_capabilities = self.capabilities
+            test_result.browser_capabilities = capabilities
             test_result.browser_id = self.get_id()
             test_result.root_path = self.test_instance._runner.root_test_result_dir  # noqa
             test_result.screenshot_path = screenshot_relative_path

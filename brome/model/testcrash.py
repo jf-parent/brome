@@ -9,6 +9,7 @@ from mongoalchemy.fields import (
 
 
 from brome.model.basemodel import BaseModel
+from brome.model.testinstance import Testinstance
 from brome.core import exceptions
 
 
@@ -35,6 +36,20 @@ class Testcrash(BaseModel):
         except AttributeError:
             return "Testcrash uninitialized"
 
+    def get_video_current_time(self, context):
+        db_session = context.get('db_session')
+
+        test_instance = db_session.query(Testinstance)\
+            .filter(Testinstance.mongo_id == self.test_instance_id)\
+            .one()
+
+        created_ts = self.created_ts
+        test_instance_created_ts = test_instance.created_ts
+
+        current_time = (created_ts - test_instance_created_ts).total_seconds()
+
+        return current_time
+
     async def sanitize_data(self, context):
         return []
 
@@ -44,9 +59,12 @@ class Testcrash(BaseModel):
         data['browser_capabilities'] = self.browser_capabilities
         data['screenshot_path'] = self.screenshot_path
         data['video_capture_path'] = self.video_capture_path
-        # TODO calculate the total time of the video capture
-        # TODO video_capture_total_time - max(30 seconds)
-        # data['video_capture_current_time'] = video_capture_current_time
+        data['video_capture_current_time'] = min(
+            10,
+            self.get_video_current_time(
+                context
+            )
+        )
         data['root_path'] = self.root_path
         data['extra_data'] = self.extra_data
         data['title'] = self.title

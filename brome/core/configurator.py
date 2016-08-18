@@ -475,7 +475,7 @@ default_config["highlight"]["highlight_when_element_receive_keys"] = {
     'title': 'Highlight when element received keys'
 }
 
-default_config["highlight"]["highlight_when_element_is_visible"] = {
+default_config["highlight"]["element_is_visible"] = {
     'default': False,
     'type': 'checkbox',
     'visible': True,

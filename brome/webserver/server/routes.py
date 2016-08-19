@@ -17,7 +17,7 @@ from brome.webserver.server.brome_api.views import (
 
 routes = [
     # CLIENT ROUTE => not /api/* and not /static/*
-    ('GET', r'/{to:(?!api)(?!static).*}', index, 'index'),
+    ('GET', r'/{to:(?!api)(?!static)(?!tb_results).*}', index, 'index'),
 
     # API ROUTES
     ('GET', '/api/get_session', api_get_session, 'get_session'),

@@ -413,7 +413,7 @@ class EC2Instance(BaseInstance):
             self.scp_file_remote_to_local(remote_file_path, local_file_path)
 
         # kill the proxy
-        self.execute_command("fuser -k %i/tcp" % self.proxy_port)
+        self.execute_command("fuser -k %s/tcp" % self.proxy_port)
 
     def get_id(self):
         return '%s - %s' % (self.browser_config.browser_id, self.index)

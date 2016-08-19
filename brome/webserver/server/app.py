@@ -87,6 +87,21 @@ async def init(loop):
     if BROME_CONFIG['webserver'].get('env', 'production') in \
             ['development', 'test']:
         static_path = os.path.join(ROOT, 'dist-dev')
+        try:
+            os.symlink(
+                os.path.join(
+                    BROME_CONFIG['project']['test_batch_result_path'],
+                    'tb_results'
+                ),
+                os.path.join(static_path, 'static', 'tb_results')
+            )
+            logger.info(
+                "Serving test batch results from symlink: %s"
+                % BROME_CONFIG['project']['test_batch_result_path']
+            )
+        except FileExistsError:
+            pass
+
     else:
         if BROME_CONFIG['webserver'].get('release', 'latest') == 'latest':
             latest_version_path = os.path.join(
@@ -111,21 +126,6 @@ async def init(loop):
             static_path=static_path
         )
     )
-
-    try:
-        os.symlink(
-            os.path.join(
-                BROME_CONFIG['project']['test_batch_result_path'],
-                'tb_results'
-            ),
-            os.path.join(static_path, 'tb_results')
-        )
-        logger.info(
-            "Serving test batch results from symlink: %s"
-            % BROME_CONFIG['project']['test_batch_result_path']
-        )
-    except FileExistsError:
-        pass
 
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(static_path))
 

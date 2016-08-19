@@ -112,7 +112,7 @@ class EC2Instance(BaseInstance):
 
             ssh.close()
 
-            return ''.join(stdout), ''.join(stderr)
+            return b''.join(stdout), b''.join(stderr)
 
         except Exception as e:
             msg = "Execute_command exception: %s" % str(e)

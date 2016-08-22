@@ -244,22 +244,6 @@ class TestBatchScreenshots extends BaseComponent {
                   </label>
                 </div>
               </li>
-              <!--
-              <li>
-                <div className='checkbox'>
-                  <label>
-                    <input
-                      id='show_bullets'
-                      data-action='showBullets'
-                      type='checkbox'
-                      onChange={this.handleCheckboxChange}
-                      checked={this.state.showBullets}
-                    />
-                    Show bullets
-                  </label>
-                </div>
-              </li>
-              -->
               <li>
                 <div className='checkbox'>
                   <label>

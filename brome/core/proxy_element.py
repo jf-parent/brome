@@ -201,6 +201,7 @@ class ProxyElement(object):
             'highlight',
             BROME_CONFIG['highlight']['highlight_when_element_receive_keys']  # noqa
         )
+        """
         wait_until_clickable = kwargs.get(
             'wait_until_clickable',
             BROME_CONFIG['proxy_element']['wait_until_clickable']
@@ -212,6 +213,7 @@ class ProxyElement(object):
                 self.selector._selector,
                 raise_exception=True
             )
+        """
 
         if highlight:
             self.highlight(

@@ -33,7 +33,7 @@
   "testBatchDetail.TerminatedTestBatchSuccess": "The test batch will be terminated shortly...",
   "testBatchDetail.DeletedTestBatchError": "The test batch could not be deleted. See server log...",
   "testBatchDetail.deletedTestBatchSuccess": "The test batch has been deleted!",
-  "testBatchDetail.NbInstanceToSetup": "{nb} instance to setup",
+  "testBatchDetail.NbInstanceToSetup": "{nb} instances to setup",
   "testBatchDetail.InstanceSetupCompleted": "All instances are ready",
   "testBatchDetail.InstanceTearDownCompleted": "Tear down of instances finished",
   "testBatchDetail.SeleniumServerKilled": "Selenium server killed",

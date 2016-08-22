@@ -34,7 +34,7 @@ class TestBatchScreenshots extends BaseComponent {
       infinite: true,
       showIndex: true,
       slideOnThumbnailHover: false,
-      showBullets: true,
+      showBullets: false,
       showThumbnails: true,
       showNav: true,
       slideInterval: 2000,
@@ -244,6 +244,7 @@ class TestBatchScreenshots extends BaseComponent {
                   </label>
                 </div>
               </li>
+              <!--
               <li>
                 <div className='checkbox'>
                   <label>
@@ -258,6 +259,7 @@ class TestBatchScreenshots extends BaseComponent {
                   </label>
                 </div>
               </li>
+              -->
               <li>
                 <div className='checkbox'>
                   <label>

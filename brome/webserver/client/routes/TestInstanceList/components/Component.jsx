@@ -47,7 +47,7 @@ class TestInstanceList extends BaseComponent {
       // Alive
       } else {
         this._interval = setTimeout(() => {
-          this.fetchTestInstance(0)
+          this.fetchTestInstance(this.props.state.testinstancelist.skip)
         },
         2000)
       }

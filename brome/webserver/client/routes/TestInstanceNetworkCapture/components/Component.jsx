@@ -46,7 +46,7 @@ class TestInstanceNetworkCapture extends BaseComponent {
       // Alive
       } else {
         this._interval = setTimeout(() => {
-          this.fetchTestInstanceNetworkCapture(0)
+          this.fetchTestInstanceNetworkCapture(this.props.state.testinstancenetworkcapture.skip)
         },
         2000)
       }

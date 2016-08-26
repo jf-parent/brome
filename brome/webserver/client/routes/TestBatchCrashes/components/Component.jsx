@@ -11,7 +11,6 @@ import ErrorMsg from 'components/ux/ErrorMsg'
 // import ComponentStyle from './ComponentStyle.postcss'
 import BaseComponent from 'core/BaseComponent'
 
-// TODO add a pager (maybe?)
 class TestBatchCrashes extends BaseComponent {
   constructor (props) {
     super(props)

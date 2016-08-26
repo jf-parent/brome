@@ -31,34 +31,6 @@ class TestInstanceNetworkCapture extends BaseComponent {
     this.fetchTestInstanceNetworkCapture(0)
   }
 
-  componentWillReceiveProps () {
-    let testBatch = this.getTestBatch()
-
-    // Add a setTimeout if the testBatch is live
-    // Remove the interval otherwise
-    if (testBatch) {
-      // Terminated
-      if (testBatch.terminated) {
-        if (this._interval) {
-          clearInterval(this._interval)
-          this._interval = null
-        }
-      // Alive
-      } else {
-        this._interval = setTimeout(() => {
-          this.fetchTestInstanceNetworkCapture(this.props.state.testinstancenetworkcapture.skip)
-        },
-        2000)
-      }
-    }
-  }
-
-  componentWillUnmount () {
-    this.debug('componentWillUnmount')
-
-    clearInterval(this._interval)
-  }
-
   fetchTestInstanceNetworkCapture (skip) {
     this.props.actions.doFetchTestInstanceNetworkCapture(
       this.props.state.session,

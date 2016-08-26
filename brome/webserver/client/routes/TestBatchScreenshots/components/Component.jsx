@@ -45,12 +45,7 @@ class TestBatchScreenshots extends BaseComponent {
   componentWillMount () {
     let testBatchUid = this.props.location.query['testbatchuid']
 
-    // TODO set interval
     this.fetchScreenshots(testBatchUid)
-  }
-
-  componentWillUnmount () {
-    this.debug('componentWillUnmount')
   }
 
   fetchScreenshots (testBatchUid) {

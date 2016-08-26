@@ -2,8 +2,8 @@ class Stateful(object):
     def __getstate__(self):
         dict_ = {}
 
-        for key, value in self.__dict__.iteritems():
-            if type(value) in [str, unicode, int, float, dict, list] :
+        for key, value in iter(self.__dict__.items()):
+            if type(value) in [str, int, float, dict, list]:
                 dict_[key] = value
 
         return dict_
@@ -11,7 +11,7 @@ class Stateful(object):
     @classmethod
     def is_stateful(cls, value):
         if Stateful in value.__class__.__bases__ or \
-            type(value) in [int, unicode, str, dict, list, float]:
+                type(value) in [int, str, dict, list, float]:
             return True
         else:
             return False
@@ -34,7 +34,7 @@ class Stateful(object):
     @classmethod
     def cleanup_dict(cls, dict_):
         effective_dict = {}
-        for key, value in dict_.iteritems():
+        for key, value in iter(dict_.items()):
             if type(value) == list:
                 effective_dict[key] = cls.cleanup_list(value)
             elif type(value) == dict:
@@ -45,11 +45,11 @@ class Stateful(object):
                     effective_dict[key] = value
 
         return effective_dict
-        
+
     @classmethod
     def cleanup_state(cls, state):
         effective_state = {}
-        for key, value in state.iteritems():
+        for key, value in iter(state.items()):
             if type(value) == list:
                 effective_state[key] = cls.cleanup_list(value)
             elif type(value) == dict:

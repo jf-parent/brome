@@ -480,7 +480,7 @@ class BaseTest(object):
         state = {}
 
         # Remove all the instance variables that are private
-        state = {key: value for (key, value) in self.__dict__.iteritems() if key[0] != '_'}  # noqa
+        state = {key: value for (key, value) in iter(self.__dict__.items()) if key[0] != '_'}  # noqa
 
         # Remove the pdriver
         del state['pdriver']

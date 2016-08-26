@@ -524,7 +524,7 @@ class BaseTest(object):
                 for v in value:
                     set_pdriver(v)
             elif type(value) is dict:
-                for k, v in value.iteritems():
+                for k, v in iter(value.items()):
                     set_pdriver(v)
 
         # Load the state pickle
@@ -542,7 +542,7 @@ class BaseTest(object):
             return False
 
         # Set the pdriver
-        for key, value in state.iteritems():
+        for key, value in iter(state.items()):
             set_pdriver(value)
 
         # Update the instance variable dictionary

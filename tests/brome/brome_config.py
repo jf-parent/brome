@@ -2,6 +2,8 @@
 
 default_config = {}
 
+default_config['runner_args'] = {}
+
 # BROWSER
 default_config["browser"] = {}
 default_config["browser"]["maximize_window"] = False
@@ -55,7 +57,7 @@ default_config["logger_runner"]["filelogger"] = False
 default_config["logger_runner"]["format"] = \
     "[%(batchid)s]%(message)s"
 default_config["logger_runner"]["level"] = 'DEBUG'
-default_config["logger_runner"]["streamlogger"] = True
+default_config["logger_runner"]["streamlogger"] = False
 
 # LOGGER TEST
 default_config["logger_test"] = {}
@@ -63,7 +65,7 @@ default_config["logger_test"]["filelogger"] = False
 default_config["logger_test"]["format"] = \
     "[%(batchid)s]%(testname)s):%(message)s"
 default_config["logger_test"]["level"] = 'DEBUG'
-default_config["logger_test"]["streamlogger"] = True
+default_config["logger_test"]["streamlogger"] = False
 
 # PROJECT
 default_config["project"] = {}

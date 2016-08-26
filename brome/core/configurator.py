@@ -75,6 +75,22 @@ default_config["logger_test"] = {}
 default_config["ec2"] = {}
 default_config["grid_runner"] = {}
 default_config["webserver"] = {}
+default_config["runner_args"] = {}
+
+# RUNNER ARGS
+default_config["runner_args"]["remote_runner"] = {
+    'default': '',
+    'type': 'input',
+    'visible': False,
+    'title': ''
+}
+
+default_config["runner_args"]["localhost_runner"] = {
+    'default': '',
+    'type': 'input',
+    'visible': False,
+    'title': ''
+}
 
 # MITMPROXY
 default_config["mitmproxy"]["path"] = {

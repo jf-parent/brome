@@ -42,7 +42,7 @@ def test_wait_until_visible(browser_name, brome):
                 assert element
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -90,7 +90,7 @@ def test_wait_until_present(browser_name, brome):
                 assert el.get_attribute('id') == '2'
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -124,7 +124,7 @@ def test_wait_until_not_visible(browser_name, brome):
                 assert not element
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -160,7 +160,7 @@ def test_wait_until_not_present(browser_name, brome):
                 assert not False
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -213,7 +213,7 @@ def test_state(browser_name, brome):
                 assert hasattr(self, 'dict_')
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -561,7 +561,7 @@ def test_selector(browser_name, brome):
                 assert _selector.get_selector() == selector_dict['example_multiple_selector']['chrome|iphone|android'][3:]  # noqa
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -589,7 +589,7 @@ def test_select_all(browser_name, brome):
                 # TODO find a way to know that the text has been selected
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -619,7 +619,7 @@ def test_assert_wait_until_visible(browser_name, brome):
                 assert not ret
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -649,7 +649,7 @@ def test_assert_wait_until_present(browser_name, brome):
                 assert ret
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -700,7 +700,7 @@ def test_assert_intercept_javascript_error_disabled(browser_name, brome):
                 assert js_error == []
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
     brome_config['proxy_driver']['intercept_javascript_error'] = False
 
     brome.configure(
@@ -752,7 +752,7 @@ def test_assert_intercept_javascript_error(browser_name, brome):
                 assert js_error != self.pdriver.no_javascript_error_string
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
     brome_config['proxy_driver']['intercept_javascript_error'] = True
 
     brome.configure(
@@ -793,7 +793,7 @@ def test_assert_inject_script(browser_name, brome):
                 assert ret == 'test'
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -840,7 +840,7 @@ def test_assert_dnd(browser_name, brome):
                 """
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -874,7 +874,7 @@ def test_assert_click(browser_name, brome):
                 assert result
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -917,7 +917,7 @@ def test_assert_visible(browser_name, brome):
                 assert not ret
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -962,7 +962,7 @@ def test_assert_equal_not_equal(browser_name, brome):
                 assert not ret
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -1001,7 +1001,7 @@ def test_assert_present(browser_name, brome):
                 assert ret
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -1048,7 +1048,7 @@ def test_assert_not_visible(browser_name, brome):
                 assert not ret
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,
@@ -1095,7 +1095,7 @@ def test_assert_not_present(browser_name, brome):
                 assert ret
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,

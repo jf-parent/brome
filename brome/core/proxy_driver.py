@@ -783,7 +783,10 @@ class ProxyDriver(object):
                 else:
                     return self.no_javascript_error_string
         else:
-            return []
+            if return_type == 'list':
+                return []
+            else:
+                return self.no_javascript_error_string
 
     def pdb(self):
         """Start the python debugger

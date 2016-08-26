@@ -315,7 +315,6 @@ class GridRunner(BaseRunner):
                                 ) for th in threading.enumerate() if type(th) != threading._MainThread and hasattr(th, 'test')  # noqa
                             ])
                         ))
-                        active_thread = active_thread_test_number
                     except Exception as e:
                         self.error_log("print active exception: %s" % str(e))
 

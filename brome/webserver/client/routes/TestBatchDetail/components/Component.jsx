@@ -238,10 +238,12 @@ class TestBatchDetail extends BaseComponent {
             } else {
               return (
                 <li>
-                  <FormattedMessage
-                    id='testBatchDetail.NoTestFailed'
-                    defaultMessage='No test failed'
-                  />
+                  <small>
+                    <FormattedMessage
+                      id='testBatchDetail.NoTestFailed'
+                      defaultMessage='No test failed'
+                    />
+                  </small>
                 </li>
               )
             }
@@ -281,10 +283,12 @@ class TestBatchDetail extends BaseComponent {
             } else {
               return (
                 <li>
-                  <FormattedMessage
-                    id='testBatchDetail.NoCrashes'
-                    defaultMessage='No crashes'
-                  />
+                  <small>
+                    <FormattedMessage
+                      id='testBatchDetail.NoCrashes'
+                      defaultMessage='No crashes'
+                    />
+                  </small>
                 </li>
               )
             }

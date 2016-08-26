@@ -49,7 +49,7 @@ def test_grid_runner_ec2_config_validation(
         selenium_monkeypath,
         ec2_instance_monkeypath):
     brome_config = default_config.copy()
-    brome_config['runner']['remote_runner'] = 'dummy'
+    brome_config['runner_args']['remote_runner'] = 'dummy'
     brome_config['grid_runner']['start_selenium_server'] = False
 
     def reconfigure(browsers_dict):
@@ -100,7 +100,7 @@ def test_grid_runner_ec2_success(
     browsers_dict = copy.deepcopy(BROWSERS_DICT)
 
     brome_config = default_config.copy()
-    brome_config['runner']['remote_runner'] = 'dummy'
+    brome_config['runner_args']['remote_runner'] = 'dummy'
     brome_config['grid_runner']['start_selenium_server'] = False
     brome_config['logger_runner']['streamlogger'] = False
     brome_config['logger_test']['streamlogger'] = False

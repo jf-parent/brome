@@ -101,8 +101,12 @@ class BaseRunner(object):
                 .filter(Testbatch.mongo_id == self.test_batch_id)\
                 .one()
 
-            test_batch.root_path = self.root_test_result_dir
-            test_batch.log_file_path = self.relative_log_file_path
+            if self.root_test_result_dir:
+                test_batch.root_path = self.root_test_result_dir
+                test_batch.log_file_path = self.relative_log_file_path
+            else:
+                test_batch.root_path = ''
+                test_batch.log_file_path = ''
 
             session.save(test_batch, safe=True)
 

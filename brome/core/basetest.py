@@ -127,10 +127,16 @@ class BaseTest(object):
             test_instance.browser_id = self.pdriver.get_id()
             test_instance.test_batch_id = self._test_batch_id
             test_instance.extra_data = extra_data
-            test_instance.log_file_path = self._relative_log_file_path
-            test_instance.root_path = self._runner.root_test_result_dir
-            test_instance.network_capture_path = self._network_capture_file_relative_path  # noqa
-            test_instance.video_capture_path = self._video_capture_file_relative_path  # noqa
+            if self._runner.root_test_result_dir:
+                test_instance.log_file_path = self._relative_log_file_path
+                test_instance.root_path = self._runner.root_test_result_dir
+                test_instance.network_capture_path = self._network_capture_file_relative_path  # noqa
+                test_instance.video_capture_path = self._video_capture_file_relative_path  # noqa
+            else:
+                test_instance.log_file_path = ''
+                test_instance.root_path = ''
+                test_instance.network_capture_path = ''
+                test_instance.video_capture_path = ''
 
             session.save(test_instance, safe=True)
 
@@ -797,9 +803,14 @@ class BaseTest(object):
             test_crash.browser_id = self.pdriver.get_id()
             test_crash.timestamp = datetime.now()
             test_crash.trace = str(tb)
-            test_crash.root_path = self._runner.root_test_result_dir
-            test_crash.screenshot_path = crash_screenshot_relative_path
-            test_crash.video_capture_path = self._video_capture_file_relative_path  # noqa
+            if self._runner.root_test_result_dir:
+                test_crash.root_path = self._runner.root_test_result_dir
+                test_crash.screenshot_path = crash_screenshot_relative_path
+                test_crash.video_capture_path = self._video_capture_file_relative_path  # noqa
+            else:
+                test_crash.root_path = ''
+                test_crash.screenshot_path = ''
+                test_crash.video_capture_path = ''
             test_crash.extra_data = extra_data
             test_crash.test_instance_id = self._test_instance_id
             test_crash.test_batch_id = self._test_batch_id

@@ -34,34 +34,6 @@ class TestInstanceDetailList extends BaseComponent {
     this.fetchTestInstanceDetailList(0)
   }
 
-  componentWillReceiveProps () {
-    let testBatch = this.getTestBatch()
-
-    // Add a setTimeout if the testBatch is live
-    // Remove the interval otherwise
-    if (testBatch) {
-      // Terminated
-      if (testBatch.terminated) {
-        if (this._interval) {
-          clearInterval(this._interval)
-          this._interval = null
-        }
-      // Alive
-      } else {
-        this._interval = setTimeout(() => {
-          this.fetchTestInstanceDetailList(this.props.state.testinstancedetaillist.skip)
-        },
-        2000)
-      }
-    }
-  }
-
-  componentWillUnmount () {
-    this.debug('componentWillUnmount')
-
-    clearInterval(this._interval)
-  }
-
   fetchTestInstanceDetailList (skip) {
     this.props.actions.doFetchTestInstanceDetailList(
       this.props.state.session,

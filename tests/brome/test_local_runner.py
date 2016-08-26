@@ -22,7 +22,7 @@ def test_local_runner(browser_name, brome):
                 assert ret
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = 'phantomjs'
+    brome_config['runner_args']['localhost_runner'] = 'phantomjs'
 
     brome.configure(
         config=brome_config,

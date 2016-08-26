@@ -62,7 +62,7 @@ def test_proxy_element_list(browser_name, brome):
                     assert div.get_attribute('id') != '%d' % (i+1)
 
     brome_config = default_config.copy()
-    brome_config['runner']['localhost_runner'] = browser_name
+    brome_config['runner_args']['localhost_runner'] = browser_name
 
     brome.configure(
         config=brome_config,

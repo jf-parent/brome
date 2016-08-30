@@ -7,6 +7,7 @@ import tempfile
 import subprocess
 
 import yaml
+from aiohttp_session import get_session
 from aiohttp import web
 
 from brome.core.settings import BROME_CONFIG
@@ -123,6 +124,7 @@ class LogStreamOut(web.View):
 
         context = {
             'db_session': self.request.db_session,
+            'ws_session': await get_session(self.request),
             'method': 'read'
         }
 

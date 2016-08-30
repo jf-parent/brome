@@ -58,7 +58,6 @@ async def api_get_session(request):
     resp_data = {
         'success': success,
         'user': user,
-        'token': token,
-        'test': True
+        'token': token
     }
     return web.json_response(resp_data)

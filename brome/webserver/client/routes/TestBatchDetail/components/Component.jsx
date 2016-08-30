@@ -3,6 +3,7 @@ import { FormattedMessage } from 'react-intl'
 import { Link } from 'react-router'
 import 'font-awesome-webpack'
 import { Line } from 'rc-progress'
+import moment from 'moment'
 
 import LaddaButton from 'components/ux/LaddaButton'
 import ErrorMsg from 'components/ux/ErrorMsg'
@@ -20,6 +21,7 @@ class TestBatchDetail extends BaseComponent {
     this._bind(
       'getTestBatchUid',
       'getTestBatch',
+      'getRunningTime',
       'fetchTestBatchDetail',
       'getToolbelt',
       'getTool',
@@ -84,6 +86,43 @@ class TestBatchDetail extends BaseComponent {
       }
     }
     this.props.actions.doDelete(data)
+  }
+
+  getRunningTime () {
+    let testBatch = this.getTestBatch()
+
+    function pad2 (number) {
+      return (number < 10 ? '0' : '') + number
+    }
+    let startingTimestamp = moment(testBatch.starting_timestamp)
+    let endingTimestamp
+    if (testBatch.ending_timestamp) {
+      endingTimestamp = moment(testBatch.ending_timestamp)
+    } else {
+      endingTimestamp = Date.now()
+    }
+    let duration = moment.duration(moment(endingTimestamp).diff(startingTimestamp))
+    let hours = parseInt(duration.asHours())
+    let minutes = parseInt(duration.asMinutes()) - hours * 60
+    let seconds = parseInt(duration.asSeconds()) - hours * 60 - minutes * 60
+    let runningDuration = pad2(hours) + ':' + pad2(minutes) + ':' + pad2(seconds)
+
+    return (
+      <div className='row'>
+        <center>
+          <small>
+            <b>
+              <FormattedMessage
+                id='testBatchList.TotalDuration'
+                defaultMessage='Total duration:'
+              />
+            </b>
+            {' '}
+            {runningDuration}
+          </small>
+        </center>
+      </div>
+    )
   }
 
   getNotification () {
@@ -568,6 +607,7 @@ class TestBatchDetail extends BaseComponent {
             />
             <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
           </h2>
+          {this.getRunningTime()}
           {this.getProgress()}
           {this.getToolbelt()}
           {this.getTestResults()}

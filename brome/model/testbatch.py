@@ -9,6 +9,7 @@ from mongoalchemy.fields import (
     BoolField
 )
 
+from brome.core.utils import convert_tz_datetime
 from brome.model.basemodel import BaseModel
 from brome.model.testinstance import Testinstance
 from brome.model.testcrash import Testcrash
@@ -190,6 +191,8 @@ class Testbatch(BaseModel):
         return {k: data[k] for k in data if k in editable_fields}
 
     async def serialize(self, context):
+        ws_session = context.get('ws_session')
+
         data = {}
         data['uid'] = self.get_uid()
         data['friendly_name'] = self.friendly_name
@@ -198,7 +201,10 @@ class Testbatch(BaseModel):
         data['browser_ids'] = await self.get_browser_ids(context)
         data['total_executed_tests'] = await self.get_total_executed_tests(context)  # noqa
         data['total_executing_tests'] = await self.get_total_executings_tests(context)  # noqa
-        data['starting_timestamp'] = self.starting_timestamp.isoformat()
+        data['starting_timestamp'] = convert_tz_datetime(
+            self.starting_timestamp,
+            ws_session['tz']
+        ).isoformat()
         data['nb_screenshot'] = await self.get_nb_screenshot(context)
         data['root_path'] = self.root_path
         data['log_file_path'] = self.log_file_path
@@ -218,7 +224,10 @@ class Testbatch(BaseModel):
         data['terminated'] = self.terminated
         # Terminated test batch
         if self.terminated:
-            data['ending_timestamp'] = self.ending_timestamp.isoformat()
+            data['ending_timestamp'] = convert_tz_datetime(
+                self.ending_timestamp,
+                ws_session['tz']
+            ).isoformat()
 
         # Running test batch
         else:

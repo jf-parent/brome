@@ -30,6 +30,10 @@ class DbSessionContext(ContextDecorator):
         return False
 
 
+def convert_tz_datetime(datetime_input, to_tz):
+    return datetime_input.astimezone(tz.gettz(to_tz))
+
+
 def utcnow():
     return datetime.now(tz=pytz.utc)
 

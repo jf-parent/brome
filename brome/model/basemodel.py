@@ -11,8 +11,8 @@ from mongoalchemy.fields import (
 class BaseModel(Document):
 
     # TIMESTAMP
-    created_ts = CreatedField()
-    modified_ts = ModifiedField()
+    created_ts = CreatedField(tz_aware=True)
+    modified_ts = ModifiedField(tz_aware=True)
 
     # @abstractmethod
     async def sanitize_data(self, context):

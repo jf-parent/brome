@@ -1,7 +1,6 @@
 import logging
 import traceback
 from time import sleep
-from datetime import datetime
 import os
 import pickle
 import urllib
@@ -24,6 +23,7 @@ from brome.model.test import Test
 from brome.core import exceptions
 from brome.core.utils import (
     DbSessionContext,
+    utcnow,
     say,
     create_dir_if_doesnt_exist,
     string_to_filename
@@ -95,7 +95,7 @@ class BaseTest(object):
 
         # VIDEO RECORDING
         self.start_video_recording()
-        starting_timestamp = datetime.now()
+        starting_timestamp = utcnow()
 
         # TEST KWARGS
         self._test_config = test_config_to_dict(
@@ -704,7 +704,7 @@ class BaseTest(object):
                 instance.stop_proxy()
 
         self.stop_video_recording()
-        ending_timestamp = datetime.now()
+        ending_timestamp = utcnow()
 
         self.quit_driver()
 
@@ -801,7 +801,7 @@ class BaseTest(object):
             test_crash.title = self._name
             test_crash.browser_capabilities = capabilities
             test_crash.browser_id = self.pdriver.get_id()
-            test_crash.timestamp = datetime.now()
+            test_crash.timestamp = utcnow()
             test_crash.trace = str(tb)
             if self._runner.root_test_result_dir:
                 test_crash.root_path = self._runner.root_test_result_dir

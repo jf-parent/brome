@@ -1,6 +1,5 @@
 from tempfile import tempdir
 from inspect import currentframe
-from datetime import datetime
 import re
 import os
 
@@ -13,6 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from brome.core.utils import (
     say,
+    utcnow,
     string_to_filename,
     DbSessionContext,
     get_timestamp
@@ -1058,7 +1058,7 @@ class ProxyDriver(object):
                     'version': self.capabilities['version']
                 }
                 quality_screenshot = Testqualityscreenshot()
-                quality_screenshot.timestamp = datetime.now()
+                quality_screenshot.timestamp = utcnow()
                 quality_screenshot.browser_capabilities = capabilities
                 quality_screenshot.browser_id = self.get_id()
                 quality_screenshot.file_path = relative_path
@@ -1513,7 +1513,7 @@ class ProxyDriver(object):
             }
             test_result = Testresult()
             test_result.result = result
-            test_result.timestamp = datetime.now()
+            test_result.timestamp = utcnow()
             test_result.browser_capabilities = capabilities
             test_result.browser_id = self.get_id()
             test_result.root_path = self.test_instance._runner.root_test_result_dir  # noqa

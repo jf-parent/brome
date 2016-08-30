@@ -11,6 +11,7 @@ from mongoalchemy.fields import (
 
 
 from brome.model.basemodel import BaseModel
+from brome.core.utils import convert_tz_datetime
 from brome.core import exceptions
 
 
@@ -19,8 +20,8 @@ class Testinstance(BaseModel):
     name = StringField()
     browser_capabilities = DictField(AnythingField())
     browser_id = StringField()
-    starting_timestamp = DateTimeField()
-    ending_timestamp = DateTimeField(required=False)
+    starting_timestamp = DateTimeField(use_tz=True)
+    ending_timestamp = DateTimeField(required=False, use_tz=True)
     terminated = BoolField(default=False)
     extra_data = DictField(StringField(), default=dict())
 
@@ -44,6 +45,8 @@ class Testinstance(BaseModel):
         return []
 
     async def serialize(self, context):
+        ws_session = context.get('ws_session')
+
         data = {}
         data['uid'] = self.get_uid()
         data['name'] = self.name
@@ -52,10 +55,16 @@ class Testinstance(BaseModel):
         data['network_capture_path'] = self.network_capture_path
         data['video_capture_path'] = self.video_capture_path
         data['browser_capabilities'] = self.browser_capabilities
-        data['starting_timestamp'] = self.starting_timestamp.isoformat()
+        data['starting_timestamp'] = convert_tz_datetime(
+            self.starting_timestamp,
+            ws_session.get('tz')
+        ).isoformat()
         data['terminated'] = self.terminated
         if self.terminated:
-            data['ending_timestamp'] = self.ending_timestamp.isoformat()
+            data['ending_timestamp'] = convert_tz_datetime(
+                self.ending_timestamp,
+                ws_session.get('tz')
+            ).isoformat()
         else:
             data['ending_timestamp'] = False
         data['extra_data'] = self.extra_data

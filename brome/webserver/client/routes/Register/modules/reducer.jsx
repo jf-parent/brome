@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { routerActions } from 'react-router-redux'
+import moment from 'moment-timezone'
 
 import { getSessionRegistered } from 'actions/AuthActions'
 
@@ -21,6 +22,8 @@ logger.setLevel(__LOGLEVEL__)
 export function doRegister (data, nextPath) {
   return dispatch => {
     dispatch({type: REGISTER_LOADING})
+
+    data.user_timezone = moment.tz.guess()
 
     axios.post('/api/register', data)
       .then((response) => {

@@ -81,13 +81,13 @@ class TestBatchList extends BaseComponent {
               </b>
               {' '}
               <FormattedDate
-                value={startingTimestamp}
+                value={testBatch.starting_timestamp}
                 year='numeric'
                 month='long'
                 day='2-digit'
               />
               {' '}
-              <FormattedTime value={startingTimestamp} />
+              <FormattedTime value={testBatch.starting_timestamp} />
             </small>
           </p>
           {testBatch.ending_timestamp

@@ -1,5 +1,4 @@
 import traceback
-from datetime import datetime
 
 from brome.runner.localhost_instance import LocalhostInstance
 from brome.core.settings import BROME_CONFIG
@@ -7,6 +6,7 @@ from brome.runner.base_runner import BaseRunner
 from brome.runner.browser_config import BrowserConfig
 from brome.model.testbatch import Testbatch
 from brome.core.utils import (
+    utcnow,
     DbSessionContext
 )
 
@@ -86,7 +86,7 @@ class LocalRunner(BaseRunner):
         with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
             test_batch = session.query(Testbatch)\
                 .filter(Testbatch.mongo_id == self.test_batch_id).one()
-            test_batch.ending_timestamp = datetime.now()
+            test_batch.ending_timestamp = utcnow()
             test_batch.terminated = True
             session.save(test_batch, safe=True)
 

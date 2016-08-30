@@ -20,7 +20,7 @@ routes = [
     ('GET', r'/{to:(?!api)(?!static)(?!tb_results).*}', index, 'index'),
 
     # API ROUTES
-    ('GET', '/api/get_session', api_get_session, 'get_session'),
+    ('POST', '/api/get_session', api_get_session, 'get_session'),
     ('*', '/api/crud', CRUD, 'api_crud'),
     ('*', '/api/getbromeconfig', GetBromeConfig, 'api_get_brome_config'),
     ('*', '/api/starttestbatch', StartTestBatch, 'api_start_test_batch'),

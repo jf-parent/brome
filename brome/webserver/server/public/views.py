@@ -30,6 +30,7 @@ async def api_get_session(request):
 
     session = await get_session(request)
     await set_csrf_token_session(session)
+    data = await request.json()
 
     success = False
     token = session['csrf_token']
@@ -38,11 +39,13 @@ async def api_get_session(request):
     uid = session.get('uid')
     if uid:
         user = get_user_from_session(session, request.db_session)
+        session['tz'] = data.get('user_timezone')
         if user.enable:
             context = {
                 'user': user,
                 'db_session': request.db_session,
                 'method': 'read',
+                'ws_session': session,
                 'queue': request.app.queue
             }
 

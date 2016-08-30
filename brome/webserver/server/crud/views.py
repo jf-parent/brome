@@ -75,12 +75,14 @@ class CRUD(web.View):
         read_context = {
             'author': author,
             'db_session': self.request.db_session,
+            'ws_session': session,
             'method': 'read',
             'queue': self.request.app.queue,
         }
         action_context = {
             'author': author,
             'db_session': self.request.db_session,
+            'ws_session': session,
             'queue': self.request.app.queue
         }
 

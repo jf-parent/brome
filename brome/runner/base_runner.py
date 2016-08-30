@@ -15,6 +15,7 @@ from brome.model.testinstance import Testinstance
 from brome.model.testresult import Testresult
 from brome.core.utils import (
     DbSessionContext,
+    utcnow,
     create_dir_if_doesnt_exist
 )
 
@@ -48,7 +49,7 @@ class BaseRunner(object):
 
         # Create test batch
         with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
-            self.starting_timestamp = datetime.now()
+            self.starting_timestamp = utcnow()
 
             haikunator = Haikunator()
 

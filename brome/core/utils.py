@@ -1,8 +1,10 @@
 import string
 import os
+import pytz
 from datetime import datetime
 import sys
 from subprocess import call
+from dateutil import tz
 
 from redis import StrictRedis
 from contextlib import ContextDecorator
@@ -15,7 +17,8 @@ import psutil
 class DbSessionContext(ContextDecorator):
     def __init__(self, mongo_database_name):
         self.session = Session.connect(
-            mongo_database_name
+            mongo_database_name,
+            timezone=tz.gettz('UTC')
         )
 
     def __enter__(self):
@@ -25,6 +28,10 @@ class DbSessionContext(ContextDecorator):
         self.session.end()
         self.session.db.client.close()
         return False
+
+
+def utcnow():
+    return datetime.now(tz=pytz.utc)
 
 
 def get_timestamp():

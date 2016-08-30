@@ -10,7 +10,8 @@ import math
 # import virtualbox
 
 from brome.core.utils import (
-    DbSessionContext
+    DbSessionContext,
+    utcnow
 )
 from brome.core.settings import BROME_CONFIG
 from brome.runner.base_runner import BaseRunner
@@ -303,7 +304,7 @@ class GridRunner(BaseRunner):
                             executed_tests.append(test_)
 
                 active_thread = len([tn for tn in threading.enumerate() if type(tn) != threading._MainThread and hasattr(tn, 'test')])  # noqa
-                self.info_log("active_thread=%s" % active_thread)
+                # self.info_log("active_thread=%s" % active_thread)
                 if active_thread:
                     try:
                         active_thread_test_number = len([tn for tn in threading.enumerate() if type(tn) != threading._MainThread and hasattr(tn, 'test')])  # noqa
@@ -319,7 +320,7 @@ class GridRunner(BaseRunner):
                         self.error_log("print active exception: %s" % str(e))
 
                 # TIMEOUT
-                now = datetime.now()
+                now = utcnow()
                 if (self.starting_timestamp - now).total_seconds() >\
                         BROME_CONFIG['grid_runner']['max_running_time']:
 
@@ -345,7 +346,7 @@ class GridRunner(BaseRunner):
         with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
             test_batch = session.query(Testbatch)\
                 .filter(Testbatch.mongo_id == self.test_batch_id).one()
-            test_batch.ending_timestamp = datetime.now()
+            test_batch.ending_timestamp = utcnow()
             test_batch.terminated = True
             session.save(test_batch, safe=True)
 

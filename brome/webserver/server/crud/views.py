@@ -55,11 +55,14 @@ class CRUD(web.View):
                 '{model} not found'.format(model=model)
             )
 
-    def trim_response_data(self, success, response_data):
+    def trim_response_data(self, success, response_data, error):
         if len(response_data) == 1:
             return response_data[0]
         else:
-            return {'success': success, 'results': response_data}
+            data = {'success': success, 'results': response_data}
+            if error:
+                data['error'] = error
+            return data
 
     @exception_handler()
     @csrf_protected()
@@ -69,8 +72,6 @@ class CRUD(web.View):
 
         session = await get_session(self.request)
         author = get_user_from_session(session, self.request.db_session)
-
-        success = True
 
         read_context = {
             'author': author,
@@ -86,7 +87,9 @@ class CRUD(web.View):
             'queue': self.request.app.queue
         }
 
+        success = True
         response_data = []
+        error = []
         for index, action in enumerate(actions):
             try:
                 # RESPONSE
@@ -135,6 +138,14 @@ class CRUD(web.View):
                         base_query = self.request.db_session\
                             .query(model_class)\
                             .filter(model_class.mongo_id == uid)
+
+                    # BATCH
+                    elif action.get('uids'):
+                        uids = action.get('uids')
+                        base_query = self.request.db_session.query(model_class)
+                        response_data[index]['total'] = len(uids)
+                        base_query = base_query.in_('mongo_id', *uids)
+                        results = base_query.all()
 
                     else:
                         filters = action.get('filters')
@@ -200,11 +211,32 @@ class CRUD(web.View):
                             action_context
                         )
                         action_context['data'] = sane_data
+                        # BEFORE HOOK
+                        await getattr(
+                            result,
+                            'before_{action_name}'
+                            .format(
+                                action_name=action_name
+                            )
+                        )(action_context)
+
                         await result.validate_and_save(action_context)
+
+                        # AFTER HOOK
+                        await getattr(
+                            result,
+                            'after_{action_name}'
+                            .format(
+                                action_name=action_name
+                            )
+                        )(action_context)
+
 
                     # DELETE
                     elif action_name == 'delete':
+                        await result.before_delete(action_context)
                         self.request.db_session.remove(result, safe=True)
+                        await result.after_delete(action_context)
 
                     if not action.get('total_only', False) \
                             and not action_name == 'delete':
@@ -239,16 +271,20 @@ class CRUD(web.View):
                     .format(exception=str(tb))
                 )
                 if isinstance(e, exceptions.ServerBaseException):
-                    response_data[index] = {
-                        'success': False,
-                        'error': e.get_name()
-                    }
+                    error_msg = e.get_name()
                 else:
-                    response_data[index] = {
-                        'success': False,
-                        'error': 'ServerSideError'
-                    }
+                    error_msg = 'ServerSideError'
+
+                response_data[index] = {
+                    'success': False,
+                    'error': error_msg
+                }
+                error.append(error_msg)
 
         # RESPONSE
-        trimmed_response_data = self.trim_response_data(success, response_data)
+        trimmed_response_data = self.trim_response_data(
+            success,
+            response_data,
+            error
+        )
         return web.json_response(trimmed_response_data)

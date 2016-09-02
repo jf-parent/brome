@@ -35,3 +35,21 @@ class BaseModel(Document):
 
     def get_uid(self):
         return str(self.mongo_id)
+
+    async def before_create(self, context):
+        pass
+
+    async def after_create(self, context):
+        pass
+
+    async def before_update(self, context):
+        pass
+
+    async def after_update(self, context):
+        pass
+
+    async def before_delete(self, context):
+        pass
+
+    async def after_delete(self, context):
+        pass

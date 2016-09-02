@@ -8,6 +8,7 @@ const APP_DIR = path.resolve(__dirname, 'client');
 const serverAddr = 'localhost:8000'
 const clientPort = '8080';
 const clientAddr = 'localhost:' + clientPort;
+const DashboardPlugin = require('webpack-dashboard/plugin');
 
 console.log('[*] BUILD_DIR:', BUILD_DIR);
 console.log('[*] APP_DIR:', APP_DIR);
@@ -34,6 +35,7 @@ var config = {
    },
 
   plugins: [
+      new DashboardPlugin(),
       new webpack.HotModuleReplacementPlugin(),
       new ExtractTextPlugin('style.css', { allChunks: true }),
       new HtmlWebpackPlugin({

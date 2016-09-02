@@ -1,6 +1,7 @@
 import React from 'react'
 import axios from 'axios'
 // import { FormattedMessage } from 'react-intl'
+import 'font-awesome-webpack'
 
 // import ComponentStyle from './ComponentStyle.postcss'
 import Breadcrumbs from 'components/ux/Breadcrumbs'
@@ -87,6 +88,7 @@ class TestInstanceLog extends BaseComponent {
       return <ErrorMsg msgId={this.state.error} />
     } else {
       let lines = this.state.lines
+      let directLinkLog = this.state.parent.log_file_path
       let logStyle = {
         border: '2px solid black',
         padding: '4px',
@@ -124,6 +126,12 @@ class TestInstanceLog extends BaseComponent {
           <b>
             {this.state.name}
           </b>
+          <span>
+            {' '}
+            <a href={directLinkLog} target='_blank'>Direct link</a>
+            {' '}
+            <i className='fa fa-external-link' aria-hidden='true'></i>
+          </span>
           <div style={logStyle}>
             <ol>
               {(() => {

@@ -6,6 +6,7 @@ import types
 import pytest
 from webtest_aiohttp import TestApp
 
+from brome.core.settings import BROME_CONFIG
 from brome.webserver.server.app import init
 from brome.core.utils import DbSessionContext, delete_database
 from brome.model.user import User
@@ -24,19 +25,20 @@ def client():
     asyncio.set_event_loop(loop)
 
     config = {
-        "ENV": "test",
-        "MONGO_DATABASE_NAME": "webbase_test",
-        "MONGO_HOST": "127.0.0.1",
-        "SERVER_PORT": 1337,
-        "SERVER_HOST": "localhost",
-        "MASTER_PASSWORD": "Wkjdfkjdfjkdjkj"
+        "env": "test",
+        "mongo_database_name": "webbase_test",
+        "mongo_host": "127.0.0.1",
+        "server_port": 1337,
+        "server_host": "localhost"
     }
 
-    delete_database(config.get('MONGO_DATABASE_NAME'))
+    delete_database(config.get('mongo_database_name'))
 
-    _, _, app = loop.run_until_complete(init(loop, config))
+    BROME_CONFIG['webserver'] = {}
+    BROME_CONFIG['webserver'].update(config)
+    _, _, app = loop.run_until_complete(init(loop))
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(config.get('mongo_database_name')) as session:
 
         # INSERT DUMMY DATA
         # TEST
@@ -167,7 +169,7 @@ def client():
             }
         )
         with DbSessionContext(
-            self.config.get('MONGO_DATABASE_NAME')
+            self.config.get('mongo_database_name')
         ) as session:
             user = session.query(User)\
                 .filter(User.email == email).one()

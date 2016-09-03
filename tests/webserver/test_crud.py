@@ -1,4 +1,4 @@
-from brome.webserver.server.settings import config
+from brome.core.settings import BROME_CONFIG
 from brome.core.utils import DbSessionContext
 from brome.model.user import User
 
@@ -123,7 +123,7 @@ def test_crud_combination_multiple_model_multiple_action_by_admin(client):
 def test_crud_combination_multiple_model_multiple_action_by_user_not_allowed(client):  # noqa
     client.login('test@test.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG.get('mongo_database_name')) as session:
         admin = session.query(User) \
                 .filter(User.email == 'admin@admin.com').one()
 
@@ -162,7 +162,7 @@ def test_crud_combination_multiple_model_multiple_action_by_user_not_allowed(cli
 def test_crud_combination_multiple_model_multiple_action_by_user_some_allowed(client):  # noqa
     user = client.login('test@test.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG.get('mongo_database_name')) as session:
         admin = session.query(User) \
                 .filter(User.email == 'admin@admin.com').one()
 

@@ -9,11 +9,13 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common import proxy
 
+from IPython import embed
 from brome.core.settings import BROME_CONFIG
 from brome.core.stateful import Stateful
 from brome.core.proxy_driver import ProxyDriver
 from brome.core.configurator import (
-    test_config_to_dict
+    test_config_to_dict,
+    parse_brome_config_from_browser_config
 )
 from brome.model.testinstance import Testinstance
 from brome.model.testbatch import Testbatch
@@ -50,6 +52,12 @@ class BaseTest(object):
         self._test_batch_id = test_batch_id
         self._localhost_instance = kwargs.get('localhost_instance')
         self._log_file_path = ''
+
+
+        browser_config = parse_brome_config_from_browser_config(self._browser_config.config)
+        for key in iter(BROME_CONFIG):
+            if key in browser_config:
+                BROME_CONFIG[key].update(browser_config[key])
 
         with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
             test_batch = session.query(Testbatch)\

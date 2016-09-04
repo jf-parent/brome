@@ -369,7 +369,9 @@ class BaseTest(object):
                         config.get('mobile_emulation')
                     )
 
+
                 desired_cap = chrome_options.to_capabilities()
+                desired_cap['platform'] = config.get('platform')
 
             try:
                 command_executor = "http://%s:%s/wd/hub" % (  # noqa

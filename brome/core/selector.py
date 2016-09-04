@@ -143,7 +143,7 @@ class Selector(object):
                         for target in key.split('|'):
                             try:
                                 re.search(
-                                    target, self._pdriver.get_id()
+                                    target.lower(), self._pdriver.get_id().lower()
                                 ).group(0)
                                 current_browser_id = key
                             except AttributeError:

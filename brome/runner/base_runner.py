@@ -102,7 +102,7 @@ class BaseRunner(object):
                 .one()
 
             if self.root_test_result_dir:
-                test_batch.root_path = self.runner_dir
+                test_batch.root_path = self.root_test_result_dir
                 test_batch.log_file_path = self.relative_log_file_path
             else:
                 test_batch.root_path = ''

@@ -463,7 +463,7 @@ class TestBatchDetail extends BaseComponent {
         defaultMessage: 'Test Instances'
       },
       'list',
-      true
+      !!testBatch.total_executed_tests
     )
     let screenshots = this.getTool(
       'browseridslist',
@@ -497,7 +497,7 @@ class TestBatchDetail extends BaseComponent {
         defaultMessage: 'Instances Logs'
       },
       'newspaper-o',
-      true,
+      !!testBatch.total_executed_tests,
       '&path=testinstancelog'
     )
     let runnerLog = this.getTool(

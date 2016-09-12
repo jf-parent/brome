@@ -1,5 +1,4 @@
 from datetime import datetime
-import os
 import shutil
 
 from mongoalchemy.fields import (
@@ -160,6 +159,7 @@ class Testbatch(BaseModel):
 
         test_crashes = db_session.query(Testcrash)\
             .filter(Testcrash.test_batch_id == self.get_uid())\
+            .ascending('title')\
             .all()
 
         # TODO auto serialize

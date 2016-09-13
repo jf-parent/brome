@@ -1,4 +1,5 @@
 from datetime import datetime
+import os
 import shutil
 
 from mongoalchemy.fields import (
@@ -331,4 +332,8 @@ class Testbatch(BaseModel):
         db_session.save(self, safe=True)
 
     async def after_delete(self, context):
-        shutil.rmtree(self.root_path)
+        root_path = os.path.join(
+            self.root_path,
+            os.sep.join(self.log_file_path.split(os.sep)[:-1])
+        )
+        shutil.rmtree(root_path)

@@ -1,5 +1,7 @@
 sudo: required
-services: mongodb
+services:
+  - mongodb
+  - redis-server
 language: python
 python:
 - '3.5'

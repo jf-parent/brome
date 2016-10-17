@@ -39,7 +39,7 @@ Add the following config to your brome yaml::
 Network capture data
 --------------------
 
-The network capture data will be stored in the test results folder under the network_capture folder of the specific test batch. For example: `/path/to/project/test_results/tb_1/network_data/test.data`
+The network capture data will be stored in the test results folder under the network_capture folder of the specific test batch. For example: `/path/to/project/test_results/tb_1/network_capture/test.data`
 
 You can analyse the data manually with this code::
 

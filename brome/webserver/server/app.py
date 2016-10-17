@@ -127,15 +127,15 @@ async def init(loop):
     if static_path:
         app.router.add_static('/', static_path, name='static')
 
-    if BROME_CONFIG['webserver'].get('env') != 'test':
-        logger.info(
-            "Serving static: {static_path}"
-            .format(
-                static_path=static_path
+        if BROME_CONFIG['webserver'].get('env') != 'test':
+            logger.info(
+                "Serving static: {static_path}"
+                .format(
+                    static_path=static_path
+                )
             )
-        )
 
-    aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(static_path))
+        aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(static_path))
 
     # PREPARE HOOK
     async def after_request(request, response):

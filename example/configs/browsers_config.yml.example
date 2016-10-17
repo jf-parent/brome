@@ -1,0 +1,4 @@
+f:
+  browserName: 'Firefox'
+c:
+  browserName: 'Chrome'

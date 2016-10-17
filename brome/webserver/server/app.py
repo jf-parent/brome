@@ -106,7 +106,7 @@ async def init(loop):
 
     elif BROME_CONFIG['webserver']['env'] == 'test':
         # NOTE don't serve any static in test mode
-        pass
+        static_path = False
     else:
         if BROME_CONFIG['webserver'].get('release', 'latest') == 'latest':
             latest_version_path = os.path.join(
@@ -124,7 +124,9 @@ async def init(loop):
 
         static_path = os.path.join(ROOT, 'releases', release_version)
 
-    app.router.add_static('/', static_path, name='static')
+    if static_path:
+        app.router.add_static('/', static_path, name='static')
+
     if BROME_CONFIG['webserver'].get('env') != 'test':
         logger.info(
             "Serving static: {static_path}"

@@ -39,7 +39,7 @@ redis
 jinja2
 Flask
 Flask-Admin
-Flask-Login
 flask-appbuilder
+Flask-Login
 flask-mongoengine
 Flask-Session

@@ -1,0 +1,8 @@
+# BROME
+
+* test brome cli
+* fix the brome/test_proxy_driver/test_select_all
+* fix the brome/test_proxy_driver/test_state
+* test remote runner
+* test virtualbox runner
+* setup travis-ci

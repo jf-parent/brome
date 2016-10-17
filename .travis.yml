@@ -1,12 +1,12 @@
+sudo: required
+services: mongodb
 language: python
 python:
-- '2.7'
-install: pip install -r requirements.txt
+- '3.5'
+install: pip install -r requirements.txt; pip install -r requirements-dev.txt
 before_script:
 - python setup.py install
-- python brome/unittest/test_brome/test_server/server.py &
-- sleep 3
-script: python brome/unittest/test_brome/bro run -l p --test-file brome/unittest/test_brome/test_file.yml
+script: py.test tests/webserver && py.test tests/brome
 deploy:
   provider: pypi
   user: worker-9
@@ -14,5 +14,5 @@ deploy:
     secure: L/lSW42PLdKwNzvZZ32tElrqhfOXRXTG/RAWqsvEoeM/ARcxsaQWtJQ9rFgNEbBTAjchoplVjxtMaLPCJLWM0bTgXgOsobKdDit0pYhIO95YiqGk9iKvqpN7W7ksEg7pmiDe7cocl1absaC5h6/7ZSODKxGJp2OrfSNIa0B8aboBvCIitE792MbQq9gWBiBMJKyqTwr88Pv118eo6Nj1Ap3J4FBuyGa9eedlfK5OMQFWHqmjXvm6NAL3SL8QXWG9IjSPTJieS99VeCLJ+ugQDH0hThi3+xoZGFdDjhzTj2uO7JJ3pPuaY4PnmIPmZY2t/XqcpoblAv+cQjgeTCtiwPt9Sm+kDGvokKhjGEwFgm9oY8odLK4ABDtNgzoTv6C61ktiftRK1C33IR8TGnvFfowUSAOWgKlTo/0W9YbIx4A7+j2W64U4QGczoxhCBg9bEmTZnlnsOKT8pc8qIu2n1PdUJVgkRgqeIUAlOKBPceuOH1N89hRKXTUru3T6HefYj8OlVwQAL5ppznnQuFu0VbRpnqqDlPcR5CLZXVdZ7pHrWHG9TPxV/IaKInjSk32YCsuaCHKGqNr3/bPlgDjM7cypS+CA/FDnV3TBEjEBx7wjdICd4Z8XcPVH/wjSy1cxYD51fdLKjZ7hSxu6OMDu9i0iSPYG1FavBK3JQpQP+Gk=
   on:
     tags: true
-    repo: brome-hq/brome
+    repo: jf-parent/brome
     branch: release

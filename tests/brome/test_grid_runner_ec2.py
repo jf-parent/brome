@@ -1,9 +1,10 @@
 import copy
 
-import pytest  # noqa
+import pytest
 
 from brome.core.exceptions import BromeBrowserConfigException
 from brome.model.testbatch import Testbatch
+from brome.core.settings import BROME_CONFIG
 from brome_config import default_config
 from model.basetest import BaseTest
 from model.selector import selector_dict
@@ -120,7 +121,7 @@ def test_grid_runner_ec2_success(
     assert len(grid_runner.instances['dummy']) == NB_TESTS
     test_batch_id = grid_runner.test_batch_id
 
-    with DbSessionContext(grid_runner.get_config_value('database:mongo_database_name')) as session:  # noqa
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         assert not session.query(Testcrash)\
             .filter(Testcrash.test_batch_id == test_batch_id).count()
 
@@ -129,7 +130,6 @@ def test_grid_runner_ec2_success(
             .one()
 
         runner_metadata = test_batch.runner_metadata
-        assert 'instance_setup_completed' in runner_metadata.keys()
-        assert runner_metadata['nb_instance_to_setup'] == NB_TESTS
-        assert 'instance_teardown_completed' in runner_metadata.keys()
-        assert 'instance_setup_completed' in runner_metadata.keys()
+        assert 'InstanceSetupCompleted' in runner_metadata['milestones'].keys()
+        assert runner_metadata['milestones']['NbInstanceToSetup']['values']['nb'] == NB_TESTS  # noqa
+        assert 'InstanceTearDownCompleted' in runner_metadata['milestones'].keys()  # noqa

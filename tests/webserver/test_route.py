@@ -1,8 +1,6 @@
 import pytest
 from webtest.app import AppError
 
-from brome.webserver.server.exceptions import *  # noqa
-
 
 def test_index_route(client):
     response = client.get('/')
@@ -17,7 +15,8 @@ def test_index_non_api_route(client):
 
 
 def test_api(client):
-    response = client.get('/api/get_session')
+    data = {'user_timezone': 'Australia/Sydney'}
+    response = client.post_json('/api/get_session', data)
     assert response.status_code == 200
     assert response.content_type == 'application/json'
 
@@ -30,7 +29,8 @@ def test_non_existing_api_route(client):
 
 
 def test_get_session_route(client):
-    response = client.get('/api/get_session')
+    data = {'user_timezone': 'Australia/Sydney'}
+    response = client.post_json('/api/get_session', data)
 
     assert response.status_code == 200
     assert response.content_type == 'application/json'
@@ -38,34 +38,6 @@ def test_get_session_route(client):
 
 def test_logout_route(client):
     response = client.post_json('/api/logout')
-
-    assert response.status_code == 200
-    assert response.content_type == 'application/json'
-
-
-def test_send_reset_password_token(client):
-    response = client.post_json('/api/send_reset_password_token')
-
-    assert response.status_code == 200
-    assert response.content_type == 'application/json'
-
-
-def test_validate_reset_password_token(client):
-    response = client.post_json('/api/validate_reset_password_token')
-
-    assert response.status_code == 200
-    assert response.content_type == 'application/json'
-
-
-def test_reset_password(client):
-    response = client.post_json('/api/reset_password')
-
-    assert response.status_code == 200
-    assert response.content_type == 'application/json'
-
-
-def test_confirm_email_route(client):
-    response = client.post_json('/api/confirm_email')
 
     assert response.status_code == 200
     assert response.content_type == 'application/json'
@@ -137,10 +109,10 @@ def test_logout_method_not_allowed(client):
 
 
 def test_get_session_method_not_allowed(client):
-    with pytest.raises(AppError) as post_not_allowed:
-        client.post_json('/api/get_session')
+    with pytest.raises(AppError) as get_not_allowed:
+        client.get('/api/get_session')
 
-    assert post_not_allowed
+    assert get_not_allowed
 
     with pytest.raises(AppError) as put_not_allowed:
         client.put('/api/get_session')

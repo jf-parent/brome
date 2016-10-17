@@ -1,4 +1,4 @@
-from brome.webserver.server.settings import config
+from brome.core.settings import BROME_CONFIG
 # NOTE this import will issue a warning from pytest
 # because the class name start with Test*
 from brome.model.testresult import Testresult
@@ -95,7 +95,7 @@ def test_crud_read_all_test_result_as_an_admin(client):
 def test_crud_read_specific_test_result_from_test_batch(client):
     client.login('test@test.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_batch = session.query(Testbatch).first()
 
     response = client.post_json(
@@ -122,7 +122,7 @@ def test_crud_read_specific_test_result_from_test_batch(client):
 def test_crud_read_specific_test_result(client):
     client.login('test@test.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_result = session.query(Testresult).first()
 
     response = client.post_json(
@@ -150,7 +150,7 @@ def test_crud_read_specific_test_result(client):
 
 
 def test_crud_update_test_result_not_allowed(client):
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_result = session.query(Testresult).first()
 
     client.login('admin@admin.com')
@@ -202,7 +202,7 @@ def test_crud_update_test_result_not_allowed(client):
 def test_crud_delete_not_allowed(client):
     client.login('test@test.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_result = session.query(Testresult).first()
 
     response = client.post_json(

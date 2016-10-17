@@ -1,4 +1,4 @@
-from brome.webserver.server.settings import config
+from brome.core.settings import BROME_CONFIG
 from brome.core.utils import DbSessionContext
 from brome.model.user import User, NAME_MAX_LEN
 
@@ -20,7 +20,12 @@ def test_register_empty_post(client):
 def test_register_without_token(client):
     response = client.post_json(
         '/api/register',
-        {'email': 'test@test.com', 'name': 'test', 'password': '123456'}
+        {
+            'email': 'test@test.com',
+            'name': 'test',
+            'registration_token': 'registration_token',
+            'password': '123456'
+        }
     )
     assert response.status_code == 200
     assert response.json == {'success': False, 'error': 'CSRFMismatch'}
@@ -33,6 +38,7 @@ def test_register_with_wrong_token(client):
             'email': DEFAULT_EMAIL,
             'name': DEFAULT_NAME,
             'password': DEFAULT_PASSWORD,
+            'registration_token': 'registration_token',
             'token': '1337'
         }
     )
@@ -50,6 +56,7 @@ def test_register_name_too_short(client):
             'email': email,
             'name': name,
             'password': password,
+            'registration_token': 'registration_token',
             'token': client.__token__
         }
     )
@@ -67,6 +74,7 @@ def test_register_name_too_long(client):
             'email': email,
             'name': name,
             'password': password,
+            'registration_token': 'registration_token',
             'token': client.__token__
         }
     )
@@ -84,6 +92,7 @@ def test_register_password_too_short(client):
             'email': email,
             'name': name,
             'password': password,
+            'registration_token': 'registration_token',
             'token': client.__token__
         }
     )
@@ -101,6 +110,7 @@ def test_register_email_already_exist(client):
         {
             'email': email,
             'name': name,
+            'registration_token': 'registration_token',
             'password': password,
             'token': client.__token__
         }
@@ -119,6 +129,7 @@ def test_register_with_empty_email(client):
         {
             'email': email,
             'name': name,
+            'registration_token': 'registration_token',
             'password': password,
             'token': client.__token__
         }
@@ -137,6 +148,7 @@ def test_register_with_invalid_email(client):
         {
             'email': email,
             'name': name,
+            'registration_token': 'registration_token',
             'password': password,
             'token': client.__token__
         }
@@ -152,6 +164,7 @@ def test_register_with_right_token(client):
         {
             'email': DEFAULT_EMAIL,
             'name': DEFAULT_NAME,
+            'registration_token': 'registration_token',
             'password': DEFAULT_PASSWORD,
             'token': client.__token__
         }
@@ -159,7 +172,7 @@ def test_register_with_right_token(client):
     assert response.status_code == 200
     assert response.json['success']
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         user_query = session.query(User) \
             .filter(User.email == DEFAULT_EMAIL)
 
@@ -178,6 +191,7 @@ def test_register_return_correct_user(client):
         {
             'email': DEFAULT_EMAIL,
             'name': DEFAULT_NAME,
+            'registration_token': 'registration_token',
             'password': DEFAULT_PASSWORD,
             'token': client.__token__
         }
@@ -195,6 +209,7 @@ def test_register_logout_login(client):
         {
             'email': DEFAULT_EMAIL,
             'name': DEFAULT_NAME,
+            'registration_token': 'registration_token',
             'password': DEFAULT_PASSWORD,
             'token': client.__token__
         }
@@ -227,3 +242,34 @@ def test_register_logout_login(client):
     assert response.json['success']
     assert response.json['user']['email'] == DEFAULT_EMAIL
     assert response.json['user']['name'] == DEFAULT_NAME
+
+
+def test_register_without_registration_token(client):
+    response = client.post_json(
+        '/api/register',
+        {
+            'email': 'test@test.com',
+            'name': 'test',
+            'token': client.__token__,
+            'password': '123456'
+        }
+    )
+    assert response.status_code == 200
+    assert response.json == \
+        {'success': False, 'error': 'InvalidRegistrationTokenException'}
+
+
+def test_register_with_wrong_registration_token(client):
+    response = client.post_json(
+        '/api/register',
+        {
+            'email': DEFAULT_EMAIL,
+            'name': DEFAULT_NAME,
+            'password': DEFAULT_PASSWORD,
+            'registration_token': 'wrong',
+            'token': client.__token__
+        }
+    )
+    assert response.status_code == 200
+    assert response.json == \
+        {'success': False, 'error': 'InvalidRegistrationTokenException'}

@@ -1,4 +1,4 @@
-from brome.webserver.server.settings import config
+from brome.core.settings import BROME_CONFIG
 # NOTE this import will issue a warning from pytest
 # because the class name start with Test*
 from brome.model.testinstance import Testinstance
@@ -71,7 +71,7 @@ def test_crud_read_all_test_instance_as_a_normal_user(client):
     )
     assert response.status_code == 200
     assert response.json['success']
-    assert len(response.json['results']) == 2
+    assert len(response.json['results']) == 4
 
 
 def test_crud_read_all_test_instance_as_an_admin(client):
@@ -89,13 +89,13 @@ def test_crud_read_all_test_instance_as_an_admin(client):
     )
     assert response.status_code == 200
     assert response.json['success']
-    assert len(response.json['results']) == 2
+    assert len(response.json['results']) == 4
 
 
 def test_crud_read_specific_test_instance_from_test_batch_id(client):
     client.login('test@test.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_batch = session.query(Testbatch).first()
 
     response = client.post_json(
@@ -115,14 +115,14 @@ def test_crud_read_specific_test_instance_from_test_batch_id(client):
     assert response.json['success']
     assert type(response.json['results']) == list
     assert response.json['results'][0]['test_batch_id'] == test_batch.get_uid()
-    assert response.json['total'] == 1
-    assert len(response.json['results']) == 1
+    assert response.json['total'] == 2
+    assert len(response.json['results']) == 2
 
 
 def test_crud_read_specific_test_instance(client):
     client.login('test@test.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_instance = session.query(Testinstance).first()
 
     response = client.post_json(
@@ -150,7 +150,7 @@ def test_crud_read_specific_test_instance(client):
 
 
 def test_crud_update_test_instance_not_allowed(client):
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_instance = session.query(Testinstance).first()
 
     client.login('admin@admin.com')
@@ -202,7 +202,7 @@ def test_crud_update_test_instance_not_allowed(client):
 def test_crud_delete_not_allowed(client):
     client.login('test@test.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_instance = session.query(Testinstance).first()
 
     response = client.post_json(

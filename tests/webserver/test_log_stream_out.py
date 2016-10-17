@@ -1,6 +1,6 @@
 import pytest  # noqa
 
-from brome.webserver.server.settings import config
+from brome.core.settings import BROME_CONFIG
 from brome.core.utils import DbSessionContext
 from brome.model.testbatch import Testbatch
 
@@ -8,7 +8,7 @@ from brome.model.testbatch import Testbatch
 def test_log_stream_out_success(client):
     client.login('test@test.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_batch_id = session.query(Testbatch).first().get_uid()
 
     response = client.post_json(
@@ -70,7 +70,7 @@ def test_log_stream_out_missing_params(client):
 def test_log_stream_out_wrong_model(client):
     client.login('test@test.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_batch_id = session.query(Testbatch).first().get_uid()
 
     response = client.post_json(
@@ -105,7 +105,7 @@ def test_log_stream_out_wrong_uid(client):
 def test_log_stream_out_empty_log(client):
     client.login('test@test.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_batch_id = session.query(Testbatch).all()[1].get_uid()
 
     response = client.post_json(
@@ -124,7 +124,7 @@ def test_log_stream_out_empty_log(client):
 def test_log_stream_out_skip_too_high_error(client):
     client.login('test@test.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_batch_id = session.query(Testbatch).first().get_uid()
 
     response = client.post_json(
@@ -143,7 +143,7 @@ def test_log_stream_out_skip_too_high_error(client):
 def test_log_stream_out_skip(client):
     client.login('test@test.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_batch_id = session.query(Testbatch).first().get_uid()
 
     response = client.post_json(

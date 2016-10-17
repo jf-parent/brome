@@ -21,7 +21,7 @@ from brome.core.configurator import (
     generate_brome_config
 )
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 class Brome(object):
@@ -45,6 +45,10 @@ class Brome(object):
         for key in iter(BROME_CONFIG):
             if key in brome_config:
                 BROME_CONFIG[key].update(brome_config[key])
+
+        for key in iter(brome_config):
+            if key not in BROME_CONFIG:
+                BROME_CONFIG[key] = brome_config[key]
 
         BROME_CONFIG['selector_dict'] = selector_dict
         BROME_CONFIG['browsers_config'] = browsers_config

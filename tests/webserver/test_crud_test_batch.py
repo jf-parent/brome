@@ -1,4 +1,4 @@
-from brome.webserver.server.settings import config
+from brome.core.settings import BROME_CONFIG
 # NOTE this import will issue a warning from pytest
 # because the class name start with Test*
 from brome.model.testbatch import Testbatch
@@ -94,7 +94,7 @@ def test_crud_read_all_test_batch_as_an_admin(client):
 def test_crud_read_specific_test_batch(client):
     client.login('test@test.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_batch = session.query(Testbatch).first()
 
     response = client.post_json(
@@ -121,8 +121,8 @@ def test_crud_read_specific_test_batch(client):
 ###############################################################################
 
 
-def test_crud_update_test_batch_not_allowed(client):
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+def test_crud_update_test_batch_allowed(client):
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_batch = session.query(Testbatch).first()
 
     client.login('admin@admin.com')
@@ -142,8 +142,7 @@ def test_crud_update_test_batch_not_allowed(client):
         }
     )
     assert response.status_code == 200
-    assert not response.json['success']
-    assert response.json['error'] == 'NotAuthorizedException'
+    assert response.json['success']
 
     client.login('test@test.com')
 
@@ -156,14 +155,13 @@ def test_crud_update_test_batch_not_allowed(client):
                 'model': 'testbatch',
                 'uid': test_batch.get_uid(),
                 'data': {
-                    'pid': 1337
+                    'pid': 31337
                 }
             }
         }
     )
     assert response.status_code == 200
-    assert not response.json['success']
-    assert response.json['error'] == 'NotAuthorizedException'
+    assert response.json['success']
 
 
 ###############################################################################
@@ -171,10 +169,10 @@ def test_crud_update_test_batch_not_allowed(client):
 ###############################################################################
 
 
-def test_crud_delete_not_allowed_for_normal_user(client):
+def test_crud_delete_allowed_for_normal_user(client):
     client.login('test@test.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_batch = session.query(Testbatch).first()
 
     response = client.post_json(
@@ -189,14 +187,13 @@ def test_crud_delete_not_allowed_for_normal_user(client):
         }
     )
     assert response.status_code == 200
-    assert not response.json['success']
-    assert response.json['error'] == 'NotAuthorizedException'
+    assert response.json['success']
 
 
 def test_crud_delete_test_batch_allowed_for_admin(client):
     client.login('admin@admin.com')
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         test_batch = session.query(Testbatch).first()
 
     test_batch_uid = test_batch.get_uid()
@@ -216,6 +213,6 @@ def test_crud_delete_test_batch_allowed_for_admin(client):
     assert response.json['success']
     assert response.json['total'] == 1
 
-    with DbSessionContext(config.get('MONGO_DATABASE_NAME')) as session:
+    with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
         assert not session.query(Testbatch)\
             .filter(Testbatch.mongo_id == test_batch_uid).count()

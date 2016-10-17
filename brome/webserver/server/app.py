@@ -88,17 +88,19 @@ async def init(loop):
             ['development', 'test']:
         static_path = os.path.join(ROOT, 'dist-dev')
         try:
-            os.symlink(
-                os.path.join(
-                    BROME_CONFIG['project']['test_batch_result_path'],
-                    'tb_results'
-                ),
-                os.path.join(static_path, 'static', 'tb_results')
-            )
-            logger.info(
-                "Serving test batch results from symlink: %s"
-                % BROME_CONFIG['project']['test_batch_result_path']
-            )
+            if BROME_CONFIG['project']['test_batch_result_path']:
+                os.symlink(
+                    os.path.join(
+                        BROME_CONFIG['project']['test_batch_result_path'],
+                        'tb_results'
+                    ),
+                    os.path.join(static_path, 'static', 'tb_results')
+                )
+                if BROME_CONFIG['webserver'].get('env') != 'test':
+                    logger.info(
+                        "Serving test batch results from symlink: %s"
+                        % BROME_CONFIG['project']['test_batch_result_path']
+                    )
         except FileExistsError:
             pass
 
@@ -120,12 +122,13 @@ async def init(loop):
         static_path = os.path.join(ROOT, 'releases', release_version)
 
     app.router.add_static('/', static_path, name='static')
-    logger.info(
-        "Serving static: {static_path}"
-        .format(
-            static_path=static_path
+    if BROME_CONFIG['webserver'].get('env') != 'test':
+        logger.info(
+            "Serving static: {static_path}"
+            .format(
+                static_path=static_path
+            )
         )
-    )
 
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader(static_path))
 

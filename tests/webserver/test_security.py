@@ -11,6 +11,7 @@ def test_create_user_name_xss(client):
         {
             'email': 'test.security@secure.test.com',
             'name': XSS_NAME,
+            'registration_token': 'registration_token',
             'password': '123456',
             'token': client.__token__
         }
@@ -48,28 +49,6 @@ def test_require_login_api_not_authorized(client):
     )
     assert response.status_code == 200
     assert not response.json['success']
-    assert response.json == \
-        {'success': False, 'error': 'NotAuthorizedException'}
-
-
-def test_require_admin_api_authorized(client):
-    client.login('admin@admin.com')
-
-    response = client.get('/api/admin')
-    assert response.status_code == 200
-    assert response.json['success']
-
-
-def test_require_admin_api_not_authorized(client):
-    response = client.get('/api/admin')
-    assert response.status_code == 200
-    assert response.json == \
-        {'success': False, 'error': 'NotAuthorizedException'}
-
-    client.login('test@test.com')
-
-    response = client.get('/api/admin')
-    assert response.status_code == 200
     assert response.json == \
         {'success': False, 'error': 'NotAuthorizedException'}
 

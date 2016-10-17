@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
 from setuptools import setup, find_packages
 
 with open('README.md') as readme_file:
@@ -14,7 +13,7 @@ with open('requirements.txt', 'r') as fd:
 
 setup(
     name='brome',
-    version='1.0.0',
+    version='1.1.0',
     description="Selenium Framework",
     long_description=readme,
     author="Jean-Francois Parent",
@@ -25,7 +24,7 @@ setup(
     install_requires=requirements,
     license="MIT",
     zip_safe=False,
-    keywords='brome',
+    keywords=['brome', 'selenium'],
     classifiers=[
         'Development Status :: 1 - Alpha',
         'Intended Audience :: Developers',

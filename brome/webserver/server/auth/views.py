@@ -41,6 +41,7 @@ class Login(web.View):
 
                 context = {
                     'db_session': self.request.db_session,
+                    'ws_session': session,
                     'method': 'read',
                     'queue': self.request.app.queue
                 }

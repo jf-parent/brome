@@ -18,6 +18,7 @@ from brome.model.testcrash import Testcrash
 from brome.model.testresult import Testresult
 from brome.model.testscreenshot import Testscreenshot
 from brome.core import exceptions
+from brome.core.settings import BROME_CONFIG
 
 
 class Testbatch(BaseModel):
@@ -280,7 +281,7 @@ class Testbatch(BaseModel):
             self.friendly_name = friendly_name
         else:
             if is_new:
-                raise exceptions.MissingModelValueException('total_tests')
+                raise exceptions.MissingModelValueException('friendly_name')
 
         # STARTING TIMESTAMP
         starting_timestamp = data.get('starting_timestamp')
@@ -332,8 +333,9 @@ class Testbatch(BaseModel):
         db_session.save(self, safe=True)
 
     async def after_delete(self, context):
-        root_path = os.path.join(
-            self.root_path,
-            os.sep.join(self.log_file_path.split(os.sep)[:-1])
-        )
-        shutil.rmtree(root_path)
+        if BROME_CONFIG['webserver']['env'] != 'test':
+            root_path = os.path.join(
+                self.root_path,
+                os.sep.join(self.log_file_path.split(os.sep)[:-1])
+            )
+            shutil.rmtree(root_path)

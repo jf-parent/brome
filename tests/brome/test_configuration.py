@@ -1,17 +1,14 @@
-from brome.core.configurator import default_config as brome_default_config
+from pytest import set_trace  # noqa
 
+from brome.core.configurator import default_config as brome_default_config
 from brome_config import default_config
+from brome.core.settings import BROME_CONFIG
 
 
 def test_default_config(brome):
-
     for key, value in iter(default_config.items()):
         for sub_key, sub_value in iter(value.items()):
-            _key = "{key}:{sub_key}".format(
-                key=key,
-                sub_key=sub_key
-            )
-            assert brome.get_config_value(_key) == sub_value
+            assert BROME_CONFIG[key][sub_key] == sub_value
 
 
 def test_default_config_when_config_not_provided(brome):
@@ -19,11 +16,7 @@ def test_default_config_when_config_not_provided(brome):
 
     for key, value in iter(brome_default_config.items()):
         for sub_key, sub_value in iter(value.items()):
-            _key = "{key}:{sub_key}".format(
-                key=key,
-                sub_key=sub_key
-            )
-            assert brome.get_config_value(_key) == sub_value['default']
+            assert BROME_CONFIG[key][sub_key] == sub_value['default']
 
 
 def test_default_config_when_value_not_provided(brome):
@@ -31,11 +24,7 @@ def test_default_config_when_value_not_provided(brome):
 
     for key, value in iter(brome_default_config.items()):
         for sub_key, sub_value in iter(value.items()):
-            _key = "{key}:{sub_key}".format(
-                key=key,
-                sub_key=sub_key
-            )
-            assert brome.get_config_value(_key) == sub_value['default']
+            assert BROME_CONFIG[key][sub_key] == sub_value['default']
 
 
 def test_new_section(brome):
@@ -45,8 +34,8 @@ def test_new_section(brome):
     new_config['new_section']['test_1'] = True
     brome.configure(config=new_config)
 
-    assert brome.get_config_value("new_section:test") == 1
-    assert brome.get_config_value("new_section:test_1")
+    assert BROME_CONFIG["new_section"]["test"] == 1
+    assert BROME_CONFIG["new_section"]["test_1"]
 
 
 def test_project_config(brome):
@@ -56,12 +45,14 @@ def test_project_config(brome):
     new_config['project']['test_1'] = True
     brome.configure(config=new_config)
 
-    assert brome.get_config_value("project:test") == 1
-    assert brome.get_config_value("project:test_1")
+    assert BROME_CONFIG["project"]["test"] == 1
+    assert BROME_CONFIG["project"]["test_1"]
 
 
 def test_project_absolute_path(brome):
-    brome.configure(
+    brome.configure(config={
+            'project': {}
+        },
         absolute_path="/dev/null/"
     )
-    assert brome.get_config_value("project:absolute_path") == "/dev/null/"
+    assert BROME_CONFIG["project"]["absolute_path"] == "/dev/null/"

@@ -1,6 +1,5 @@
 import asyncio
 import os
-from datetime import datetime
 import types
 
 import pytest
@@ -8,7 +7,7 @@ from webtest_aiohttp import TestApp
 
 from brome.core.settings import BROME_CONFIG
 from brome.webserver.server.app import init
-from brome.core.utils import DbSessionContext, delete_database
+from brome.core.utils import DbSessionContext, delete_database, utcnow
 from brome.model.user import User
 from brome.model.testbatch import Testbatch
 from brome.model.test import Test
@@ -26,6 +25,7 @@ def client():
 
     config = {
         "env": "test",
+        "registration_token": "registration_token",
         "mongo_database_name": "webbase_test",
         "mongo_host": "127.0.0.1",
         "server_port": 1337,
@@ -36,6 +36,12 @@ def client():
 
     BROME_CONFIG['webserver'] = {}
     BROME_CONFIG['webserver'].update(config)
+    BROME_CONFIG['database'] = {
+        "mongo_database_name": config['mongo_database_name']
+    }
+    BROME_CONFIG['project'] = {
+        "test_batch_result_path": False
+    }
     _, _, app = loop.run_until_complete(init(loop))
 
     with DbSessionContext(config.get('mongo_database_name')) as session:
@@ -60,7 +66,8 @@ def client():
             'db_session': session,
             'data': {
                 'pid': 1337,
-                'starting_timestamp': datetime.now(),
+                'starting_timestamp': utcnow(),
+                'friendly_name': 'test',
                 'total_tests': 1
             }
         }
@@ -84,8 +91,10 @@ def client():
                 test_instance_context = {
                     'db_session': session,
                     'data': {
-                        'starting_timestamp': datetime.now(),
+                        'starting_timestamp': utcnow(),
                         'name': 'Test Instance {index}'.format(index=index),
+                        'browser_id': 'Firefox',
+                        'browser_capabilities': {'browserName': 'Firefox'},
                         'test_batch_id': test_batch.mongo_id
                     }
                 }
@@ -100,8 +109,10 @@ def client():
                     'db_session': session,
                     'data': {
                         'result': bool(j),
-                        'browser_id': 'firefox',
+                        'browser_id': 'Firefox',
+                        'browser_capabilities': {'browserName': 'Firefox'},
                         'title': 'Test result %s' % i,
+                        'testid': "#%s" % i,
                         'test_id': test.mongo_id,
                         'test_instance_id': test_instance.mongo_id,
                         'test_batch_id': test_batch.mongo_id
@@ -116,8 +127,10 @@ def client():
             test_crash_context = {
                 'db_session': session,
                 'data': {
-                    'browser_id': 'firefox',
+                    'browser_id': 'Firefox',
+                    'browser_capabilities': {'browserName': 'Firefox'},
                     'title': 'Test Crash',
+                    'trace': 'Exception',
                     'test_instance_id': test_instance.mongo_id,
                     'test_batch_id': test_batch.mongo_id
                 }
@@ -181,7 +194,8 @@ def client():
     client.login = types.MethodType(login, client)
 
     # NOTE Always do an /api/get_session to init the session correctly
-    response = client.get('/api/get_session')
+    data = {'user_timezone': 'Australia/Sydney'}
+    response = client.post_json('/api/get_session', data)
     client.__token__ = response.json['token']
 
     return client

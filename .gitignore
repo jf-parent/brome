@@ -1,7 +1,9 @@
 # Python
 *.pkl
 *.py[cod]
-#sqlite
+#database
+*.rdb
+data
 *.db
 #yaml
 *.yml
@@ -25,3 +27,11 @@ test_results
 
 # Sphinx
 docs/source/_build/
+
+# NODE
+node_modules
+
+dist-dev
+.cache
+brome/webserver/logs/
+example/tb_results

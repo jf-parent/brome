@@ -3,7 +3,6 @@ import os
 from time import sleep
 
 import paramiko
-import boto.ec2
 
 from brome.core.utils import (
     string_to_filename,
@@ -122,6 +121,7 @@ class EC2Instance(BaseInstance):
     def startup(self):
         """Startup the ec2 instance
         """
+        import boto.ec2
 
         if not self.browser_config.get('launch'):
             self.warning_log("Skipping launch")
@@ -162,7 +162,7 @@ class EC2Instance(BaseInstance):
                     security_group_ids=security_group_ids
             )
 
-            wait_after_instance_launched = BROME_CONFIG['ec2']['wait_after_instance_launched']
+            wait_after_instance_launched = BROME_CONFIG['ec2']['wait_after_instance_launched']  # noqa
             if wait_after_instance_launched:
                 self.info_log(
                     "Waiting after instance launched: %s seconds..." %
@@ -306,6 +306,7 @@ class EC2Instance(BaseInstance):
     def tear_down(self):
         """Tear down the instance
         """
+        import boto.ec2
 
         if not self.browser_config.get('terminate'):
             self.warning_log("Skipping terminate")

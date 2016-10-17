@@ -2,6 +2,7 @@
 
 root = true
 
+# General settings for whole project
 [*]
 indent_style = space
 indent_size = 4
@@ -17,5 +18,26 @@ end_of_line = crlf
 [LICENSE]
 insert_final_newline = false
 
+# Format specific overrides
+[*.md]
+trim_trailing_whitespace = false
+
+[**.less]
+indent_style = space
+indent_size = 2
+
+[**.js]
+indent_style = space
+indent_size = 2
+
+[**.jsx]
+indent_style = space
+indent_size = 2
+
+[**.json]
+indent_style = space
+indent_size = 2
+
 [Makefile]
 indent_style = tab
+indent_size = 8

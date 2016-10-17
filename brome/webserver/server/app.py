@@ -85,7 +85,7 @@ async def init(loop):
         app.router.add_route(route[0], route[1], route[2], name=route[3])
 
     if BROME_CONFIG['webserver'].get('env', 'production') in \
-            ['development', 'test']:
+            ['development']:
         static_path = os.path.join(ROOT, 'dist-dev')
         try:
             if BROME_CONFIG['project']['test_batch_result_path']:
@@ -104,6 +104,9 @@ async def init(loop):
         except FileExistsError:
             pass
 
+    elif BROME_CONFIG['webserver']['env'] == 'test':
+        # NOTE don't serve any static in test mode
+        pass
     else:
         if BROME_CONFIG['webserver'].get('release', 'latest') == 'latest':
             latest_version_path = os.path.join(

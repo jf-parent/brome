@@ -2,7 +2,6 @@ from time import sleep
 from subprocess import Popen
 from subprocess import call
 
-import virtualbox
 import paramiko
 import netifaces as ni
 
@@ -110,6 +109,8 @@ class VirtualboxInstance(BaseInstance):
     def startup(self):
         """This will launch and configure the virtual box machine
         """
+
+        import virtualbox
 
         # Do not launch the virtual machine
         if not self.browser_config.get('launch', False):

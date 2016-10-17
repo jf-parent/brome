@@ -3,7 +3,8 @@ include LICENSE
 include README.rst
 include requirements.txt
 
-recursive-include brome/webserver/ *
+recursive-include brome/webserver/server *
+recursive-include brome/webserver/releases *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 

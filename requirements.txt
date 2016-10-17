@@ -31,15 +31,10 @@ rq
 ## env LDFLAGS="-L$(brew --prefix openssl)/lib" CFLAGS="-I$(brew --prefix openssl)/include" pip install cryptography
 cryptography
 
+pytz
 commentjson
 MongoAlchemy
 bcrypt==3.1.0
 validate_email
 redis
 jinja2
-Flask
-Flask-Login==0.2.11
-Flask-Admin
-flask-appbuilder
-flask-mongoengine
-Flask-Session

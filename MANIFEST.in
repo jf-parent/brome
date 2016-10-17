@@ -3,9 +3,9 @@ include LICENSE
 include README.rst
 include requirements.txt
 
-recursive-include brome/webserver/templates *
-recursive-include brome/webserver/static *
+recursive-include brome/webserver/server *
+recursive-include brome/webserver/releases *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 
-recursive-include docs *.rst conf.py Makefile make.bat
+recursive-include docs *.rst *.md conf.py Makefile make.bat

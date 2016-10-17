@@ -38,8 +38,8 @@ validate_email
 redis
 jinja2
 Flask
+Flask-Login==0.2.11
 Flask-Admin
 flask-appbuilder
-Flask-Login
 flask-mongoengine
 Flask-Session

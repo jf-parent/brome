@@ -13,7 +13,7 @@ with open('requirements.txt', 'r') as fd:
 
 setup(
     name='brome',
-    version='1.1.0',
+    version='1.1.1',
     description="Selenium Framework",
     long_description=readme,
     author="Jean-Francois Parent",

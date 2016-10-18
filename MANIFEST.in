@@ -1,6 +1,6 @@
 include AUTHORS.rst
 include LICENSE
-include README.rst
+include README.md
 include requirements.txt
 
 recursive-include brome/webserver/server *

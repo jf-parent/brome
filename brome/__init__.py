@@ -21,7 +21,7 @@ from brome.core.configurator import (
     generate_brome_config
 )
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 
 class Brome(object):

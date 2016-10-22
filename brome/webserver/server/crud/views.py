@@ -149,6 +149,7 @@ class CRUD(web.View):
 
                     else:
                         filters = action.get('filters')
+                        filters_wildcard = action.get('filters_wildcard')
                         limit = action.get('limit')
                         skip = action.get('skip')
                         descending = action.get('descending')
@@ -174,6 +175,18 @@ class CRUD(web.View):
                                 del filters['uid']
 
                             base_query = base_query.filter_by(**filters)
+
+                        if filters_wildcard:
+                            wildcard = []
+                            for key, value in iter(filters_wildcard.items()):
+                                wildcard.append(
+                                    getattr(
+                                        model_class,
+                                        key
+                                    ).regex('.*%s.*' % value, ignore_case=True)
+                                )
+
+                            base_query = base_query.or_(*wildcard)
 
                     response_data[index]['total'] = base_query.count()
                     results = base_query.all()
@@ -230,7 +243,6 @@ class CRUD(web.View):
                                 action_name=action_name
                             )
                         )(action_context)
-
 
                     # DELETE
                     elif action_name == 'delete':

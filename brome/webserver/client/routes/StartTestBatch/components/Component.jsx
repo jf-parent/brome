@@ -87,7 +87,7 @@ class StartTestBatch extends BaseComponent {
 
       return (
         <div className='container-fluid'>
-          <SecureForm ref='form' onValid={this.enableButton} onInvalid={this.disableButton} session={this.props.state.session}>
+          <SecureForm ref='form' style={{maxWidth: '100%'}} onValid={this.enableButton} onInvalid={this.disableButton} session={this.props.state.session}>
             <center>
               <h2 className={SecureFormStyle['form-signin-heading']}>
                 <FormattedMessage

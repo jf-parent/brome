@@ -7,6 +7,8 @@ import yaml
 
 from brome.core.utils import DbSessionContext
 from brome.model.testinstance import Testinstance
+from brome.model.testcrash import Testcrash
+from brome.model.testresult import Testresult
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 ROOT = os.path.join(HERE, '..')
@@ -31,7 +33,7 @@ with DbSessionContext(DB_NAME) as session:
 
     for test_instance in test_instance_list:
         # upload the video to s3
-        file_path  = os.path.join(
+        file_path = os.path.join(
              ROOT_TB_RESULTS,
              test_instance.video_capture_path
         )
@@ -42,7 +44,10 @@ with DbSessionContext(DB_NAME) as session:
             continue
 
         print('[*]Uploading {file_path} to s3...'.format(file_path=file_path))
-        s3.Bucket(BUCKET_NAME).put_object(Key=test_instance.video_capture_path, Body=data)
+        s3.Bucket(BUCKET_NAME).put_object(
+            Key=test_instance.video_capture_path,
+            Body=data
+        )
 
         remote_file_name = \
             'https://s3-us-west-2.amazonaws.com/{bucket}/{path}' \
@@ -55,6 +60,25 @@ with DbSessionContext(DB_NAME) as session:
         test_instance.video_location = 's3'
         test_instance.video_capture_path = remote_file_name
         session.save(test_instance, safe=True)
+
+        # Test Crash
+        test_crash_list = session.query(Testcrash)\
+            .filter(Testcrash.test_instance_id == test_instance.mongo_id)\
+            .all()
+        for test_crash in test_crash_list:
+            test_crash.video_capture_path = remote_file_name
+            test_crash.video_location = 's3'
+            session.save(test_crash, safe=True)
+
+        # Test Result
+        test_result_list = session.query(Testresult)\
+            .filter(Testresult.test_instance_id == test_instance.mongo_id)\
+            .all()
+        for test_result in test_result_list:
+            test_result.video_capture_path = remote_file_name
+            test_result.video_location = 's3'
+            session.save(test_result, safe=True)
+
         os.remove(file_path)
 
 print('Done')

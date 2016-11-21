@@ -3,8 +3,10 @@
 
 from setuptools import setup, find_packages
 
-with open('README.md') as readme_file:
-    readme = readme_file.read()
+import pypandoc
+
+# https://bitbucket.org/pypa/pypi/issues/148/support-markdown-for-readmes
+long_description = pypandoc.convert('README.md', 'rst')
 
 requirements = []
 with open('requirements.txt', 'r') as fd:
@@ -15,7 +17,7 @@ setup(
     name='brome',
     version='1.1.1',
     description="Selenium Framework",
-    long_description=readme,
+    long_description=long_description,
     author="Jean-Francois Parent",
     author_email='parent.j.f@gmail.com',
     url='https://github.com/jf-parent/brome',

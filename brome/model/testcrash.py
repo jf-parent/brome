@@ -24,7 +24,6 @@ class Testcrash(BaseModel):
     root_path = StringField(default='')
     screenshot_path = StringField(default='')
     video_capture_path = StringField(default='')
-    video_location = StringField(default='local')
 
     test_instance_id = ObjectIdField()
     test_batch_id = ObjectIdField()

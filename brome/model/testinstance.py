@@ -29,7 +29,6 @@ class Testinstance(BaseModel):
     log_file_path = StringField(default='')
     network_capture_path = StringField(default='')
     video_capture_path = StringField(default='')
-    video_location = StringField(default='local')
     # Bot diary
 
     test_batch_id = ObjectIdField()

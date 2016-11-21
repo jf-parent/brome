@@ -22,7 +22,6 @@ class Testresult(BaseModel):
     root_path = StringField(default='')
     screenshot_path = StringField(default='')
     video_capture_path = StringField(default='')
-    video_location = StringField(default='local')
 
     extra_data = DictField(StringField(), default=dict())
 

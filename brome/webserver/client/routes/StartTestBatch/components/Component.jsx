@@ -1,5 +1,5 @@
 import React from 'react'
-import { FormattedMessage } from 'react-intl'
+import { defineMessages, injectIntl, FormattedMessage } from 'react-intl'
 import Collapse, { Panel } from 'rc-collapse'
 import 'rc-collapse/assets/index.css'
 import Formsy from 'formsy-react'
@@ -20,6 +20,17 @@ Formsy.addValidationRule('requiredOneBrowser', (values, value) => {
 
 Formsy.addValidationRule('requiredOneTest', (values, value) => {
   return !!values.tests.length
+})
+
+const startTestBatchMessages = defineMessages({
+  requireOneBrowserSelectedPlaceholder: {
+    id: 'startTestBatch.RequiredOneBrowserSelected',
+    defaultMessage: 'Browsers (select at least one):'
+  },
+  testsRunAllByDefaultPlaceholder: {
+    id: 'startTestBatch.TestsRunAllByDefault',
+    defaultMessage: 'Tests (run all by default):'
+  }
 })
 
 class StartTestBatch extends BaseComponent {
@@ -84,6 +95,9 @@ class StartTestBatch extends BaseComponent {
       let browsers = Object.keys(starttestbatch.bromeConfig['browsers_config']).sort()
       let tests = starttestbatch.tests
       let selectedTests = this.state.selectedTests
+      const { formatMessage } = this.props.intl
+      const requireOneBrowserSelectedPlaceholder = formatMessage(startTestBatchMessages.requireOneBrowserSelectedPlaceholder)
+      const testsRunAllByDefaultPlaceholder = formatMessage(startTestBatchMessages.testsRunAllByDefaultPlaceholder)
 
       return (
         <div className='container-fluid'>
@@ -97,7 +111,7 @@ class StartTestBatch extends BaseComponent {
               </h2>
             </center>
             <Collapse activeKey='1'>
-              <Panel header='Browsers (select at least one):' key='1'>
+              <Panel header={requireOneBrowserSelectedPlaceholder} key='1'>
                 <MultiCheckboxSet
                   value={[]}
                   name='browsers'
@@ -107,10 +121,20 @@ class StartTestBatch extends BaseComponent {
               </Panel>
             </Collapse>
             <Collapse>
-              <Panel header='Tests (run all by default):'>
-                <a className='btn btn-default btn-link' onClick={this.uncheckAll}>Uncheck All</a>
+              <Panel header={testsRunAllByDefaultPlaceholder}>
+                <a className='btn btn-default btn-link' onClick={this.uncheckAll}>
+                  <FormattedMessage
+                    id='starttestbatch.UncheckAll'
+                    defaultMessage='Uncheck All'
+                  />
+                </a>
                 {' - '}
-                <a className='btn btn-default btn-link' onClick={this.checkAll}>Check All</a>
+                <a className='btn btn-default btn-link' onClick={this.checkAll}>
+                  <FormattedMessage
+                    id='starttestbatch.CheckAll'
+                    defaultMessage='Check All'
+                  />
+                </a>
                 <MultiCheckboxSet
                   value={selectedTests}
                   name='tests'
@@ -132,4 +156,4 @@ class StartTestBatch extends BaseComponent {
   }
 }
 
-module.exports = StartTestBatch
+module.exports = injectIntl(StartTestBatch)

@@ -1,6 +1,6 @@
 import React from 'react'
 import axios from 'axios'
-// import { FormattedMessage } from 'react-intl'
+import { FormattedMessage } from 'react-intl'
 import 'font-awesome-webpack'
 
 import Breadcrumbs from 'components/ux/Breadcrumbs'
@@ -107,7 +107,14 @@ class TestBatchRunnerLog extends BaseComponent {
       return (
         <div>
           <Breadcrumbs routes={routes} />
-          <h2>Test Batch Log <small>({this.state.parent.friendly_name}) ({this.state.parent.uid})</small></h2>
+          <h2>
+            <FormattedMessage
+              id='testBatchRunnerLog.TestBatchLog'
+              defaultMessage='Test Batch Log'
+            />
+            {' '}
+            <small>({this.state.parent.friendly_name}) ({this.state.parent.uid})</small>
+          </h2>
           <span>
             Log:{' '}
           </span>
@@ -116,7 +123,12 @@ class TestBatchRunnerLog extends BaseComponent {
           </b>
           <span>
             {' '}
-            <a href={directLinkLog} target='_blank'>Direct link</a>
+            <a href={directLinkLog} target='_blank'>
+              <FormattedMessage
+                id='general.DirectLink'
+                defaultMessage='Direct link'
+              />
+            </a>
             {' '}
             <i className='fa fa-external-link' aria-hidden='true'></i>
           </span>

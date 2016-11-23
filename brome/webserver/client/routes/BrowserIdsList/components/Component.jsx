@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router'
-// import { FormattedMessage } from 'react-intl'
+import { FormattedMessage } from 'react-intl'
 
 // import ComponentStyle from './ComponentStyle.postcss'
 import Breadcrumbs from 'components/ux/Breadcrumbs'
@@ -121,7 +121,12 @@ class BrowserIdsList extends BaseComponent {
         <div>
           <Breadcrumbs routes={routes} />
           <h2 className='text-center'>
-            Browser Ids List <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
+            <FormattedMessage
+              id='browserIdsList.BrowserIdsList'
+              defaultMessage='Browser Ids List'
+            />
+            {' '}
+            <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
           </h2>
           <ul>
           {(() => {

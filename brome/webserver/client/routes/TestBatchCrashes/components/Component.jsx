@@ -1,5 +1,5 @@
 import React from 'react'
-// import { FormattedMessage } from 'react-intl'
+import { defineMessages, injectIntl, FormattedMessage } from 'react-intl'
 import Collapse, { Panel } from 'rc-collapse'
 import 'rc-collapse/assets/index.css'
 
@@ -10,6 +10,17 @@ import Loading from 'components/ux/Loading'
 import ErrorMsg from 'components/ux/ErrorMsg'
 // import ComponentStyle from './ComponentStyle.postcss'
 import BaseComponent from 'core/BaseComponent'
+
+const testBatchCrashesMessages = defineMessages({
+  screenshotPlaceholder: {
+    id: 'testBatchCrashes.Screenshot',
+    defaultMessage: 'Screenshot'
+  },
+  videoCapturePlaceholder: {
+    id: 'testBatchCrashes.VideoCapture',
+    defaultMessage: 'Video Capture'
+  }
+})
 
 class TestBatchCrashes extends BaseComponent {
   constructor (props) {
@@ -83,6 +94,10 @@ class TestBatchCrashes extends BaseComponent {
       )
     } else {
       let testBatch = this.props.state.testbatchcrashes.testBatch
+      const { formatMessage } = this.props.intl
+      const videoCapturePlaceholder = formatMessage(testBatchCrashesMessages.videoCapturePlaceholder)
+      const screenshotPlaceholder = formatMessage(testBatchCrashesMessages.screenshotPlaceholder)
+
       let routes = [
         {
           msgId: 'TestBatchDetail',
@@ -96,7 +111,14 @@ class TestBatchCrashes extends BaseComponent {
       return (
         <div>
           <Breadcrumbs routes={routes} />
-          <h2>Test Batch Crashes <small>({testBatch.friendly_name}) ({testBatch.uid})</small></h2>
+          <h2>
+            <FormattedMessage
+              id='testBatchCrashes.TestBatchCrashes'
+              defaultMessage='Test Batch Crashes'
+            />
+            {' '}
+            <small>({testBatch.friendly_name}) ({testBatch.uid})</small>
+          </h2>
 
           {(() => {
             let crashes = testbatchcrashes.crashes
@@ -136,7 +158,7 @@ class TestBatchCrashes extends BaseComponent {
                             </ol>
                           </div>
                         </Panel>
-                        <Panel header='Screenshot'>
+                        <Panel header={screenshotPlaceholder}>
                           {(() => {
                             if (crash.screenshot_path !== '') {
                               return (
@@ -146,12 +168,17 @@ class TestBatchCrashes extends BaseComponent {
                               )
                             } else {
                               return (
-                                <small>No screenshot</small>
+                                <small>
+                                  <FormattedMessage
+                                    id='testBatchCrashes.NoScreenshot'
+                                    defaultMessage='No screenshot'
+                                  />
+                                </small>
                               )
                             }
                           })()}
                         </Panel>
-                        <Panel header='Video Capture'>
+                        <Panel header={videoCapturePlaceholder}>
                           {(() => {
                             if (crash.video_capture_path !== '') {
                               return (
@@ -159,7 +186,12 @@ class TestBatchCrashes extends BaseComponent {
                               )
                             } else {
                               return (
-                                <small>No video capture</small>
+                                <small>
+                                  <FormattedMessage
+                                    id='testBatchCrashes.NoVideoCapture'
+                                    defaultMessage='No video capture'
+                                  />
+                                </small>
                               )
                             }
                           })()}
@@ -177,4 +209,4 @@ class TestBatchCrashes extends BaseComponent {
   }
 }
 
-module.exports = TestBatchCrashes
+module.exports = injectIntl(TestBatchCrashes)

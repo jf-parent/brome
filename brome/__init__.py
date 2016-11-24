@@ -55,7 +55,7 @@ class Brome(object):
         BROME_CONFIG['test_dict'] = test_dict
 
     def print_usage(self):
-        print('$ ./bro admin | run | webserver | list | find')
+        print('$ ./bro admin | run | webserver | list | find | webadmin')
         exit(1)
 
     def execute(self, args):
@@ -72,6 +72,8 @@ class Brome(object):
             self.list_(args[2:])
         elif args[1] == 'webserver':
             self.webserver(args[2:])
+        elif args[1] == 'webadmin':
+            self.webadmin(args[2:])
         else:
             self.print_usage()
 
@@ -175,6 +177,15 @@ class Brome(object):
 
     def webserver(self, args):
         run_app()
+
+    def webadmin(self, args):
+        from brome.admin.app import app as admin_app
+        admin_config = BROME_CONFIG['webserver']['admin']
+        admin_app.run(
+            host=admin_config['host'],
+            port=admin_config['port'],
+            debug=admin_config.get('debug', False)
+        )
 
     def list_(self, args):
         query = os.path.join(

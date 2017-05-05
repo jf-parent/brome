@@ -1,5 +1,5 @@
 import React from 'react'
-// import { FormattedMessage } from 'react-intl'
+import { FormattedMessage } from 'react-intl'
 import ImageGallery from 'react-image-gallery'
 import 'react-image-gallery/build/image-gallery.css'
 
@@ -172,7 +172,10 @@ class TestBatchScreenshots extends BaseComponent {
         <div className='container-fluid'>
           <Breadcrumbs routes={routes} />
           <h2>
-            Test Batch Screenshots
+            <FormattedMessage
+              id='testBatchScreenshots.TestBatchScreenshots'
+              defaultMessage='Test Batch Screenshots'
+            />
             {' - '}
             <small>
               ({testBatchScreenshots.testBatch.friendly_name}) ({testBatchScreenshots.testBatch.uid})
@@ -205,21 +208,30 @@ class TestBatchScreenshots extends BaseComponent {
               <button
                 className={'btn ' + (this.state.isPlaying ? 'btn-primary' : 'btn-default')}
                 onClick={this.playSlider}>
-                Play
+                <FormattedMessage
+                  id='testBatchScreenshots.Play'
+                  defaultMessage='Play'
+                />
               </button>
             </li>
             <li>
               <button
                 className={'btn ' + (!this.state.isPlaying ? 'btn-primary' : 'btn-default')}
                 onClick={this.pauseSlider}>
-                Pause
+                <FormattedMessage
+                  id='testBatchScreenshots.Pause'
+                  defaultMessage='Pause'
+                />
               </button>
             </li>
             <li>
               <button
                 className='btn btn-default'
                 onClick={this.fullScreen}>
-                Full Screen
+                <FormattedMessage
+                  id='testBatchScreenshots.FullScreen'
+                  defaultMessage='Full Screen'
+                />
               </button>
             </li>
           </ul>
@@ -235,7 +247,10 @@ class TestBatchScreenshots extends BaseComponent {
                       onChange={this.handleCheckboxChange}
                       checked={this.state.infinite}
                     />
-                    Infinite sliding
+                    <FormattedMessage
+                      id='testBatchScreenshots.InfiniteSliding'
+                      defaultMessage='Infinite sliding'
+                    />
                   </label>
                 </div>
               </li>
@@ -249,7 +264,10 @@ class TestBatchScreenshots extends BaseComponent {
                       onChange={this.handleCheckboxChange}
                       checked={this.state.showThumbnails}
                     />
-                    Show thumbnails
+                    <FormattedMessage
+                      id='testBatchScreenshots.ShowThumbnails'
+                      defaultMessage='Show thumbnails'
+                    />
                   </label>
                 </div>
               </li>
@@ -263,7 +281,10 @@ class TestBatchScreenshots extends BaseComponent {
                       onChange={this.handleCheckboxChange}
                       checked={this.state.showNav}
                     />
-                    Show navigation
+                    <FormattedMessage
+                      id='testBatchScreenshots.ShowNavigation'
+                      defaultMessage='Show navigation'
+                    />
                   </label>
                 </div>
               </li>
@@ -277,7 +298,10 @@ class TestBatchScreenshots extends BaseComponent {
                       onChange={this.handleCheckboxChange}
                       checked={this.state.showIndex}
                     />
-                    Show index
+                    <FormattedMessage
+                      id='testBatchScreenshots.ShowIndex'
+                      defaultMessage='Show index'
+                    />
                   </label>
                 </div>
               </li>
@@ -291,7 +315,10 @@ class TestBatchScreenshots extends BaseComponent {
                       onChange={this.handleCheckboxChange}
                       checked={this.state.slideOnThumbnailHover}
                     />
-                    Slide on thumbnail hover (desktop)
+                    <FormattedMessage
+                      id='testBatchScreenshots.SlideOnThumbnailHover'
+                      defaultMessage='Slide on thumbnail hover (desktop)'
+                    />
                   </label>
                 </div>
               </li>

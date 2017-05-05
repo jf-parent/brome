@@ -33,6 +33,7 @@ cryptography
 
 pytz
 commentjson
+pymongo==3.3.1
 MongoAlchemy
 bcrypt==3.1.0
 validate_email

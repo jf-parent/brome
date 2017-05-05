@@ -6,6 +6,7 @@ import { Line } from 'rc-progress'
 import moment from 'moment'
 
 import LaddaButton from 'components/ux/LaddaButton'
+import Modal from 'components/ux/Modal'
 import ErrorMsg from 'components/ux/ErrorMsg'
 import SuccessMsg from 'components/ux/SuccessMsg'
 import Loading from 'components/ux/Loading'
@@ -19,6 +20,8 @@ class TestBatchDetail extends BaseComponent {
 
     this._initLogger()
     this._bind(
+      'getModal',
+      'closeModal',
       'getTestBatchUid',
       'getTestBatch',
       'getRunningTime',
@@ -34,6 +37,12 @@ class TestBatchDetail extends BaseComponent {
       'getCrashes',
       'getMilestone'
     )
+
+    this.state = {
+      showModal: false,
+      modalTitle: '',
+      modalCb: null
+    }
   }
 
   componentWillMount () {
@@ -60,32 +69,56 @@ class TestBatchDetail extends BaseComponent {
     this.props.actions.doReset()
   }
 
+  closeModal () {
+    this.setState({showModal: false, modalCb: null})
+  }
+
   onTerminate () {
-    let data = {
-      token: this.props.state.session.token,
-      actions: {
-        action: 'update',
-        uid: this.getTestBatchUid(),
-        model: 'testbatch',
-        data: {
-          killed: true
+    let doTerminate = function () {
+      let data = {
+        token: this.props.state.session.token,
+        actions: {
+          action: 'update',
+          uid: this.getTestBatchUid(),
+          model: 'testbatch',
+          data: {
+            killed: true
+          }
         }
       }
-    }
 
-    this.props.actions.doTerminate(data)
+      this.props.actions.doTerminate(data)
+      this.closeModal()
+    }
+    doTerminate = doTerminate.bind(this)
+    this.setState({showModal: true, modalCb: doTerminate, modalTitle: 'Are you sure you want to terminate this test batch?'})
   }
 
   onDelete () {
-    let data = {
-      token: this.props.state.session.token,
-      actions: {
-        action: 'delete',
-        uid: this.getTestBatchUid(),
-        model: 'testbatch'
+    let doDelete = function () {
+      let data = {
+        token: this.props.state.session.token,
+        actions: {
+          action: 'delete',
+          uid: this.getTestBatchUid(),
+          model: 'testbatch'
+        }
       }
+      this.props.actions.doDelete(data)
+      this.closeModal()
     }
-    this.props.actions.doDelete(data)
+    doDelete = doDelete.bind(this)
+    this.setState({showModal: true, modalCb: doDelete, modalTitle: 'Are you sure you want to delete this test batch?'})
+  }
+
+  getModal () {
+    return (
+      <Modal ref='modal' isOpen={this.state.showModal} onClose={this.closeModal} title={this.state.modalTitle}>
+        <button className='btn btn-warning btn-default' onClick={this.state.modalCb}>Yes</button>
+        {' '}
+        <button className='btn btn-success btn-default' onClick={this.closeModal}>No</button>
+      </Modal>
+    )
   }
 
   getRunningTime () {
@@ -613,6 +646,7 @@ class TestBatchDetail extends BaseComponent {
           {this.getTestResults()}
           {this.getMilestone()}
           {this.getCrashes()}
+          {this.getModal()}
         </div>
       )
     }

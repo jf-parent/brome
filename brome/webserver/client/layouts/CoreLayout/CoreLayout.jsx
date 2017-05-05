@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import { FormattedMessage } from 'react-intl'
 import { bindActionCreators } from 'redux'
 
 import './global.css'
@@ -65,7 +66,14 @@ class CoreLayout extends BaseComponent {
           <footer >
             <div className='container'>
               <div className='jumbotron'>
-                <h2><a href='https://github.com/jf-parent/brome' target='_blank'>Brome</a> Webserver</h2>
+                <h2>
+                  <a href='https://github.com/jf-parent/brome' target='_blank'>Brome</a>
+                  {' '}
+                  <FormattedMessage
+                    id='footer.Webserver'
+                    defaultMessage='Webserver'
+                  />
+                </h2>
               </div>
             </div>
           </footer>

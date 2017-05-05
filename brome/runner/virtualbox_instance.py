@@ -1,6 +1,5 @@
 from time import sleep
-from subprocess import Popen
-from subprocess import call
+import subprocess
 
 import paramiko
 import netifaces as ni
@@ -84,7 +83,7 @@ class VirtualboxInstance(BaseInstance):
             "executing command: %s" %
             ' '.join(sshadd_command)
         )
-        p = Popen(sshadd_command)
+        p = subprocess.Popen(sshadd_command)
         p.wait()
 
         scp_command = [
@@ -103,31 +102,57 @@ class VirtualboxInstance(BaseInstance):
             "executing command: %s" %
             ' '.join(scp_command)
         )
-        p = Popen(scp_command)
+        p = subprocess.Popen(scp_command)
         p.wait()
 
     def startup(self):
         """This will launch and configure the virtual box machine
         """
 
-        import virtualbox
-
         # Do not launch the virtual machine
         if not self.browser_config.get('launch', False):
             return True
 
-        self.info_log("Starting up")
+        self.info_log("Starting up...")
 
         try:
+            vm_already_running_cmd = [
+                "VBoxManage",
+                "showvminfo",
+                self.browser_config.get('vbname'),
+                "--machinereadable",
+                "|",
+                "grep",
+                "VMState=",
+                "|",
+                "cut",
+                "-d'='",
+                "-f2"
+            ]
+
+            output = subprocess.check_output(
+                ' '.join(vm_already_running_cmd),
+                stderr=subprocess.STDOUT,
+                shell=True
+            ).decode('utf').strip()
+
+            print(
+                "Is vm already running output: {output}"
+                .format(output=output)
+            )
+
+            if output.find('running') != -1:
+                return True
+
             # Cleanup the vbox guestproperty variable
-            call([
+            subprocess.call([
                 'VBoxManage',
                 'guestproperty',
                 'delete',
                 self.browser_config.get('vbname'),
                 'wait_until_ready'
             ])
-            call([
+            subprocess.call([
                 'VBoxManage',
                 'guestproperty',
                 'delete',
@@ -135,96 +160,87 @@ class VirtualboxInstance(BaseInstance):
                 'hub_ip'
             ])
 
-            # Find the machine
-            vm = self.vbox.find_machine(self.browser_config.get('vbname'))
+            startvm = [
+                "VBoxManage",
+                "startvm",
+                "'{vbname}'"
+                .format(
+                    vbname=self.browser_config.get('vbname')
+                ),
+                "--type",
+                self.browser_config.get('vbox_type', 'gui')
+            ]
 
-            # Session
-            self.session = virtualbox.Session()
+            out = subprocess.check_output(
+                ' '.join(startvm),
+                stderr=subprocess.STDOUT,
+                shell=True
+            )
+            self.info_log('VBoxManage output: {out}'.format(out=out))
 
-            # Determine if the vm is running or not
-            # Launch it is necessary
-            vm_already_running = False
-            if str(vm.session_state) != 'Locked':
-                vm.launch_vm_process(
-                    self.session, self.browser_config.get(
-                        'vbox_type', 'gui'
-                    ), ''
+            instance_ready = False
+            # TODO should be configurable
+            timeout = 60
+
+            self.info_log('Waiting for instance to start...')
+
+            for i in range(timeout):
+                getproperty = [
+                    'VBoxManage',
+                    'guestproperty',
+                    'get',
+                    self.browser_config.get('vbname'),
+                    'wait_until_ready'
+                ]
+                output = subprocess.check_output(
+                    ' '.join(getproperty),
+                    stderr=subprocess.STDOUT,
+                    shell=True
+                ).decode('utf').strip()
+                self.info_log(
+                    'VBoxManage guestproperty output: {output}'
+                    .format(output=output)
                 )
+
+                if output.find('ready') != -1:
+                    instance_ready = True
+                    break
+
+                sleep(1)
+
+            sleep(3)
+            if instance_ready:
+                self.info_log('[Done] Instance ready...')
             else:
-                vm_already_running = True
-
-            user_session = vm.create_session()
-            # NOTE this is another way to record the session
-            # user_session.machine.video_capture_enabled = False
-
-            # User session
-            self.vbox_session = user_session
-
-            # Wait until the vm is ready
-            if not vm_already_running:
-
-                instance_ready = False
-                # TODO should be configurable
-                timeout = 60
-
-                self.info_log('Waiting for instance to start...')
-
-                for i in range(timeout):
-                    try:
-                        value, timestamp, flags = user_session.machine.get_guest_property('wait_until_ready')  # noqa
-
-                        if value == u'ready':
-                            instance_ready = True
-                            break
-
-                    except virtualbox.library.VBoxErrorInvalidVmState:
-                        pass
-
-                    sleep(1)
-
-                sleep(3)
-                if instance_ready:
-                    self.info_log('[Done] Instance ready...')
-                else:
-                    raise Exception("Timeout error: the virtualbox machine is still not ready.")  # noqa
+                raise Exception("Timeout error: the virtualbox machine is still not ready.")  # noqa
 
             # HUB IP
             hub_ip = ni.ifaddresses('en0')[2][0]['addr']
 
             self.info_log("Hub ip: %s" % hub_ip)
 
-            # VM IP
-            vm_ip = vm.get_guest_property(
-                "/VirtualBox/GuestInfo/Net/0/V4/IP"
-            )[0]
-            self.ip = vm_ip
-
-            self.info_log("vm ip: %s" % vm_ip)
-
             # Start selenium on the node
-            if not vm_already_running:
+            # LINUX
+            if self.browser_config.get('platform').lower() == "linux":
 
-                # LINUX
-                if self.browser_config.get('platform').lower() == "linux":
+                self.info_log('Starting the selenium node server')
 
-                    self.info_log('Starting the selenium node server')
+                # Update the hub_ip browser config
+                self.browser_config.config['hub_ip'] = hub_ip
 
-                    # Update the hub_ip browser config
-                    self.browser_config.config['hub_ip'] = hub_ip
+                command = self.browser_config.get(
+                    "selenium_command"
+                ).format(**self.browser_config.config)
+                self.execute_command(command)
 
-                    command = self.browser_config.get(
-                        "selenium_command"
-                    ).format(**self.browser_config.config)
-                    self.execute_command(command)
+            # WINDOWS
+            elif self.browser_config.get('platform').lower() == "windows":
 
-                # WINDOWS
-                elif self.browser_config.get('platform').lower() == "windows":
+                self.info_log("Setting the guest property in Windows")
 
-                    self.info_log("Setting the guest property in Windows")
-
-                    user_session.machine.set_guest_property(
-                        "hub_ip", "%s:%s" % (hub_ip, '4444'), ''
-                    )
+                # user_session.machine.set_guest_property(
+                #     "hub_ip", "%s:%s" % (hub_ip, '4444'), ''
+                # )
 
             return True
 

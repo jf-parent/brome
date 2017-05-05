@@ -3,10 +3,16 @@
 
 from setuptools import setup, find_packages
 
-import pypandoc
+try:
+    import pypandoc
+except ImportError:
+    pypandoc = False
 
-# https://bitbucket.org/pypa/pypi/issues/148/support-markdown-for-readmes
-long_description = pypandoc.convert('README.md', 'rst')
+if pypandoc:
+    # https://bitbucket.org/pypa/pypi/issues/148/support-markdown-for-readmes
+    long_description = pypandoc.convert('README.md', 'rst')
+else:
+    long_description = 'Brome'
 
 requirements = []
 with open('requirements.txt', 'r') as fd:

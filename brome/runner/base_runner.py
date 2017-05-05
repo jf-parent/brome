@@ -72,7 +72,11 @@ class BaseRunner(object):
         self.test_batch_friendly_name = test_batch.friendly_name
 
         # RUNNER LOG DIR
-        self.root_test_result_dir = BROME_CONFIG["project"]["test_batch_result_path"]  # noqa
+        root_test_result_dir = BROME_CONFIG["project"]["test_batch_result_path"]  # noqa
+        if root_test_result_dir:
+            self.root_test_result_dir = root_test_result_dir
+        else:
+            self.root_test_result_dir = ''
 
         if self.root_test_result_dir:
             self.runner_dir = os.path.join(

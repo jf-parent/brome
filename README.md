@@ -26,10 +26,9 @@
 
 # Quick-start
 
+* install mongodb first!
+
 ```bash
-$ cookiecutter https://github.com/jf-parent/cookiecutter-brome -f
-$ chmod +x bro
-$ pip install brome
-$ vim config/brome.yml
-$ ./bro --help
+$ cookiecutter https://github.com/jf-parent/cookiecutter-brome
+$ ./bro run -l firefox -s example
 ```

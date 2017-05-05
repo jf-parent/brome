@@ -1,6 +1,5 @@
 import React from 'react'
-// import { FormattedMessage } from 'react-intl'
-import { FormattedTime, FormattedDate, FormattedMessage } from 'react-intl'
+import { defineMessages, injectIntl, FormattedTime, FormattedDate, FormattedMessage } from 'react-intl'
 import moment from 'moment'
 import Collapse, { Panel } from 'rc-collapse'
 import 'rc-collapse/assets/index.css'
@@ -15,17 +14,38 @@ import BaseComponent from 'core/BaseComponent'
 
 const TEST_INSTANCE_LIMIT = 10
 
+const testInstanceDetailMessages = defineMessages({
+  searchPlaceholder: {
+    id: 'general.Search',
+    defaultMessage: 'Search'
+  },
+  extraInfoPlaceholder: {
+    id: 'testInstanceDetail.ExtraInfo',
+    defaultMessage: 'Extra Info'
+  },
+  executionTimePlaceholder: {
+    id: 'testInstanceDetail.ExecutionTime',
+    defaultMessage: 'Execution Time'
+  }
+})
+
 class TestInstanceDetailList extends BaseComponent {
   constructor (props) {
     super(props)
 
     this._initLogger()
     this._bind(
+      'onSearch',
+      'onSearchTextChange',
       'pad2',
       'getTestBatch',
       'getTestBatchUid',
       'fetchTestInstanceDetailList'
     )
+
+    this.state = {
+      searchText: ''
+    }
   }
 
   componentWillMount () {
@@ -34,12 +54,23 @@ class TestInstanceDetailList extends BaseComponent {
     this.fetchTestInstanceDetailList(0)
   }
 
+  onSearch () {
+    this.fetchTestInstanceDetailList(0)
+  }
+
+  onSearchTextChange (event) {
+    let searchText = event.target.value
+
+    this.setState({searchText})
+  }
+
   fetchTestInstanceDetailList (skip) {
     this.props.actions.doFetchTestInstanceDetailList(
       this.props.state.session,
       this.getTestBatchUid(),
       skip,
-      TEST_INSTANCE_LIMIT
+      TEST_INSTANCE_LIMIT,
+      this.state.searchText
     )
   }
 
@@ -69,6 +100,10 @@ class TestInstanceDetailList extends BaseComponent {
     } else {
       let testInstances = this.props.state.testinstancedetaillist.testInstanceDetailList
       let testBatch = this.getTestBatch()
+      const { formatMessage } = this.props.intl
+      const searchPlaceholder = formatMessage(testInstanceDetailMessages.searchPlaceholder)
+      const extraInfoPlaceholder = formatMessage(testInstanceDetailMessages.extraInfoPlaceholder)
+      const executionTimePlaceholder = formatMessage(testInstanceDetailMessages.executionTimePlaceholder)
       let routes = [
         {
           msgId: 'TestBatchDetail',
@@ -84,8 +119,24 @@ class TestInstanceDetailList extends BaseComponent {
         <div>
           <Breadcrumbs routes={routes} />
           <h2 className='text-center'>
-            Test Instance List <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
+            <FormattedMessage
+              id='testInstanceDetailList.TestIntanceList'
+              defaultMessage='Test Instance List'
+            />
+            <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
           </h2>
+          <div className='row'>
+            <div className='col-xs-offset-8'>
+              <input placeholder={searchPlaceholder} value={this.state.searchText} onChange={this.onSearchTextChange} />
+              {' '}
+              <button className='btn btn-default btn-xs' onClick={this.onSearch}>
+                <FormattedMessage
+                  id='general.Search'
+                  defaultMessage='Search'
+                />
+              </button>
+            </div>
+          </div>
           <ul>
           {(() => {
             return testInstances.map((testInstance, index) => {
@@ -117,7 +168,7 @@ class TestInstanceDetailList extends BaseComponent {
                   <Collapse accordion>
                     <Panel header={title} key={index}>
                       <Collapse accordion>
-                        <Panel header='Execution Time'>
+                        <Panel header={executionTimePlaceholder}>
                           <p>
                             <small>
                               <b>
@@ -202,7 +253,7 @@ class TestInstanceDetailList extends BaseComponent {
                             }
                           })()}
                         </Panel>
-                        <Panel header='Extra Info'>
+                        <Panel header={extraInfoPlaceholder}>
                           <ul>
                               {(() => {
                                 if (Object.keys(testInstance.extra_data).length) {
@@ -213,7 +264,12 @@ class TestInstanceDetailList extends BaseComponent {
                                   })
                                 } else {
                                   return (
-                                    <li>No extra info</li>
+                                    <li>
+                                      <FormattedMessage
+                                        id='testInstanceDetailList.NoExtraInfo'
+                                        defaultMessage='No extra info'
+                                      />
+                                    </li>
                                   )
                                 }
                               })()}
@@ -237,7 +293,6 @@ class TestInstanceDetailList extends BaseComponent {
       )
     }
   }
-
 }
 
-module.exports = TestInstanceDetailList
+module.exports = injectIntl(TestInstanceDetailList)

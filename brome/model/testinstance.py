@@ -8,6 +8,7 @@ from mongoalchemy.fields import (
     ObjectIdField,
     DictField
 )
+import pytz
 
 
 from brome.model.basemodel import BaseModel
@@ -29,6 +30,7 @@ class Testinstance(BaseModel):
     log_file_path = StringField(default='')
     network_capture_path = StringField(default='')
     video_capture_path = StringField(default='')
+    video_location = StringField(default='local')
     # Bot diary
 
     test_batch_id = ObjectIdField()
@@ -113,15 +115,19 @@ class Testinstance(BaseModel):
         # STARTING TIMESTAMP
         starting_timestamp = data.get('starting_timestamp')
         if starting_timestamp:
-            self.starting_timestamp = starting_timestamp
+            self.starting_timestamp = starting_timestamp.replace(
+                tzinfo=pytz.utc
+            )
         else:
             if is_new:
-                self.starting_timestamp = datetime.now()
+                self.starting_timestamp = datetime.utcnow()
 
         # ENDING TIMESTAMP
         ending_timestamp = data.get('ending_timestamp')
         if ending_timestamp:
-            self.ending_timestamp = ending_timestamp
+            self.ending_timestamp = ending_timestamp.replace(
+                tzinfo=pytz.utc
+            )
 
         # EXTRA DATA
         extra_data = data.get('extra_data')

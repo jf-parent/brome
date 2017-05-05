@@ -1,7 +1,6 @@
 import React from 'react'
 import axios from 'axios'
 import 'react-html5video/src/assets/video.css'
-// import { FormattedMessage } from 'react-intl'
 
 // import ComponentStyle from './ComponentStyle.postcss'
 import BrowserBadge from 'components/ux/BrowserBadge'

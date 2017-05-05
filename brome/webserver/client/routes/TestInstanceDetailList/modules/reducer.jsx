@@ -14,7 +14,7 @@ export const LOADED_TEST_INSTANCE_DETAIL_LIST_ERROR = 'LOADED_TEST_INSTANCE_DETA
 const logger = require('loglevel').getLogger('TestInstanceDetailList')
 logger.setLevel(__LOGLEVEL__)
 
-export function doFetchTestInstanceDetailList (session, testBatchUid, skip, limit) {
+export function doFetchTestInstanceDetailList (session, testBatchUid, skip, limit, searchText) {
   return dispatch => {
     let data = {
       token: session.token,
@@ -34,6 +34,12 @@ export function doFetchTestInstanceDetailList (session, testBatchUid, skip, limi
           uid: testBatchUid
         }
       ]
+    }
+
+    if (searchText !== '') {
+      data.actions[0].filters_wildcard = {
+        name: searchText
+      }
     }
     axios.post('/api/crud', data)
       .then((response) => {

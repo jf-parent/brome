@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router'
-// import { FormattedMessage } from 'react-intl'
+import { defineMessages, injectIntl, FormattedMessage } from 'react-intl'
 
 // import ComponentStyle from './ComponentStyle.postcss'
 import Breadcrumbs from 'components/ux/Breadcrumbs'
@@ -12,17 +12,30 @@ import BaseComponent from 'core/BaseComponent'
 
 const TEST_INSTANCE_LIMIT = 10
 
+const testInstanceListMessages = defineMessages({
+  searchPlaceholder: {
+    id: 'general.Search',
+    defaultMessage: 'Search'
+  }
+})
+
 class TestInstanceList extends BaseComponent {
   constructor (props) {
     super(props)
 
     this._initLogger()
     this._bind(
+      'onSearch',
+      'onSearchTextChange',
       'getTestBatch',
       'getPath',
       'getTestBatchUid',
       'fetchTestInstance'
     )
+
+    this.state = {
+      searchText: ''
+    }
   }
 
   componentWillMount () {
@@ -31,12 +44,23 @@ class TestInstanceList extends BaseComponent {
     this.fetchTestInstance(0)
   }
 
+  onSearch () {
+    this.fetchTestInstance(0)
+  }
+
+  onSearchTextChange (event) {
+    let searchText = event.target.value
+
+    this.setState({searchText})
+  }
+
   fetchTestInstance (skip) {
     this.props.actions.doFetchTestInstance(
       this.props.state.session,
       this.getTestBatchUid(),
       skip,
-      TEST_INSTANCE_LIMIT
+      TEST_INSTANCE_LIMIT,
+      this.state.searchText
     )
   }
 
@@ -67,6 +91,8 @@ class TestInstanceList extends BaseComponent {
     } else {
       let testInstances = this.props.state.testinstancelist.testInstanceList
       let testBatch = this.getTestBatch()
+      const { formatMessage } = this.props.intl
+      const searchPlaceholder = formatMessage(testInstanceListMessages.searchPlaceholder)
       let routes = [
         {
           msgId: 'TestBatchDetail',
@@ -82,8 +108,25 @@ class TestInstanceList extends BaseComponent {
         <div>
           <Breadcrumbs routes={routes} />
           <h2 className='text-center'>
-            Test Instance List <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
+            <FormattedMessage
+              id='testInstanceList.TestInstanceList'
+              defaultMessage='Test Instance List'
+            />
+            {' '}
+            <small> ({testBatch.friendly_name}) ({testBatch.uid})</small>
           </h2>
+          <div className='row'>
+            <div className='col-xs-offset-8'>
+              <input placeholder={searchPlaceholder} value={this.state.searchText} onChange={this.onSearchTextChange} />
+              {' '}
+              <button className='btn btn-default btn-xs' onClick={this.onSearch}>
+                <FormattedMessage
+                  id='general.Search'
+                  defaultMessage='Search'
+                />
+              </button>
+            </div>
+          </div>
           <ul>
           {(() => {
             return testInstances.map((testInstance, index) => {
@@ -118,4 +161,4 @@ class TestInstanceList extends BaseComponent {
   }
 }
 
-module.exports = TestInstanceList
+module.exports = injectIntl(TestInstanceList)

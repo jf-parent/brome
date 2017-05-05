@@ -4,10 +4,7 @@ import threading
 import traceback
 import os
 from subprocess import Popen
-from datetime import datetime
 import math
-
-# import virtualbox
 
 from brome.core.utils import (
     DbSessionContext,
@@ -98,18 +95,11 @@ class GridRunner(BaseRunner):
 
                 # VIRTUALBOX
                 elif browser_config.location == 'virtualbox':
-                    # Instanciate only one vbox
-                    """
-                    if not hasattr(self, 'vbox'):
-                        self.vbox = virtualbox.VirtualBox()
-                    """
-
                     vbox_instance = virtualbox_instance.VirtualboxInstance(
                         runner=self,
                         browser_config=browser_config,
                         index=i,
                     )
-                    # vbox=self.vbox
 
                     vbox_instance_thread = InstanceThread(vbox_instance)
                     vbox_instance_thread.start()

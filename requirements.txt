@@ -16,7 +16,7 @@ paramiko
 boto==2.32.1
 
 # BROME-WEBSERVER
-aiohttp==0.21.6
+aiohttp==0.21.1
 python-memcached==1.58
 requests
 python-dateutil==2.5.3
@@ -33,6 +33,7 @@ cryptography
 
 pytz
 commentjson
+pymongo==3.3.1
 MongoAlchemy
 bcrypt==3.1.0
 validate_email

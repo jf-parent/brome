@@ -4,7 +4,7 @@ pdbpp
 flake8
 pip-save
 tmuxp
-webtest-aiohttp
+webtest-aiohttp==1.1.0
 pytest
 pytest-xdist
 pytest-instafail
@@ -13,3 +13,4 @@ q
 freezegun
 cookiecutter
 xvfbwrapper
+pypandoc

@@ -1163,7 +1163,7 @@ class ProxyDriver(object):
 
         Args:
             selector (str): the selector used to find the element
-            test_id (str): the test_id or a str
+            testid (str): the test_id or a str
 
         Kwargs:
             wait_until_visible (bool)

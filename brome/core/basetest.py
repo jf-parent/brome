@@ -9,7 +9,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common import proxy
 
-from IPython import embed
 from brome.core.settings import BROME_CONFIG
 from brome.core.stateful import Stateful
 from brome.core.proxy_driver import ProxyDriver
@@ -53,8 +52,9 @@ class BaseTest(object):
         self._localhost_instance = kwargs.get('localhost_instance')
         self._log_file_path = ''
 
-
-        browser_config = parse_brome_config_from_browser_config(self._browser_config.config)
+        browser_config = parse_brome_config_from_browser_config(
+            self._browser_config.config
+        )
         for key in iter(BROME_CONFIG):
             if key in browser_config:
                 BROME_CONFIG[key].update(browser_config[key])
@@ -107,7 +107,7 @@ class BaseTest(object):
 
         # TEST KWARGS
         self._test_config = test_config_to_dict(
-            BROME_CONFIG['runner'].get('test_config')
+            BROME_CONFIG['runner_args'].get('test_config')
         )
 
         with DbSessionContext(BROME_CONFIG['database']['mongo_database_name']) as session:  # noqa
@@ -268,6 +268,11 @@ class BaseTest(object):
                         "--proxy-server={0}".format(get_proxy())
                     )
 
+                # https://sqa.stackexchange.com/questions/26051/chrome-driver-2-28-chrome-is-being-controlled-by-automated-test-software-notif
+                chrome_options.add_argument(
+                    "disable-infobars"
+                )
+
                 driver = webdriver.Chrome(chrome_options=chrome_options)
 
             elif self._browser_config.get('browserName').lower() \
@@ -376,7 +381,6 @@ class BaseTest(object):
                         "mobileEmulation",
                         config.get('mobile_emulation')
                     )
-
 
                 desired_cap = chrome_options.to_capabilities()
                 desired_cap['platform'] = config.get('platform')

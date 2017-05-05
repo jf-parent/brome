@@ -10,6 +10,7 @@ from mongoalchemy.fields import (
     IntField,
     BoolField
 )
+import pytz
 
 from brome.core.utils import convert_tz_datetime
 from brome.model.basemodel import BaseModel
@@ -286,15 +287,19 @@ class Testbatch(BaseModel):
         # STARTING TIMESTAMP
         starting_timestamp = data.get('starting_timestamp')
         if starting_timestamp:
-            self.starting_timestamp = starting_timestamp
+            self.starting_timestamp = starting_timestamp.replace(
+                tzinfo=pytz.utc
+            )
         else:
             if is_new:
-                self.starting_timestamp = datetime.now()
+                self.starting_timestamp = datetime.utcnow()
 
         # ENDING TIMESTAMP
         ending_timestamp = data.get('ending_timestamp')
         if ending_timestamp:
-            self.ending_timestamp = ending_timestamp
+            self.ending_timestamp = ending_timestamp.replace(
+                tzinfo=pytz.utc
+            )
 
         # FEATURES
         feature_session_video_capture = data.get(

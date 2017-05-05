@@ -1,5 +1,5 @@
 import React from 'react'
-import { FormattedMessage, defineMessages } from 'react-intl'
+import { defineMessages, injectIntl, FormattedMessage } from 'react-intl'
 import LaddaButton from 'components/ux/LaddaButton'
 import BrowserBadge from 'components/ux/BrowserBadge'
 import Collapse, { Panel } from 'rc-collapse'
@@ -20,8 +20,48 @@ const TEST_RESULT_LIMIT = 10
 
 const testBatchTestResultsMessages = defineMessages({
   filterByPlaceholder: {
-    id: 'testbatchtestresults.FilterBy',
+    id: 'testBatchTestResults.FilterBy',
     defaultMessage: 'Search (test id)'
+  },
+  screenshotPlaceholder: {
+    id: 'testBatchTestResults.Screenshot',
+    defaultMessage: 'Screenshot'
+  },
+  videoCapturePlaceholder: {
+    id: 'testBatchTestResults.VideoCapture',
+    defaultMessage: 'Video Capture'
+  },
+  createdTimestampAscPlaceholder: {
+    id: 'testBatchTestResults.CreatedTimestampAsc',
+    defaultMessage: 'Created timestamp (asc)'
+  },
+  createdTimestampDescPlaceholder: {
+    id: 'testBatchTestResults.CreatedTimestampDesc',
+    defaultMessage: 'Created timestamp (desc)'
+  },
+  testIdAscPlaceholder: {
+    id: 'testBatchTestResults.TestIdAsc',
+    defaultMessage: 'Test id (asc)'
+  },
+  testIdDescPlaceholder: {
+    id: 'testBatchTestResults.TestIdDesc',
+    defaultMessage: 'Test id (desc)'
+  },
+  titleAscPlaceholder: {
+    id: 'testBatchTestResults.TitleAsc',
+    defaultMessage: 'Title (asc)'
+  },
+  titleDescPlaceholder: {
+    id: 'testBatchTestResults.TitleDesc',
+    defaultMessage: 'Title (desc)'
+  },
+  resultAscPlaceholder: {
+    id: 'testBatchTestResults.ResultAsc',
+    defaultMessage: 'Result (asc)'
+  },
+  resultDescPlaceholder: {
+    id: 'testBatchTestResults.ResultDesc',
+    defaultMessage: 'Result (desc)'
   }
 })
 
@@ -131,20 +171,30 @@ class TestBatchTestResults extends BaseComponent {
     } else if (testbatchtestresults.error) {
       return <ErrorMsg msgId={testbatchtestresults.error} name='error-test-batch-test-results' />
     } else {
-      const { formatMessage } = this._reactInternalInstance._context.intl
+      const { formatMessage } = this.props.intl
       const filterByPlaceholder = formatMessage(testBatchTestResultsMessages.filterByPlaceholder)
+      const videoCapturePlaceholder = formatMessage(testBatchTestResultsMessages.videoCapturePlaceholder)
+      const screenshotPlaceholder = formatMessage(testBatchTestResultsMessages.screenshotPlaceholder)
+      const createdTimestampAscPlaceholder = formatMessage(testBatchTestResultsMessages.createdTimestampAscPlaceholder)
+      const createdTimestampDescPlaceholder = formatMessage(testBatchTestResultsMessages.createdTimestampAscPlaceholder)
+      const testIdAscPlaceholder = formatMessage(testBatchTestResultsMessages.testIdAscPlaceholder)
+      const testIdDescPlaceholder = formatMessage(testBatchTestResultsMessages.testIdDescPlaceholder)
+      const titleAscPlaceholder = formatMessage(testBatchTestResultsMessages.titleAscPlaceholder)
+      const titleDescPlaceholder = formatMessage(testBatchTestResultsMessages.titleDescPlaceholder)
+      const resultAscPlaceholder = formatMessage(testBatchTestResultsMessages.resultAscPlaceholder)
+      const resultDescPlaceholder = formatMessage(testBatchTestResultsMessages.resultDescPlaceholder)
       let testBatch = testbatchtestresults.testBatch
 
       // TODO translate
       let orderByOptions = [
-        {value: 'created_ts_asc', label: 'Created timestamp (asc)'},
-        {value: 'created_ts_desc', label: 'Created timestamp (desc)'},
-        {value: 'testid_asc', label: 'Test id (asc)'},
-        {value: 'testid_desc', label: 'Test id (desc)'},
-        {value: 'title_asc', label: 'Title (asc)'},
-        {value: 'title_desc', label: 'Title (desc)'},
-        {value: 'result_asc', label: 'Result (asc)'},
-        {value: 'result_desc', label: 'Result (desc)'}
+        {value: 'created_ts_asc', label: createdTimestampAscPlaceholder},
+        {value: 'created_ts_desc', label: createdTimestampDescPlaceholder},
+        {value: 'testid_asc', label: testIdAscPlaceholder},
+        {value: 'testid_desc', label: testIdDescPlaceholder},
+        {value: 'title_asc', label: titleAscPlaceholder},
+        {value: 'title_desc', label: titleDescPlaceholder},
+        {value: 'result_asc', label: resultAscPlaceholder},
+        {value: 'result_desc', label: resultDescPlaceholder}
       ]
       let routes = [
         {
@@ -162,7 +212,14 @@ class TestBatchTestResults extends BaseComponent {
           <Breadcrumbs routes={routes} />
           <div className='row'>
             <div className='col-xs-12 col-sm-12 col-md-12 col-lg-12'>
-              <h2>Test Results <small>({testBatch.friendly_name}) ({testBatch.uid})</small></h2>
+              <h2>
+                <FormattedMessage
+                  id='testBatchTestResults.TestResults'
+                  defaultMessage='Test Results'
+                />
+                {' '}
+                <small>({testBatch.friendly_name}) ({testBatch.uid})</small>
+              </h2>
             </div>
           </div>
           <div className='row' style={{marginBottom: '15px'}}>
@@ -183,7 +240,7 @@ class TestBatchTestResults extends BaseComponent {
                 <i className='fa fa-search' aria-hidden='true'></i>
                 {' '}
                 <FormattedMessage
-                  id='testBatchTestResults.Search'
+                  id='general.Search'
                   defaultMessage='Search'
                 />
               </LaddaButton>
@@ -221,7 +278,7 @@ class TestBatchTestResults extends BaseComponent {
                     <Collapse accordion>
                       <Panel header={header} key={index}>
                         <Collapse accordion>
-                          <Panel header='Screenshot'>
+                          <Panel header={screenshotPlaceholder}>
                             {(() => {
                               if (testResult.screenshot_path !== '') {
                                 return (
@@ -231,12 +288,17 @@ class TestBatchTestResults extends BaseComponent {
                                 )
                               } else {
                                 return (
-                                  <small>No screenshot</small>
+                                  <small>
+                                    <FormattedMessage
+                                      id='testBatchTestResults.NoScreenshot'
+                                      defaultMessage='No screenshot'
+                                    />
+                                  </small>
                                 )
                               }
                             })()}
                           </Panel>
-                          <Panel header='Video Capture'>
+                          <Panel header={videoCapturePlaceholder}>
                             {(() => {
                               if (testResult.video_capture_path !== '') {
                                 return (
@@ -244,7 +306,12 @@ class TestBatchTestResults extends BaseComponent {
                                 )
                               } else {
                                 return (
-                                  <small>No video capture</small>
+                                  <small>
+                                    <FormattedMessage
+                                      id='testBatchTestResults.NoVideoCapture'
+                                      defaultMessage='No video capture'
+                                    />
+                                  </small>
                                 )
                               }
                             })()}
@@ -259,7 +326,12 @@ class TestBatchTestResults extends BaseComponent {
               return (
                 <div className='row' style={{marginBottom: '15px'}}>
                   <div className='col-xs-12 col-sm-12 col-md-3 col-lg-3 col-md-offset-5 col-lg-offset-5'>
-                    <h2>No Test Result</h2>
+                    <h2>
+                      <FormattedMessage
+                        id='testBatchTestResults.NoTestResult'
+                        defaultMessage='No Test Result'
+                      />
+                    </h2>
                   </div>
                 </div>
               )
@@ -277,4 +349,4 @@ class TestBatchTestResults extends BaseComponent {
   }
 }
 
-module.exports = TestBatchTestResults
+module.exports = injectIntl(TestBatchTestResults)

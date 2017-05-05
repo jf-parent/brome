@@ -20,12 +20,16 @@ class SecureForm extends BaseComponent {
 
   render () {
     return (
-      <Form ref='form' onValid={this.props.onValid} onInvalid={this.props.onInvalid} className={SecureFormStyle['form-signin']}>
+      <Form ref='form' style={this.props.style} onValid={this.props.onValid} onInvalid={this.props.onInvalid} className={SecureFormStyle['form-signin']}>
         <input ref='token' type='hidden' value={this.props.session.token} name='token' />
         {this.props.children}
       </Form>
     )
   }
+}
+
+SecureForm.defaultProps = {
+  style: {}
 }
 
 module.exports = SecureForm

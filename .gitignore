@@ -35,3 +35,4 @@ dist-dev
 .cache
 brome/webserver/logs/
 example/tb_results
+brome/webserver/releases

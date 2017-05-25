@@ -21,7 +21,7 @@ with open('requirements.txt', 'r') as fd:
 
 setup(
     name='brome',
-    version='1.2.0',
+    version='1.2.1',
     description="Selenium Framework",
     long_description=long_description,
     author="Jean-Francois Parent",
